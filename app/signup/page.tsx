@@ -1,0 +1,14 @@
+import { AuthForm } from "@/components/AuthForm";
+
+export default function SignUpPage() {
+  return (
+    <main className="wrap page">
+      <article className="glass auth-card">
+        <div className="kicker">Web2 account</div>
+        <h1 style={{ fontSize: 40 }}>Sign up</h1>
+        <p className="lead">Email and password. No wallet. This site is not on-chain.</p>
+        <AuthForm mode="signup" />
+      </article>
+    </main>
+  );
+}
