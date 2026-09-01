@@ -1,0 +1,25 @@
+{
+  "name": "frostedblocks-lite",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web2 clone of frostedblocks.com ICE Network",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/candid": "^2.4.1",
+    "@dfinity/principal": "^2.4.1",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.10",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.2"
+  }
+}
