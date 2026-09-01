@@ -1,14 +1,8 @@
 # frostedblocks-lite
 
-Web2 clone of ICE on frostedblocks.com.
+Web2 site for lite.frostedblocks.com.
 
-- Same quiet-social look
-- Public feed pulled from the ICE backend canister when the host can reach ICP
-- No tokens, no Internet Identity
-- Ad slot placeholders
-- Upgrade CTA back to https://frostedblocks.com
-
-## Run
+Does **not** run on ICP. First goal is get the site up on Vercel. The ICE canister feed hook is already written in `lib/ice.ts` and stays unused until you say to connect it.
 
 ```bash
 npm install
@@ -16,9 +10,3 @@ npm run dev
 ```
 
 Open http://localhost:3000
-
-## Deploy
-
-Push this repo to Vercel. No database required for v1.
-
-Canister map: see CANISTER.md

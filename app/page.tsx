@@ -1,33 +1,22 @@
 import { AdSlot } from "@/components/AdSlot";
 import { PostCard } from "@/components/PostCard";
 import { ONCHAIN_URL } from "@/lib/canisters";
-import { fetchRecentPosts } from "@/lib/ice";
 import { SEED_FEED } from "@/lib/seed-feed";
-import type { IcePost } from "@/lib/types";
 
-async function loadFeed(): Promise<{ source: string; posts: IcePost[] }> {
-  try {
-    const posts = await fetchRecentPosts(16);
-    if (posts.length) return { source: "ice", posts };
-  } catch {
-    /* fall through */
-  }
-  return { source: "seed", posts: SEED_FEED };
-}
-
-export default async function HomePage() {
-  const { source, posts } = await loadFeed();
+export default function HomePage() {
+  const posts = SEED_FEED;
   return (
     <main className="wrap page">
       <section className="grid">
         <div className="glass" style={{ padding: 28 }}>
-          <div className="kicker">Internet Computer · Sovereign social</div>
+          <div className="kicker">Quiet social · Web2</div>
           <h1><em>Quiet social,</em><br />owned by you</h1>
           <p className="lead">
-            Web2 entry to ICE — same quiet feed, no tokens and no Internet Identity required.
+            Free lite version of ICE. No tokens, no Internet Identity. The on-chain
+            feed hook gets added after this site is live at lite.frostedblocks.com.
           </p>
           <div className="features">
-            <div className="glass feature"><strong>Public feed</strong><p>Read on-chain posts without signing in.</p></div>
+            <div className="glass feature"><strong>Public feed</strong><p>Starts local. Connect ICE after launch.</p></div>
             <div className="glass feature"><strong>Web2 account</strong><p>Email signup next. No seed phrase.</p></div>
             <div className="glass feature"><strong>Your site</strong><p>Upgrade path to a personal canister.</p></div>
           </div>
@@ -40,14 +29,14 @@ export default async function HomePage() {
             <span className="chip">No tokens</span>
             <span className="chip">No algorithm</span>
             <span className="chip">Ad supported</span>
-            <span className="chip">ICP upgrade</span>
+            <span className="chip">ICP later</span>
           </div>
           <AdSlot label="Sidebar ad" />
         </div>
         <div>
           <div className="feed-head">
-            <span><i className="dot" />{source === "ice" ? "Live on-chain feed" : "Feed preview"}</span>
-            <span className="meta">{source === "ice" ? "ICE backend" : "cached sample"}</span>
+            <span><i className="dot" />Lite feed</span>
+            <span className="meta">not on ICP yet</span>
           </div>
           <div className="glass feed">
             {posts.map((post) => <PostCard key={post.id} post={post} />)}
