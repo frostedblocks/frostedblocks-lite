@@ -12,31 +12,32 @@ export default function HomePage() {
           <div className="kicker">Quiet social · Web2</div>
           <h1><em>Quiet social,</em><br />owned by you</h1>
           <p className="lead">
-            Free lite version of ICE. No tokens, no Internet Identity. The on-chain
-            feed hook gets added after this site is live at lite.frostedblocks.com.
+            ICE Lite is a regular website. No blockchain, no tokens, no Internet
+            Identity. Read and post here for free. Want ownership on-chain? That is
+            the main ICE network, not this site.
           </p>
           <div className="features">
-            <div className="glass feature"><strong>Public feed</strong><p>Starts local. Connect ICE after launch.</p></div>
+            <div className="glass feature"><strong>Public feed</strong><p>Hosted here. Not stored in a canister.</p></div>
             <div className="glass feature"><strong>Web2 account</strong><p>Email signup next. No seed phrase.</p></div>
-            <div className="glass feature"><strong>Your site</strong><p>Upgrade path to a personal canister.</p></div>
+            <div className="glass feature"><strong>Upgrade</strong><p>Move to on-chain ICE when you want a canister.</p></div>
           </div>
           <div className="glass cta-box">
-            <strong>Ready to own it?</strong>
-            <p className="note">Lite stays free and ad-supported.</p>
-            <a className="btn" href={ONCHAIN_URL}>Open on-chain ICE</a>
+            <strong>Want it on-chain?</strong>
+            <p className="note">Lite stays a free website. Ownership lives on ICE.</p>
+            <a className="btn" href={ONCHAIN_URL}>Open ICE Network</a>
           </div>
           <div className="chips">
+            <span className="chip">Not on-chain</span>
             <span className="chip">No tokens</span>
             <span className="chip">No algorithm</span>
             <span className="chip">Ad supported</span>
-            <span className="chip">ICP later</span>
           </div>
-          <AdSlot label="Sidebar ad" />
+          <AdSlot label="Ad" />
         </div>
         <div>
           <div className="feed-head">
             <span><i className="dot" />Lite feed</span>
-            <span className="meta">not on ICP yet</span>
+            <span className="meta">Web2</span>
           </div>
           <div className="glass feed">
             {posts.map((post) => <PostCard key={post.id} post={post} />)}

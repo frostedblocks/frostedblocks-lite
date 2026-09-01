@@ -4,14 +4,14 @@ export default function JoinPage() {
     <main className="wrap page">
       <article className="glass" style={{ padding: 32, maxWidth: 720, margin: "0 auto" }}>
         <div className="kicker">How to join</div>
-        <h1 style={{ fontSize: 40 }}>Two doors, one network</h1>
-        <p className="lead">Lite is free and ad-supported. On-chain ICE is ownership.</p>
+        <h1 style={{ fontSize: 40 }}>Two doors, one name</h1>
+        <p className="lead">Lite is a free website. ICE Network is on-chain ownership.</p>
         <ol className="note" style={{ lineHeight: 1.7 }}>
-          <li>Read the public feed here. No account needed.</li>
-          <li>Web2 email login comes next.</li>
-          <li>Want a canister? Sign in at frostedblocks.com with id.ai.</li>
+          <li>Use Lite here. No wallet. No canister.</li>
+          <li>Email login comes next.</li>
+          <li>Want a canister you own? Sign in at frostedblocks.com with id.ai.</li>
         </ol>
-        <p style={{ marginTop: 24 }}><a className="btn" href={ONCHAIN_URL}>Sign in with id.ai</a></p>
+        <p style={{ marginTop: 24 }}><a className="btn" href={ONCHAIN_URL}>Open ICE Network</a></p>
       </article>
     </main>
   );
