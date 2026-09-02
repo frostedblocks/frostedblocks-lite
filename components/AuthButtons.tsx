@@ -5,9 +5,14 @@ import { currentUser, signOut } from "@/lib/auth-client";
 
 export function AuthButtons() {
   const [email, setEmail] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     setEmail(currentUser()?.email ?? null);
+    setReady(true);
   }, []);
+
+  if (!ready) return null;
 
   if (email) {
     return (
@@ -17,7 +22,6 @@ export function AuthButtons() {
           className="btn ghost"
           onClick={() => {
             signOut();
-            setEmail(null);
             window.location.href = "/";
           }}
         >

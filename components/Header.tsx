@@ -1,10 +1,18 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { AuthButtons } from "./AuthButtons";
+import { currentUser } from "@/lib/auth-client";
 
 export function Header() {
+  const [home, setHome] = useState("/");
+  useEffect(() => {
+    setHome(currentUser() ? "/feed" : "/");
+  }, []);
+
   return (
     <header className="wrap glass header">
-      <Link className="brand" href="/">
+      <Link className="brand" href={home}>
         <div className="logo">ICE</div>
         <div>
           <b>ICE Lite</b>

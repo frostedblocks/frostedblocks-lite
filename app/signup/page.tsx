@@ -1,8 +1,10 @@
 import { AuthForm } from "@/components/AuthForm";
+import { AuthRedirect } from "@/components/AuthRedirect";
 
 export default function SignUpPage() {
   return (
     <main className="wrap page">
+      <AuthRedirect />
       <article className="glass auth-card">
         <div className="kicker">Web2 account</div>
         <h1 style={{ fontSize: 40 }}>Sign up</h1>

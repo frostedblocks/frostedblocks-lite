@@ -7,4 +7,4 @@ export const CANISTERS = {
 } as const;
 
 export const HOST = "https://icp-api.io";
-export const ONCHAIN_URL = "https://frostedblocks.com";
+export const ONCHAIN_URL = "https://www.frostedblocks.com";

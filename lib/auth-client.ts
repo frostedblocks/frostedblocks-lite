@@ -21,6 +21,12 @@ export function currentEmail(): string | null {
   return localStorage.getItem(SESSION);
 }
 
+export function currentUser(): LiteUser | null {
+  const email = currentEmail();
+  if (!email) return null;
+  return readUsers().find((u) => u.email === email) || null;
+}
+
 export function signUp(email: string, password: string, name: string) {
   const clean = email.trim().toLowerCase();
   if (!clean.includes("@") || password.length < 6) {
@@ -53,10 +59,4 @@ export function resetPassword(email: string, nextPassword: string) {
 
 export function signOut() {
   localStorage.removeItem(SESSION);
-}
-
-export function currentUser(): LiteUser | null {
-  const email = currentEmail();
-  if (!email) return null;
-  return readUsers().find((u) => u.email === email) || null;
 }
