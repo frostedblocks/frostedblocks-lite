@@ -15,7 +15,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     try {
       if (mode === "signup") signUp(email, password, name);
       else signIn(email, password);
-      window.location.href = "/";
+      window.location.href = "/feed";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not continue.");
     }

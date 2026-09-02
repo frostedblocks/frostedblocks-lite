@@ -14,6 +14,7 @@ export function Header() {
       <nav className="nav">
         <Link href="/join">How to join</Link>
         <Link href="/about">About</Link>
+        <Link className="btn ghost" href="/feed">Live feed</Link>
         <AuthButtons />
       </nav>
     </header>
