@@ -44,7 +44,7 @@ export function LiteFeed() {
     <div>
       <div className="feed-head">
         <span><i className="dot" />Live feed</span>
-        <span className="meta">Public preview</span>
+        {signedIn ? null : <span className="meta">Public preview</span>}
       </div>
       <div className="glass" style={{ padding: 8 }}>
         {signedIn ? (
