@@ -41,6 +41,16 @@ export function signIn(email: string, password: string) {
   return user;
 }
 
+export function resetPassword(email: string, nextPassword: string) {
+  const clean = email.trim().toLowerCase();
+  if (nextPassword.length < 6) throw new Error("New password must be at least 6 characters.");
+  const users = readUsers();
+  const idx = users.findIndex((u) => u.email === clean);
+  if (idx < 0) throw new Error("No Lite account with that email on this device.");
+  users[idx] = { ...users[idx], pass: nextPassword };
+  writeUsers(users);
+}
+
 export function signOut() {
   localStorage.removeItem(SESSION);
 }

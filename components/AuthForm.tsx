@@ -39,6 +39,11 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       </label>
       {error ? <p className="error">{error}</p> : null}
       <button className="btn" type="submit">{mode === "signup" ? "Create account" : "Sign in"}</button>
+      {mode === "signin" ? (
+        <Link className="btn ghost" href="/reset" style={{ textAlign: "center" }}>
+          Forgot password
+        </Link>
+      ) : null}
       <p className="note">
         {mode === "signup" ? (
           <>Already have an account? <Link href="/signin">Sign in</Link></>
