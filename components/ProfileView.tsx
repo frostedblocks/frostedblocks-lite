@@ -12,13 +12,16 @@ export function ProfileView() {
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
+  function refresh() {
     const u = currentUser();
     setUser(u);
-    if (u) {
-      setPosts(loadFeed().filter((p) => p.author === u.email));
-    }
+    if (u) setPosts(loadFeed().filter((p) => p.author === u.email));
+    else setPosts([]);
     setReady(true);
+  }
+
+  useEffect(() => {
+    refresh();
   }, []);
 
   if (!ready) return null;
@@ -54,7 +57,7 @@ export function ProfileView() {
         <span className="meta">{posts.length}</span>
       </div>
       {posts.length ? (
-        posts.map((post) => <PostCard key={post.id} post={post} />)
+        posts.map((post) => <PostCard key={post.id} post={post} onChange={refresh} />)
       ) : (
         <p className="note">No posts yet. <Link href="/">Write one on the feed.</Link></p>
       )}
