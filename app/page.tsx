@@ -1,4 +1,3 @@
-import { AdSlot } from "@/components/AdSlot";
 import { LiteFeed } from "@/components/LiteFeed";
 import { ONCHAIN_URL } from "@/lib/canisters";
 
@@ -7,44 +6,60 @@ export default function HomePage() {
     <main className="wrap page">
       <section className="grid">
         <div className="glass" style={{ padding: 28 }}>
-          <div className="kicker">Quiet social · Web2</div>
+          <div className="kicker">Internet Computer · Sovereign social</div>
           <h1><em>Quiet social,</em><br />owned by you</h1>
           <p className="lead">
-            ICE Lite is a regular website. No blockchain, no tokens, no Internet
-            Identity. Read and post here for free. Want ownership on-chain? That is
-            the main ICE network, not this site.
+            A quiet social network — no engagement farms, no algorithm feeding you rage.
+            ICE Lite is the free website door. Sign in with email. Keep your presence.
+            Want it on-chain? That is ICE Network.
           </p>
           <div className="features">
-            <div className="glass feature"><strong>Public feed</strong><p>Hosted here. Not stored in a canister.</p></div>
-            <div className="glass feature"><strong>Web2 account</strong><p>Email and password. No seed phrase.</p></div>
-            <div className="glass feature"><strong>Upgrade</strong><p>Move to on-chain ICE when you want a canister.</p></div>
+            <div className="glass feature">
+              <div className="ico">◇</div>
+              <strong>Public posts</strong>
+              <p>Your feed lives on this site, not a silo.</p>
+            </div>
+            <div className="glass feature">
+              <div className="ico">◉</div>
+              <strong>Email login</strong>
+              <p>Password login — no email harvest on-chain.</p>
+            </div>
+            <div className="glass feature">
+              <div className="ico">+</div>
+              <strong>Your profile</strong>
+              <p>A Lite profile now. Canister later if you want.</p>
+            </div>
           </div>
           <div className="glass cta-box">
-            <strong>Want it on-chain?</strong>
-            <p className="note">Lite stays a free website. Ownership lives on ICE.</p>
-            <a className="btn" href={ONCHAIN_URL}>Open ICE Network</a>
+            <strong>Ready to enter?</strong>
+            <p className="note">Sign in with email. No wallet popups on this site.</p>
+            <a className="btn" href="/signin">Sign in with email</a>
           </div>
           <div className="chips">
-            <span className="chip">Not on-chain</span>
-            <span className="chip">No tokens</span>
+            <span className="chip">Lite</span>
             <span className="chip">No algorithm</span>
-            <span className="chip">Ad supported</span>
+            <span className="chip">Email login</span>
+            <span className="chip">Free</span>
+            <span className="chip">Censorship-resistant path</span>
           </div>
-          <AdSlot label="Ad" />
+          <a className="glass founder" href={ONCHAIN_URL}>
+            <span>Open ICE Network</span>
+            <span className="meta">On-chain door</span>
+          </a>
         </div>
         <LiteFeed />
       </section>
       <section className="partners">
         <div className="partners-label">PARTNERS</div>
         <div className="partner-row">
-          <div className="glass partner">
-            <div><b>Binance.US</b><div className="meta">Buy ICP</div></div>
-            <a className="btn" href="https://www.binance.us" target="_blank" rel="noreferrer">Sign up</a>
-          </div>
-          <div className="glass partner">
-            <div><b>Ledger</b><div className="meta">Cold wallet</div></div>
-            <a className="btn" href="https://www.ledger.com" target="_blank" rel="noreferrer">Shop</a>
-          </div>
+          <a className="glass partner" href="https://www.binance.us" target="_blank" rel="noreferrer">
+            <div><b>Binance.US</b><div className="meta">Buy ICP · crypto</div></div>
+            <span className="btn binance">Sign up</span>
+          </a>
+          <a className="glass partner" href="https://www.ledger.com" target="_blank" rel="noreferrer">
+            <div><b>Ledger</b><div className="meta">Cold wallet · self-custody</div></div>
+            <span className="btn ledger">Shop</span>
+          </a>
         </div>
       </section>
     </main>

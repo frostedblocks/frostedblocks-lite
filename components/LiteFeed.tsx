@@ -35,32 +35,28 @@ export function LiteFeed() {
   return (
     <div>
       <div className="feed-head">
-        <span><i className="dot" />Lite feed</span>
-        <span className="meta">Web2</span>
+        <span><i className="dot" />Live feed</span>
+        <span className="meta">Public preview</span>
       </div>
-      {signedIn ? (
-        <form className="glass compose" onSubmit={publish}>
-          <div className="meta">Post as {name}</div>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Write a post…"
-            rows={4}
-            maxLength={2000}
-          />
-          {error ? <p className="error">{error}</p> : null}
-          <button className="btn" type="submit">Post</button>
-        </form>
-      ) : (
-        <div className="glass compose">
-          <p className="note">Sign in with email to post on Lite.</p>
-          <Link className="btn" href="/signin">Sign in to post</Link>
+      <div className="glass" style={{ padding: 8 }}>
+        {signedIn ? (
+          <form className="compose" onSubmit={publish}>
+            <div className="meta">Post as {name}</div>
+            <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
+            {error ? <p className="error">{error}</p> : null}
+            <button className="btn" type="submit">Post</button>
+          </form>
+        ) : (
+          <div className="compose">
+            <p className="note" style={{ margin: 0 }}>Sign in with email to post.</p>
+            <Link className="btn" href="/signin">Sign in with email</Link>
+          </div>
+        )}
+        <div className="feed" style={{ maxHeight: 520 }}>
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
         </div>
-      )}
-      <div className="glass feed">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
       </div>
     </div>
   );
