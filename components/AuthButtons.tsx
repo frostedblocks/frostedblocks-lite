@@ -13,7 +13,7 @@ export function AuthButtons() {
   if (email) {
     return (
       <>
-        <span className="meta">{email}</span>
+        <Link className="btn ghost" href="/profile">Profile</Link>
         <button
           className="btn ghost"
           onClick={() => {
