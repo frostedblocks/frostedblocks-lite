@@ -55,6 +55,9 @@ button { font: inherit; }
 }
 .btn.binance { background: #f0b90b; color: #111; font-weight: 700; padding: 8px 14px; }
 .btn.ledger { background: #22c55e; color: #052e16; font-weight: 700; padding: 8px 14px; }
+.delete-btn {
+  background: none; border: 0; color: #fb7185; cursor: pointer; padding: 0; font-size: 13px;
+}
 .grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 16px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 .kicker {

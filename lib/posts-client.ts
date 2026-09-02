@@ -34,7 +34,16 @@ export function createPost(content: string): IcePost {
     timestamp: Date.now() * 1e6,
     category: "Lite",
   };
-  const next = [post, ...readLocal()];
-  localStorage.setItem(KEY, JSON.stringify(next));
+  localStorage.setItem(KEY, JSON.stringify([post, ...readLocal()]));
   return post;
+}
+
+export function deletePost(id: string) {
+  const user = currentUser();
+  if (!user) throw new Error("Sign in to delete a post.");
+  const local = readLocal();
+  const post = local.find((p) => p.id === id);
+  if (!post) throw new Error("That post is not yours to delete.");
+  if (post.author !== user.email) throw new Error("You can only delete your own posts.");
+  localStorage.setItem(KEY, JSON.stringify(local.filter((p) => p.id !== id)));
 }

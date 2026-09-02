@@ -13,20 +13,28 @@ export function LiteFeed() {
   const [signedIn, setSignedIn] = useState(false);
   const [name, setName] = useState("");
 
-  useEffect(() => {
+  function refresh() {
     setPosts(loadFeed());
     const user = currentUser();
     setSignedIn(!!user);
     setName(user?.name || user?.email || "");
+  }
+
+  useEffect(() => {
+    refresh();
   }, []);
 
   function publish(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!currentUser()) {
+      setError("Sign in to post.");
+      return;
+    }
     try {
       createPost(text);
       setText("");
-      setPosts(loadFeed());
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not post.");
     }
@@ -48,13 +56,13 @@ export function LiteFeed() {
           </form>
         ) : (
           <div className="compose">
-            <p className="note" style={{ margin: 0 }}>Sign in with email to post.</p>
-            <Link className="btn" href="/signin">Sign in with email</Link>
+            <p className="note" style={{ margin: 0 }}>You must be signed in to post on ICE Lite.</p>
+            <Link className="btn" href="/signin">Sign in to post</Link>
           </div>
         )}
         <div className="feed" style={{ maxHeight: 520 }}>
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} onChange={refresh} />
           ))}
         </div>
       </div>
