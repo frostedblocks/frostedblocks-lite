@@ -1,10 +1,8 @@
 import { AdSlot } from "@/components/AdSlot";
-import { PostCard } from "@/components/PostCard";
+import { LiteFeed } from "@/components/LiteFeed";
 import { ONCHAIN_URL } from "@/lib/canisters";
-import { SEED_FEED } from "@/lib/seed-feed";
 
 export default function HomePage() {
-  const posts = SEED_FEED;
   return (
     <main className="wrap page">
       <section className="grid">
@@ -18,7 +16,7 @@ export default function HomePage() {
           </p>
           <div className="features">
             <div className="glass feature"><strong>Public feed</strong><p>Hosted here. Not stored in a canister.</p></div>
-            <div className="glass feature"><strong>Web2 account</strong><p>Email signup next. No seed phrase.</p></div>
+            <div className="glass feature"><strong>Web2 account</strong><p>Email and password. No seed phrase.</p></div>
             <div className="glass feature"><strong>Upgrade</strong><p>Move to on-chain ICE when you want a canister.</p></div>
           </div>
           <div className="glass cta-box">
@@ -34,15 +32,7 @@ export default function HomePage() {
           </div>
           <AdSlot label="Ad" />
         </div>
-        <div>
-          <div className="feed-head">
-            <span><i className="dot" />Lite feed</span>
-            <span className="meta">Web2</span>
-          </div>
-          <div className="glass feed">
-            {posts.map((post) => <PostCard key={post.id} post={post} />)}
-          </div>
-        </div>
+        <LiteFeed />
       </section>
       <section className="partners">
         <div className="partners-label">PARTNERS</div>
