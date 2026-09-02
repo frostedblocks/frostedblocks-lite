@@ -99,3 +99,15 @@ h1 em {
 }
 .auth-form .btn { width: 100%; }
 .error { color: #ff8d9a; margin: 0; font-size: 13px; }
+.compose { padding: 14px; margin-bottom: 10px; display: grid; gap: 10px; }
+.compose textarea {
+  width: 100%;
+  resize: vertical;
+  background: #0b1220;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 12px 14px;
+  font: inherit;
+}
+.compose .btn { justify-self: end; }
