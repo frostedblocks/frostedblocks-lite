@@ -14,7 +14,7 @@ function readLocal(): IcePost[] {
 }
 
 export function loadFeed(): IcePost[] {
-  const local = readLocal();
+  const local = readLocal().map((p) => ({ ...p, source: p.source ?? ("lite" as const) }));
   return [...local, ...SEED_FEED].sort((a, b) => b.timestamp - a.timestamp);
 }
 
@@ -33,6 +33,7 @@ export function createPost(content: string): IcePost {
     loves: 0,
     timestamp: Date.now() * 1e6,
     category: "Lite",
+    source: "lite",
   };
   localStorage.setItem(KEY, JSON.stringify([post, ...readLocal()]));
   return post;

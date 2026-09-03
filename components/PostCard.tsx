@@ -3,7 +3,7 @@ import { currentUser } from "@/lib/auth-client";
 import { deletePost } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { DoorBadge } from "./LiteBadge";
+import { DoorBadge, doorForPost } from "./LiteBadge";
 
 function when(ts: number) {
   const ms = ts > 1e14 ? ts / 1e6 : ts;
@@ -14,11 +14,12 @@ function when(ts: number) {
 
 export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => void }) {
   const [mine, setMine] = useState(false);
+  const door = doorForPost(post.author, post.id, post.source);
 
   useEffect(() => {
     const user = currentUser();
-    setMine(!!user && user.email === post.author);
-  }, [post.author]);
+    setMine(!!user && user.email === post.author && door === "lite");
+  }, [post.author, door]);
 
   function remove() {
     if (!window.confirm("Delete this post?")) return;
@@ -36,7 +37,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
         <div>
           <b>
-            {post.authorName} <DoorBadge author={post.author} postId={post.id} />
+            {post.authorName} <DoorBadge source={door} />
           </b>
           <div className="meta">{when(post.timestamp)}</div>
         </div>

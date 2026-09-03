@@ -83,6 +83,7 @@ export async function fetchRecentPosts(limit = 20): Promise<IcePost[]> {
       imageURL: image,
       timestamp: Number(natToString(p.timestamp)),
       category,
+      source: "network",
     });
   }
   return posts;

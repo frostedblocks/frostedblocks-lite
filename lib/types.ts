@@ -1,3 +1,5 @@
+export type IceDoor = "lite" | "network";
+
 export type IcePost = {
   id: string;
   content: string;
@@ -8,10 +10,12 @@ export type IcePost = {
   imageURL?: string | null;
   timestamp: number;
   category?: string;
+  source?: IceDoor;
 };
 
 export type IceProfile = {
   username: string;
   bio: string;
   avatarURL: string;
+  source?: IceDoor;
 };
