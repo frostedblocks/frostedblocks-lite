@@ -4,6 +4,7 @@ import Link from "next/link";
 import { currentUser } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
 import { PostCard } from "./PostCard";
+import { LiteBadge } from "./LiteBadge";
 import type { IcePost } from "@/lib/types";
 import type { LiteUser } from "@/lib/auth-client";
 
@@ -47,11 +48,14 @@ export function ProfileView() {
         </div>
         <div>
           <div className="kicker">Lite profile · not on-chain</div>
-          <h1 style={{ fontSize: 36, margin: "4px 0" }}>{user.name || user.email.split("@")[0]}</h1>
+          <h1 style={{ fontSize: 36, margin: "4px 0", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {user.name || user.email.split("@")[0]}
+            <LiteBadge size="lg" />
+          </h1>
           <div className="meta">{user.email}</div>
         </div>
       </div>
-      <p className="note">This profile lives on ICE Lite only. It is not an ICE Network canister.</p>
+      <p className="note">This badge means the account was created on ICE Lite with email and password.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
@@ -59,7 +63,7 @@ export function ProfileView() {
       {posts.length ? (
         posts.map((post) => <PostCard key={post.id} post={post} onChange={refresh} />)
       ) : (
-        <p className="note">No posts yet. <Link href="/">Write one on the feed.</Link></p>
+        <p className="note">No posts yet. <Link href="/feed">Write one on the feed.</Link></p>
       )}
     </article>
   );

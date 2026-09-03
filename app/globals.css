@@ -58,6 +58,25 @@ button { font: inherit; }
 .delete-btn {
   background: none; border: 0; color: #fb7185; cursor: pointer; padding: 0; font-size: 13px;
 }
+.lite-badge {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #0b1220;
+  background: linear-gradient(90deg, #7dd3fc, #a5b4fc);
+}
+.lite-badge-lg {
+  margin-left: 0;
+  font-size: 12px;
+  padding: 4px 10px;
+}
 .grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 16px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 .kicker {

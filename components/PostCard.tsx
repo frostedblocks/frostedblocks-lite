@@ -3,6 +3,7 @@ import { currentUser } from "@/lib/auth-client";
 import { deletePost } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
+import { isLiteAccount, LiteBadge } from "./LiteBadge";
 
 function when(ts: number) {
   const ms = ts > 1e14 ? ts / 1e6 : ts;
@@ -13,6 +14,7 @@ function when(ts: number) {
 
 export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => void }) {
   const [mine, setMine] = useState(false);
+  const lite = isLiteAccount(post.author, post.id);
 
   useEffect(() => {
     const user = currentUser();
@@ -33,7 +35,12 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
     <article className="glass post">
       <div className="post-top">
         <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
-        <div><b>{post.authorName}</b><div className="meta">{when(post.timestamp)}</div></div>
+        <div>
+          <b>
+            {post.authorName} {lite ? <LiteBadge /> : null}
+          </b>
+          <div className="meta">{when(post.timestamp)}</div>
+        </div>
         {post.category ? <span className="tag">{post.category}</span> : null}
       </div>
       <p>{post.content}</p>
