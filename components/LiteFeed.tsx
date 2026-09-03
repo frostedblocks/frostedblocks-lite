@@ -3,21 +3,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
 import { currentUser } from "@/lib/auth-client";
+import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 
 export function LiteFeed() {
+  const { user, ready, signedIn } = useAuth();
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const [signedIn, setSignedIn] = useState(false);
-  const [name, setName] = useState("");
 
   function refresh() {
     setPosts(loadFeed());
-    const user = currentUser();
-    setSignedIn(!!user);
-    setName(user?.name || user?.email || "");
   }
 
   useEffect(() => {
@@ -40,6 +37,8 @@ export function LiteFeed() {
     }
   }
 
+  if (!ready) return null;
+
   return (
     <div>
       <div className="feed-head">
@@ -49,7 +48,7 @@ export function LiteFeed() {
       <div className="glass" style={{ padding: 8 }}>
         {signedIn ? (
           <form className="compose" onSubmit={publish}>
-            <div className="meta">Post as {name}</div>
+            <div className="meta">Post as {user?.name || user?.email}</div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="submit">Post</button>

@@ -1,20 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { currentUser, signOut } from "@/lib/auth-client";
+import { signOut } from "@/lib/auth-client";
+import { useAuth } from "@/lib/use-auth";
 
 export function AuthButtons() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setEmail(currentUser()?.email ?? null);
-    setReady(true);
-  }, []);
-
+  const { user, ready } = useAuth();
   if (!ready) return null;
 
-  if (email) {
+  if (user) {
     return (
       <>
         <Link className="btn ghost" href="/profile">Profile</Link>

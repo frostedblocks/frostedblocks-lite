@@ -6,7 +6,7 @@ export const SEED_FEED: IcePost[] = [
     author: "on-chain",
     authorName: "Walter L. Wood",
     category: "Crypto",
-    timestamp: Date.now() * 1e6 - 3 * 86400e9,
+    timestamp: Date.parse("2026-08-29") * 1e6,
     likes: 0,
     loves: 0,
     content:
@@ -20,8 +20,7 @@ export const SEED_FEED: IcePost[] = [
     timestamp: Date.parse("2026-08-24") * 1e6,
     likes: 0,
     loves: 0,
-    content:
-      "Supreme Court greenlights Trump's mail-in voting restrictions.",
+    content: "Supreme Court greenlights Trump's mail-in voting restrictions.",
   },
   {
     id: "seed-3",

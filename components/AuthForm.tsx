@@ -1,13 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, signUp } from "@/lib/auth-client";
+import { useAuth } from "@/lib/use-auth";
 
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+  const { signedIn, ready } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (ready && signedIn) window.location.replace("/feed");
+  }, [ready, signedIn]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,6 +26,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       setError(err instanceof Error ? err.message : "Could not continue.");
     }
   }
+
+  if (!ready || signedIn) return null;
 
   return (
     <form className="auth-form" onSubmit={submit}>

@@ -16,6 +16,10 @@ function writeUsers(users: LiteUser[]) {
   localStorage.setItem(USERS, JSON.stringify(users));
 }
 
+function ping() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("ice-auth"));
+}
+
 export function currentEmail(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(SESSION);
@@ -37,6 +41,7 @@ export function signUp(email: string, password: string, name: string) {
   users.push({ email: clean, name: name.trim() || clean.split("@")[0], pass: password });
   writeUsers(users);
   localStorage.setItem(SESSION, clean);
+  ping();
 }
 
 export function signIn(email: string, password: string) {
@@ -44,6 +49,7 @@ export function signIn(email: string, password: string) {
   const user = readUsers().find((u) => u.email === clean && u.pass === password);
   if (!user) throw new Error("Email or password is wrong.");
   localStorage.setItem(SESSION, user.email);
+  ping();
   return user;
 }
 
@@ -59,4 +65,5 @@ export function resetPassword(email: string, nextPassword: string) {
 
 export function signOut() {
   localStorage.removeItem(SESSION);
+  ping();
 }

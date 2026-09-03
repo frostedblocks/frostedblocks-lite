@@ -1,14 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { currentUser } from "@/lib/auth-client";
+import { useAuth } from "@/lib/use-auth";
 
 export function HomeCta() {
-  const [signedIn, setSignedIn] = useState(false);
-  useEffect(() => {
-    setSignedIn(!!currentUser());
-  }, []);
-
+  const { signedIn, ready } = useAuth();
+  if (!ready) return null;
   if (signedIn) {
     return (
       <div className="glass cta-box">
@@ -18,7 +14,6 @@ export function HomeCta() {
       </div>
     );
   }
-
   return (
     <div className="glass cta-box">
       <strong>Ready to enter?</strong>

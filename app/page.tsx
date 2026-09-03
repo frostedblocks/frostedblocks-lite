@@ -23,7 +23,7 @@ export default function HomePage() {
             <div className="glass feature">
               <div className="ico">◉</div>
               <strong>Email login</strong>
-              <p>Password login — no seed phrase on this site.</p>
+              <p>Password login. No wallet. No seed phrase.</p>
             </div>
             <div className="glass feature">
               <div className="ico">+</div>
