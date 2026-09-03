@@ -47,7 +47,7 @@ export function ProfileView() {
           {(user.name || user.email).slice(0, 1).toUpperCase()}
         </div>
         <div>
-          <div className="kicker">Lite profile · not on-chain</div>
+          <div className="kicker">Signed up with email</div>
           <h1 style={{ fontSize: 36, margin: "4px 0", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {user.name || user.email.split("@")[0]}
             <LiteBadge size="lg" />
@@ -55,7 +55,10 @@ export function ProfileView() {
           <div className="meta">{user.email}</div>
         </div>
       </div>
-      <p className="note">This badge means the account was created on ICE Lite with email and password.</p>
+      <p className="note">
+        ICE Lite badge = email account on this website. ICE Network badge = on-chain canister account.
+        Those two stay separate until the sites are connected.
+      </p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
