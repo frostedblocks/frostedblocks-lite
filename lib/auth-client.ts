@@ -1,4 +1,5 @@
 export type LiteUser = { email: string; name: string; pass: string };
+export type PublicUser = { email: string; name: string; source: "lite" };
 
 const USERS = "ice-lite-users";
 const SESSION = "ice-lite-session";
@@ -29,6 +30,10 @@ export function currentUser(): LiteUser | null {
   const email = currentEmail();
   if (!email) return null;
   return readUsers().find((u) => u.email === email) || null;
+}
+
+export function listPublicUsers(): PublicUser[] {
+  return readUsers().map((u) => ({ email: u.email, name: u.name, source: "lite" as const }));
 }
 
 export function signUp(email: string, password: string, name: string) {
