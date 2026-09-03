@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { currentUser } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
+import { followersOf, followingOf } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
 import type { IcePost } from "@/lib/types";
@@ -12,12 +13,19 @@ export function ProfileView() {
   const [user, setUser] = useState<LiteUser | null>(null);
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [ready, setReady] = useState(false);
+  const [following, setFollowing] = useState(0);
+  const [followers, setFollowers] = useState(0);
 
   function refresh() {
     const u = currentUser();
     setUser(u);
-    if (u) setPosts(loadFeed().filter((p) => p.author === u.email));
-    else setPosts([]);
+    if (u) {
+      setPosts(loadFeed().filter((p) => p.author === u.email));
+      setFollowing(followingOf(u.email).length);
+      setFollowers(followersOf(u.email).length);
+    } else {
+      setPosts([]);
+    }
     setReady(true);
   }
 
@@ -47,18 +55,20 @@ export function ProfileView() {
           {(user.name || user.email).slice(0, 1).toUpperCase()}
         </div>
         <div>
-          <div className="kicker">Signed up with email</div>
+          <div className="kicker">Lite profile · not on-chain</div>
           <h1 style={{ fontSize: 36, margin: "4px 0", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {user.name || user.email.split("@")[0]}
             <LiteBadge size="lg" />
           </h1>
           <div className="meta">{user.email}</div>
+          <div className="meta" style={{ marginTop: 6 }}>
+            <Link href="/network">{following} Following</Link>
+            {" · "}
+            <Link href="/network">{followers} Followers</Link>
+          </div>
         </div>
       </div>
-      <p className="note">
-        ICE Lite badge = email account on this website. ICE Network badge = on-chain canister account.
-        Those two stay separate until the sites are connected.
-      </p>
+      <p className="note">ICE Lite badge only. Following lives on Lite until the canister graph is connected.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
