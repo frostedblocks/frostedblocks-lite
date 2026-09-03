@@ -16,19 +16,31 @@ export function NetworkBadge({ size = "sm" }: { size?: "sm" | "lg" }) {
   );
 }
 
+function isLiteAuthor(author: string, postId?: string, source?: IceDoor) {
+  if (source === "lite") return true;
+  if (postId?.startsWith("lite-")) return true;
+  if (author.includes("@")) return true;
+  return false;
+}
+
+export function doorForPost(author: string, postId?: string, source?: IceDoor): IceDoor {
+  if (isLiteAuthor(author, postId, source)) return "lite";
+  if (source === "network") return "network";
+  return "network";
+}
+
 export function DoorBadge({
   source,
+  author,
+  postId,
   size = "sm",
 }: {
   source?: IceDoor | string;
+  author?: string;
+  postId?: string;
   size?: "sm" | "lg";
 }) {
-  if (source === "network") return <NetworkBadge size={size} />;
-  return <LiteBadge size={size} />;
-}
-
-export function doorForPost(author: string, postId?: string, source?: IceDoor) {
-  if (source) return source;
-  if (postId?.startsWith("lite-") || author.includes("@")) return "lite" as const;
-  return "network" as const;
+  const door = doorForPost(author || "", postId, source === "lite" || source === "network" ? source : undefined);
+  if (door === "lite") return <LiteBadge size={size} />;
+  return <NetworkBadge size={size} />;
 }

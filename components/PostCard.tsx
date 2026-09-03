@@ -37,7 +37,8 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
         <div>
           <b>
-            {post.authorName} <DoorBadge source={door} />
+            {post.authorName}{" "}
+            <DoorBadge source={door} author={post.author} postId={post.id} />
           </b>
           <div className="meta">{when(post.timestamp)}</div>
         </div>
