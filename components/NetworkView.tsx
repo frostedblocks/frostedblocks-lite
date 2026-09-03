@@ -4,26 +4,23 @@ import { useEffect, useState } from "react";
 import { listPublicUsers, type PublicUser } from "@/lib/auth-client";
 import { followersOf, followingOf, type FollowRow } from "@/lib/follow-client";
 import { useAuth } from "@/lib/use-auth";
-import { LiteBadge, NetworkBadge } from "./LiteBadge";
+import { LiteBadge } from "./LiteBadge";
 import { FollowButton } from "./FollowButton";
-
-const NETWORK_PEOPLE = [
-  { name: "Walter L. Wood", target: "network:walter", source: "network" as const },
-];
 
 type Tab = "following" | "followers" | "people";
 
 export function NetworkView() {
   const { user, ready, signedIn } = useAuth();
-  const [tab, setTab] = useState<Tab>("following");
+  const [tab, setTab] = useState<Tab>("people");
   const [people, setPeople] = useState<PublicUser[]>([]);
   const [following, setFollowing] = useState<FollowRow[]>([]);
   const [followers, setFollowers] = useState<FollowRow[]>([]);
 
   function refresh() {
-    setPeople(listPublicUsers());
+    const all = listPublicUsers();
+    setPeople(all);
     if (user) {
-      setFollowing(followingOf(user.email));
+      setFollowing(followingOf(user.email).filter((r) => r.source === "lite"));
       setFollowers(followersOf(user.email));
     } else {
       setFollowing([]);
@@ -37,62 +34,53 @@ export function NetworkView() {
 
   if (!ready) return null;
 
+  const others = people.filter((p) => p.email !== user?.email);
+
   return (
     <article className="glass" style={{ padding: 28, maxWidth: 760, margin: "0 auto" }}>
-      <div className="kicker">Follow graph</div>
-      <h1 style={{ fontSize: 40 }}>Network</h1>
-      <p className="lead">Same idea as ICE Network: people you follow, and people who follow you.</p>
+      <div className="kicker">ICE Lite</div>
+      <h1 style={{ fontSize: 40 }}>Lite network</h1>
+      <p className="lead">This is the ICE Lite network. Follow Lite users only. ICE Network follows stay on frostedblocks.com.</p>
       <div className="chips">
+        <button className={tab === "people" ? "btn" : "chip"} onClick={() => { setTab("people"); refresh(); }}>People</button>
         <button className={tab === "following" ? "btn" : "chip"} onClick={() => { setTab("following"); refresh(); }}>Following {following.length}</button>
         <button className={tab === "followers" ? "btn" : "chip"} onClick={() => { setTab("followers"); refresh(); }}>Followers {followers.length}</button>
-        <button className={tab === "people" ? "btn" : "chip"} onClick={() => { setTab("people"); refresh(); }}>People</button>
       </div>
 
       {!signedIn ? (
-        <p className="note">Sign in to follow someone. <Link href="/signin">Sign in</Link></p>
+        <p className="note">Sign in to follow someone on ICE Lite. <Link href="/signin">Sign in</Link></p>
+      ) : null}
+
+      {tab === "people" ? (
+        <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+          {others.map((p) => (
+            <PersonRow key={p.email} name={p.name} target={p.email} subtitle={p.email} onChange={refresh} />
+          ))}
+          {!others.length ? (
+            <p className="note">
+              No other Lite accounts are visible yet. Right now each browser only sees accounts created on that browser. A database is what makes the whole Lite network share one people list.
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {tab === "following" ? (
         <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
-          <p className="note">Following — people you follow</p>
+          <p className="note">Following — Lite users you follow</p>
           {following.map((row) => (
-            <PersonRow
-              key={row.target}
-              name={row.targetName}
-              target={row.target}
-              source={row.source}
-              onChange={refresh}
-            />
+            <PersonRow key={row.target} name={row.targetName} target={row.target} onChange={refresh} />
           ))}
-          {!following.length ? <p className="note">You are not following anyone yet. Open People and hit Follow.</p> : null}
+          {!following.length ? <p className="note">You are not following anyone on ICE Lite yet.</p> : null}
         </div>
       ) : null}
 
       {tab === "followers" ? (
         <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
-          <p className="note">Followers — people who follow you</p>
+          <p className="note">Followers — Lite users who follow you</p>
           {followers.map((row) => (
-            <PersonRow
-              key={row.follower}
-              name={row.follower}
-              target={row.follower}
-              source="lite"
-              onChange={refresh}
-            />
+            <PersonRow key={row.follower} name={row.follower} target={row.follower} onChange={refresh} />
           ))}
-          {!followers.length ? <p className="note">No followers on this device yet.</p> : null}
-        </div>
-      ) : null}
-
-      {tab === "people" ? (
-        <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
-          {people.map((p) => (
-            <PersonRow key={p.email} name={p.name} target={p.email} source="lite" subtitle={p.email} onChange={refresh} />
-          ))}
-          {NETWORK_PEOPLE.map((p) => (
-            <PersonRow key={p.target} name={p.name} target={p.target} source="network" subtitle="ICE Network account" onChange={refresh} />
-          ))}
-          {!people.length ? <p className="note">No other Lite accounts on this device. Sign up a second account in another browser profile to follow them.</p> : null}
+          {!followers.length ? <p className="note">No Lite followers yet.</p> : null}
         </div>
       ) : null}
     </article>
@@ -102,30 +90,26 @@ export function NetworkView() {
 function PersonRow({
   name,
   target,
-  source,
   subtitle,
   onChange,
 }: {
   name: string;
   target: string;
-  source: "lite" | "network";
   subtitle?: string;
   onChange: () => void;
 }) {
   return (
-    <div className="glass partner" style={{ minWidth: 0 }} onClick={onChange}>
+    <div className="glass partner" style={{ minWidth: 0 }}>
       <div className="post-top" style={{ margin: 0 }}>
         <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
         <div>
           <b>
-            {name} {source === "lite" ? <LiteBadge /> : <NetworkBadge />}
+            {name} <LiteBadge />
           </b>
           {subtitle ? <div className="meta">{subtitle}</div> : null}
         </div>
       </div>
-      <span onClick={(e) => e.stopPropagation()}>
-        <FollowButton target={target} targetName={name} source={source} />
-      </span>
+      <FollowButton target={target} targetName={name} source="lite" />
     </div>
   );
 }
