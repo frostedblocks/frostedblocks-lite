@@ -4,7 +4,7 @@ import Link from "next/link";
 import { resetPassword } from "@/lib/auth-client";
 
 export function ResetForm() {
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +18,7 @@ export function ResetForm() {
       return;
     }
     try {
-      resetPassword(email, password);
+      resetPassword(login, password);
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reset.");
@@ -37,8 +37,8 @@ export function ResetForm() {
   return (
     <form className="auth-form" onSubmit={submit}>
       <label>
-        Email
-        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+        Email or phone
+        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" />
       </label>
       <label>
         New password

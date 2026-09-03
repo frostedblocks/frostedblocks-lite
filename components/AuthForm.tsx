@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/use-auth";
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const { signedIn, ready } = useAuth();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -19,8 +19,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     e.preventDefault();
     setError("");
     try {
-      if (mode === "signup") signUp(email, password, name);
-      else signIn(email, password);
+      if (mode === "signup") signUp(login, password, name);
+      else signIn(login, password);
       window.location.href = "/feed";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not continue.");
@@ -38,8 +38,14 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         </label>
       ) : null}
       <label>
-        Email
-        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+        Email or phone
+        <input
+          required
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          placeholder="you@email.com or 3025551234"
+          autoComplete={mode === "signup" ? "username" : "username"}
+        />
       </label>
       <label>
         Password

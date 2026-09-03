@@ -5,10 +5,12 @@
 CREATE TABLE IF NOT EXISTS lite_users (
   id            BIGSERIAL PRIMARY KEY,
   door          TEXT NOT NULL DEFAULT 'lite',
-  email         TEXT NOT NULL UNIQUE,
+  email         TEXT UNIQUE,
+  phone         TEXT UNIQUE,
   name          TEXT NOT NULL,
   password_hash TEXT NOT NULL,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS lite_posts (
