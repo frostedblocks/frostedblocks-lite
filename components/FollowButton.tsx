@@ -8,10 +8,12 @@ export function FollowButton({
   target,
   targetName,
   source = "lite",
+  onChange,
 }: {
   target: string;
   targetName: string;
   source?: "lite" | "network";
+  onChange?: () => void;
 }) {
   const { user, ready, signedIn } = useAuth();
   const [on, setOn] = useState(false);
@@ -34,6 +36,7 @@ export function FollowButton({
         if (on) unfollow(user.email, target);
         else follow(user.email, target, targetName, source);
         setOn(!on);
+        onChange?.();
       }}
     >
       {on ? "Following" : "Follow"}

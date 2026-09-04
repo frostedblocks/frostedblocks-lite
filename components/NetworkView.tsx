@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listPublicUsers, type PublicUser } from "@/lib/auth-client";
 import { followersOf, followingOf, type FollowRow } from "@/lib/follow-client";
 import { useAuth } from "@/lib/use-auth";
@@ -16,9 +16,8 @@ export function NetworkView() {
   const [following, setFollowing] = useState<FollowRow[]>([]);
   const [followers, setFollowers] = useState<FollowRow[]>([]);
 
-  function refresh() {
-    const all = listPublicUsers();
-    setPeople(all);
+  const refresh = useCallback(() => {
+    setPeople(listPublicUsers());
     if (user) {
       setFollowing(followingOf(user.email).filter((r) => r.source === "lite"));
       setFollowers(followersOf(user.email));
@@ -26,11 +25,11 @@ export function NetworkView() {
       setFollowing([]);
       setFollowers([]);
     }
-  }
+  }, [user]);
 
   useEffect(() => {
     refresh();
-  }, [user]);
+  }, [refresh]);
 
   if (!ready) return null;
 
@@ -109,7 +108,7 @@ function PersonRow({
           {subtitle ? <div className="meta">{subtitle}</div> : null}
         </div>
       </div>
-      <FollowButton target={target} targetName={name} source="lite" />
+      <FollowButton target={target} targetName={name} source="lite" onChange={onChange} />
     </div>
   );
 }
