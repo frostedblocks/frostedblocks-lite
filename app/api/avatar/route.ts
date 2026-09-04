@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { avatarKeys, deleteAvatar, putAvatar } from "@/lib/r2";
+import { loginOf, userFromRequest } from "@/lib/session";
+import { sql } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -25,6 +27,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const me = await userFromRequest(req);
+    if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
     const missing = Object.entries(flags())
       .filter(([, on]) => !on)
       .map(([name]) => name);
@@ -37,17 +41,18 @@ export async function POST(req: Request) {
 
     const form = await req.formData();
     const file = form.get("file");
-    const login = String(form.get("login") || "").trim();
     if (!(file instanceof File)) return NextResponse.json({ error: "Pick a photo." }, { status: 400 });
-    if (!login) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
     const ext = TYPES[file.type];
     if (!ext) return NextResponse.json({ error: "Use a JPG, PNG, or WEBP." }, { status: 400 });
     if (file.size > 2_000_000) return NextResponse.json({ error: "Photo must be under 2MB." }, { status: 400 });
 
+    const login = loginOf(me);
     const safe = login.replace(/[^a-zA-Z0-9]+/g, "-").slice(0, 40);
     const key = `avatars/${safe}.${ext}`;
     const buf = Buffer.from(await file.arrayBuffer());
     const url = await putAvatar(key, buf, file.type);
+    const q = sql();
+    await q`UPDATE lite_users SET avatar = ${url} WHERE id = ${me.id}`;
     return NextResponse.json({ url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed.";
@@ -57,15 +62,17 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const { login } = await req.json();
-    if (!login) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
-    for (const key of avatarKeys(String(login))) {
+    const me = await userFromRequest(req);
+    if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+    for (const key of avatarKeys(loginOf(me))) {
       try {
         await deleteAvatar(key);
       } catch {
         /* still clear the profile photo */
       }
     }
+    const q = sql();
+    await q`UPDATE lite_users SET avatar = NULL WHERE id = ${me.id}`;
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not delete.";

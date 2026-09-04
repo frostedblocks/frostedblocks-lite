@@ -2,9 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resetPassword } from "@/lib/auth-client";
+import { useAuth } from "@/lib/use-auth";
 
 export function ResetForm() {
-  const [login, setLogin] = useState("");
+  const { signedIn, ready } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -20,20 +22,31 @@ export function ResetForm() {
     }
     setBusy(true);
     try {
-      await resetPassword(login, password);
+      await resetPassword(currentPassword, password);
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reset.");
+      setError(err instanceof Error ? err.message : "Could not change password.");
     } finally {
       setBusy(false);
     }
   }
 
+  if (!ready) return null;
+
+  if (!signedIn) {
+    return (
+      <div className="auth-form">
+        <p className="note">You must be signed in to change your password. Email reset links are not on yet.</p>
+        <Link className="btn" href="/signin">Sign in</Link>
+      </div>
+    );
+  }
+
   if (done) {
     return (
       <div className="auth-form">
-        <p className="note">Password updated. Sign in with the new one.</p>
-        <Link className="btn" href="/signin">Sign in</Link>
+        <p className="note">Password updated.</p>
+        <Link className="btn" href="/profile">Back to profile</Link>
       </div>
     );
   }
@@ -41,20 +54,19 @@ export function ResetForm() {
   return (
     <form className="auth-form" onSubmit={submit}>
       <label>
-        Email or phone
-        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" />
+        Current password
+        <input type="password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
       </label>
       <label>
         New password
         <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" />
       </label>
       <label>
-        Confirm password
-        <input type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Type it again" />
+        Confirm new password
+        <input type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} />
       </label>
       {error ? <p className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy}>{busy ? "Please wait…" : "Reset password"}</button>
-      <p className="note"><Link href="/signin">Back to sign in</Link></p>
+      <button className="btn" type="submit" disabled={busy}>{busy ? "Please wait…" : "Change password"}</button>
     </form>
   );
 }

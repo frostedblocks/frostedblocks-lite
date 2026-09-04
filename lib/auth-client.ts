@@ -118,14 +118,14 @@ export async function signIn(login: string, password: string) {
   return data;
 }
 
-export async function resetPassword(login: string, nextPassword: string) {
+export async function resetPassword(currentPassword: string, nextPassword: string) {
   const res = await fetch("/api/auth/reset", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ login, password: nextPassword }),
+    body: JSON.stringify({ currentPassword, password: nextPassword }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Could not reset.");
+  if (!res.ok) throw new Error(data.error || "Could not change password.");
 }
 
 export function signInWithGoogle(email: string, name: string, picture?: string) {
