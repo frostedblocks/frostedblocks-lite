@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, signUp } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
+import { GoogleButton } from "./GoogleButton";
 
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const { signedIn, ready } = useAuth();
@@ -14,6 +15,12 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   useEffect(() => {
     if (ready && signedIn) window.location.replace("/feed");
   }, [ready, signedIn]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const why = params.get("error");
+    if (why) setError("Google sign-in did not finish. Check the Google keys on Vercel.");
+  }, []);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +38,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
   return (
     <form className="auth-form" onSubmit={submit}>
+      <GoogleButton />
+      <p className="note" style={{ textAlign: "center" }}>or use email / phone</p>
       {mode === "signup" ? (
         <label>
           Name
@@ -44,7 +53,6 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           value={login}
           onChange={(e) => setLogin(e.target.value)}
           placeholder="you@email.com or 3025551234"
-          autoComplete={mode === "signup" ? "username" : "username"}
         />
       </label>
       <label>

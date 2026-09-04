@@ -1,4 +1,11 @@
-export type LiteUser = { email: string; name: string; pass: string; phone?: string; avatar?: string };
+export type LiteUser = {
+  email: string;
+  name: string;
+  pass: string;
+  phone?: string;
+  avatar?: string;
+  google?: boolean;
+};
 export type PublicUser = { email: string; name: string; source: "lite"; avatar?: string };
 
 const USERS = "ice-lite-users";
@@ -110,6 +117,32 @@ export function signIn(login: string, password: string) {
   localStorage.setItem(SESSION, user.email);
   ping();
   return user;
+}
+
+export function signInWithGoogle(email: string, name: string, picture?: string) {
+  const clean = normalizeLogin(email);
+  if (!isEmail(clean)) throw new Error("Google did not return an email.");
+  const users = readUsers();
+  const idx = users.findIndex((u) => sameAccount(u, clean));
+  if (idx >= 0) {
+    users[idx] = {
+      ...users[idx],
+      name: users[idx].name || name || clean.split("@")[0],
+      avatar: users[idx].avatar || picture,
+      google: true,
+    };
+  } else {
+    users.push({
+      email: clean,
+      name: name || clean.split("@")[0],
+      pass: "",
+      avatar: picture,
+      google: true,
+    });
+  }
+  writeUsers(users);
+  localStorage.setItem(SESSION, clean);
+  ping();
 }
 
 export function resetPassword(login: string, nextPassword: string) {
