@@ -6,27 +6,19 @@ export type LiteMessage = {
   at: number;
 };
 
-const KEY = "ice-lite-messages";
-
-function read(): LiteMessage[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function write(rows: LiteMessage[]) {
-  localStorage.setItem(KEY, JSON.stringify(rows));
-}
-
 export function threadId(a: string, b: string) {
   return [a.toLowerCase(), b.toLowerCase()].sort().join("|");
 }
 
-export function listThreads(me: string) {
-  const mine = read().filter((m) => m.from === me || m.to === me);
+export async function listAllMessages(): Promise<LiteMessage[]> {
+  const res = await fetch("/api/messages", { cache: "no-store" });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not load messages.");
+  return (data.messages || []) as LiteMessage[];
+}
+
+export function listThreads(me: string, messages: LiteMessage[]) {
+  const mine = messages.filter((m) => m.from === me || m.to === me);
   const map = new Map<string, LiteMessage>();
   for (const m of mine) {
     const other = m.from === me ? m.to : m.from;
@@ -38,29 +30,19 @@ export function listThreads(me: string) {
     .sort((a, b) => b.last.at - a.last.at);
 }
 
-export function listThread(me: string, other: string) {
-  return read()
-    .filter(
-      (m) =>
-        (m.from === me && m.to === other) ||
-        (m.from === other && m.to === me),
-    )
+export function listThread(me: string, other: string, messages: LiteMessage[]) {
+  return messages
+    .filter((m) => (m.from === me && m.to === other) || (m.from === other && m.to === me))
     .sort((a, b) => a.at - b.at);
 }
 
-export function sendMessage(from: string, to: string, text: string) {
-  const body = text.trim();
-  if (!from) throw new Error("Sign in to send a message.");
-  if (!to.includes("@")) throw new Error("Messages on Lite are email to email.");
-  if (from === to) throw new Error("You cannot message yourself.");
-  if (!body) throw new Error("Write a message first.");
-  const row: LiteMessage = {
-    id: `msg-${Date.now()}`,
-    from,
-    to: to.toLowerCase(),
-    text: body.slice(0, 2000),
-    at: Date.now(),
-  };
-  write([...read(), row]);
-  return row;
+export async function sendMessage(_from: string, to: string, text: string) {
+  const res = await fetch("/api/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ to, text }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not send.");
+  return data.message as LiteMessage;
 }

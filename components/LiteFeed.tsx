@@ -13,15 +13,15 @@ export function LiteFeed() {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
 
-  function refresh() {
-    setPosts(loadFeed());
+  async function refresh() {
+    setPosts(await loadFeed());
   }
 
   useEffect(() => {
     refresh();
   }, []);
 
-  function publish(e: React.FormEvent) {
+  async function publish(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!currentUser()) {
@@ -29,9 +29,9 @@ export function LiteFeed() {
       return;
     }
     try {
-      createPost(text);
+      await createPost(text);
       setText("");
-      refresh();
+      await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not post.");
     }
@@ -61,7 +61,7 @@ export function LiteFeed() {
         )}
         <div className="feed" style={{ maxHeight: 520 }}>
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} onChange={refresh} />
+            <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />
           ))}
         </div>
       </div>

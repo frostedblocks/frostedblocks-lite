@@ -34,4 +34,26 @@ export async function ensureSchema() {
     user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_posts (
+    id BIGSERIAL PRIMARY KEY,
+    door TEXT NOT NULL DEFAULT 'lite',
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    category TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_follows (
+    follower_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    followee_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (follower_id, followee_id),
+    CHECK (follower_id <> followee_id)
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    receiver_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    body TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
 }

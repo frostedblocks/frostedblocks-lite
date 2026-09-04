@@ -5,40 +5,49 @@ export type FollowRow = {
   source: "lite" | "network";
 };
 
-const KEY = "ice-lite-follows";
-
-function read(): FollowRow[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
-  } catch {
-    return [];
-  }
+export async function loadFollows() {
+  const res = await fetch("/api/follows", { cache: "no-store" });
+  const data = await res.json();
+  return {
+    following: (data.following || []) as FollowRow[],
+    followers: (data.followers || []) as FollowRow[],
+  };
 }
 
-function write(rows: FollowRow[]) {
-  localStorage.setItem(KEY, JSON.stringify(rows));
+export async function loadPeople() {
+  const res = await fetch("/api/people", { cache: "no-store" });
+  const data = await res.json();
+  return (data.people || []) as { email: string; name: string; avatar?: string; source: "lite" }[];
 }
 
-export function isFollowing(follower: string, target: string) {
-  return read().some((r) => r.follower === follower && r.target === target);
+export function followingOf(_follower: string) {
+  return [] as FollowRow[];
 }
 
-export function followingOf(follower: string) {
-  return read().filter((r) => r.follower === follower);
+export function followersOf(_target: string) {
+  return [] as FollowRow[];
 }
 
-export function followersOf(target: string) {
-  return read().filter((r) => r.target === target);
+export function isFollowing(_follower: string, _target: string) {
+  return false;
 }
 
-export function follow(follower: string, target: string, targetName: string, source: "lite" | "network") {
-  if (!follower) throw new Error("Sign in to follow someone.");
-  if (follower === target) throw new Error("You cannot follow yourself.");
-  if (isFollowing(follower, target)) return;
-  write([...read(), { follower, target, targetName, source }]);
+export async function follow(_follower: string, target: string) {
+  const res = await fetch("/api/follows", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not follow.");
 }
 
-export function unfollow(follower: string, target: string) {
-  write(read().filter((r) => !(r.follower === follower && r.target === target)));
+export async function unfollow(_follower: string, target: string) {
+  const res = await fetch("/api/follows", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not unfollow.");
 }

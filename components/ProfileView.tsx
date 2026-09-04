@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { currentUser } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
-import { followersOf, followingOf } from "@/lib/follow-client";
+import { loadFollows } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
 import { AvatarUpload } from "./AvatarUpload";
@@ -17,13 +17,15 @@ export function ProfileView() {
   const [following, setFollowing] = useState(0);
   const [followers, setFollowers] = useState(0);
 
-  function refresh() {
+  async function refresh() {
     const u = currentUser();
     setUser(u);
     if (u) {
-      setPosts(loadFeed().filter((p) => p.author === u.email));
-      setFollowing(followingOf(u.email).length);
-      setFollowers(followersOf(u.email).length);
+      const feed = await loadFeed();
+      setPosts(feed.filter((p) => p.author === u.email && p.source === "lite"));
+      const graph = await loadFollows();
+      setFollowing(graph.following.length);
+      setFollowers(graph.followers.length);
     } else {
       setPosts([]);
     }
@@ -31,7 +33,7 @@ export function ProfileView() {
   }
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
 
   if (!ready) return null;
@@ -74,15 +76,15 @@ export function ProfileView() {
         </div>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0 8px" }}>
-        <AvatarUpload onDone={refresh} />
+        <AvatarUpload onDone={() => { void refresh(); }} />
       </div>
-      <p className="note">ICE Lite badge only. Use Delete photo to remove the picture.</p>
+      <p className="note">Posts, follows, and messages now save in the ice-lite database.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
       </div>
       {posts.length ? (
-        posts.map((post) => <PostCard key={post.id} post={post} onChange={refresh} />)
+        posts.map((post) => <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />)
       ) : (
         <p className="note">No posts yet. <Link href="/feed">Write one on the feed.</Link></p>
       )}

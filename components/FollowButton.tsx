@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { follow, isFollowing, unfollow } from "@/lib/follow-client";
+import { follow, loadFollows, unfollow } from "@/lib/follow-client";
 import { useAuth } from "@/lib/use-auth";
 import Link from "next/link";
 
 export function FollowButton({
   target,
   targetName,
-  source = "lite",
   onChange,
 }: {
   target: string;
@@ -17,9 +16,13 @@ export function FollowButton({
 }) {
   const { user, ready, signedIn } = useAuth();
   const [on, setOn] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (user) setOn(isFollowing(user.email, target));
+    if (!user) return;
+    loadFollows().then(({ following }) => {
+      setOn(following.some((r) => r.target === target));
+    });
   }, [user, target]);
 
   if (!ready) return null;
@@ -32,14 +35,22 @@ export function FollowButton({
     <button
       className={on ? "btn ghost" : "btn"}
       type="button"
-      onClick={() => {
-        if (on) unfollow(user.email, target);
-        else follow(user.email, target, targetName, source);
-        setOn(!on);
-        onChange?.();
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          if (on) await unfollow(user.email, target);
+          else await follow(user.email, target);
+          setOn(!on);
+          onChange?.();
+        } catch (err) {
+          window.alert(err instanceof Error ? err.message : "Could not update follow.");
+        } finally {
+          setBusy(false);
+        }
       }}
     >
-      {on ? "Following" : "Follow"}
+      {on ? "Following" : "Follow"} {targetName ? "" : ""}
     </button>
   );
 }
