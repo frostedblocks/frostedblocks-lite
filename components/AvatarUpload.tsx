@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { currentUser, setAvatar } from "@/lib/auth-client";
+import { clearAvatar, currentUser, setAvatar } from "@/lib/auth-client";
 
-export function AvatarUpload({ onDone }: { onDone?: () => void }) {
+export function AvatarUpload({ hasPhoto, onDone }: { hasPhoto?: boolean; onDone?: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,13 +30,41 @@ export function AvatarUpload({ onDone }: { onDone?: () => void }) {
     }
   }
 
+  async function remove() {
+    if (!window.confirm("Delete this profile photo?")) return;
+    setError("");
+    setBusy(true);
+    try {
+      const user = currentUser();
+      if (!user) throw new Error("Sign in first.");
+      await fetch("/api/avatar", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: user.email }),
+      });
+      clearAvatar();
+      onDone?.();
+    } catch (err) {
+      clearAvatar();
+      onDone?.();
+      setError(err instanceof Error ? err.message : "Photo removed on this device.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <div>
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
       <label className="btn ghost" style={{ display: "inline-block" }}>
-        {busy ? "Uploading…" : "Change photo"}
+        {busy ? "Working…" : hasPhoto ? "Change photo" : "Add photo"}
         <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={pick} />
       </label>
-      {error ? <p className="error">{error}</p> : null}
+      {hasPhoto ? (
+        <button className="btn ghost" type="button" disabled={busy} onClick={remove}>
+          Delete photo
+        </button>
+      ) : null}
+      {error ? <p className="error" style={{ width: "100%" }}>{error}</p> : null}
     </div>
   );
 }

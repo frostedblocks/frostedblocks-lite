@@ -67,9 +67,13 @@ export function setAvatar(url: string) {
   const users = readUsers();
   const idx = users.findIndex((u) => sameAccount(u, me.email));
   if (idx < 0) throw new Error("Account not found.");
-  users[idx] = { ...users[idx], avatar: url };
+  users[idx] = { ...users[idx], avatar: url || undefined };
   writeUsers(users);
   ping();
+}
+
+export function clearAvatar() {
+  setAvatar("");
 }
 
 export function avatarFor(author: string) {

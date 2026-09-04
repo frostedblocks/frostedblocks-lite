@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { putAvatar } from "@/lib/r2";
+import { avatarKeys, deleteAvatar, putAvatar } from "@/lib/r2";
 
 export const runtime = "nodejs";
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       .map(([name]) => name);
     if (missing.length) {
       return NextResponse.json(
-        { error: `Missing on this deploy: ${missing.join(", ")}. Add them in Vercel Environment Variables for Production AND Preview, then Redeploy.` },
+        { error: `Missing on this deploy: ${missing.join(", ")}. Add them in Vercel for Production AND Preview, then Redeploy.` },
         { status: 500 },
       );
     }
@@ -51,6 +51,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { login } = await req.json();
+    if (!login) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+    for (const key of avatarKeys(String(login))) {
+      try {
+        await deleteAvatar(key);
+      } catch {
+        /* still clear the profile photo */
+      }
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not delete.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

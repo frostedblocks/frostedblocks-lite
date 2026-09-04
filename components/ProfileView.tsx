@@ -72,7 +72,7 @@ export function ProfileView() {
             <Link href="/network">{followers} Followers</Link>
           </div>
           <div style={{ marginTop: 10 }}>
-            <AvatarUpload onDone={refresh} />
+            <AvatarUpload hasPhoto={Boolean(user.avatar)} onDone={refresh} />
           </div>
         </div>
       </div>
