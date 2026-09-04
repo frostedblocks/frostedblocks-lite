@@ -1,4 +1,4 @@
-import { LiteFeed } from "@/components/LiteFeed";
+import { FeedTabs } from "@/components/FeedTabs";
 
 export default function FeedPage() {
   return (
@@ -6,7 +6,7 @@ export default function FeedPage() {
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <div className="kicker" style={{ marginBottom: 8 }}>Live</div>
         <h1 style={{ fontSize: 36, marginTop: 0 }}>Feed</h1>
-        <LiteFeed />
+        <FeedTabs />
       </div>
     </main>
   );
