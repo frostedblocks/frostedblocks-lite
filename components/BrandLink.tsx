@@ -9,7 +9,7 @@ export function BrandLink() {
       <div className="logo">ICE</div>
       <div>
         <b>ICE Lite</b>
-        <span>frostedblocks.com</span>
+        <span>lite.frostedblocks.com</span>
       </div>
     </Link>
   );

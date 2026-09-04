@@ -7,41 +7,39 @@ export default function HomePage() {
     <main className="wrap page">
       <section className="grid">
         <div className="glass" style={{ padding: 28 }}>
-          <div className="kicker">Internet Computer · Sovereign social</div>
+          <div className="kicker">ICE Lite · Free door</div>
           <h1><em>Quiet social,</em><br />owned by you</h1>
           <p className="lead">
-            A quiet social network — no engagement farms, no algorithm feeding you rage.
-            ICE Lite is the free website door. Sign in with email. Keep your presence.
-            Want it on-chain? That is ICE Network.
+            No engagement farm. No rage algorithm. Sign in with email or phone.
+            Keep a Lite profile now. Move to ICE Network later if you want a canister.
           </p>
           <div className="features">
             <div className="glass feature">
               <div className="ico">◇</div>
-              <strong>Public posts</strong>
-              <p>Your feed lives on this site, not a silo.</p>
+              <strong>Live feed</strong>
+              <p>Posts save in the Lite database.</p>
             </div>
             <div className="glass feature">
               <div className="ico">◉</div>
-              <strong>Email login</strong>
-              <p>Password login. No wallet. No seed phrase.</p>
+              <strong>Simple login</strong>
+              <p>Email or phone. No wallet on this site.</p>
             </div>
             <div className="glass feature">
               <div className="ico">+</div>
               <strong>Your profile</strong>
-              <p>A Lite profile now. Canister later if you want.</p>
+              <p>Photo, follows, and messages included.</p>
             </div>
           </div>
           <HomeCta />
           <div className="chips">
             <span className="chip">Lite</span>
             <span className="chip">No algorithm</span>
-            <span className="chip">Email login</span>
             <span className="chip">Free</span>
-            <span className="chip">Censorship-resistant path</span>
+            <span className="chip">On-chain path</span>
           </div>
           <a className="glass founder" href={ONCHAIN_URL}>
             <span>Open ICE Network</span>
-            <span className="meta">On-chain door</span>
+            <span className="meta">Canister door</span>
           </a>
         </div>
         <LiteFeed />
