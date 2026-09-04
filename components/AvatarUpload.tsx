@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { clearAvatar, currentUser, setAvatar } from "@/lib/auth-client";
 
-export function AvatarUpload({ hasPhoto, onDone }: { hasPhoto?: boolean; onDone?: () => void }) {
+export function AvatarUpload({ onDone }: { onDone?: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,10 +44,9 @@ export function AvatarUpload({ hasPhoto, onDone }: { hasPhoto?: boolean; onDone?
       });
       clearAvatar();
       onDone?.();
-    } catch (err) {
+    } catch {
       clearAvatar();
       onDone?.();
-      setError(err instanceof Error ? err.message : "Photo removed on this device.");
     } finally {
       setBusy(false);
     }
@@ -56,14 +55,12 @@ export function AvatarUpload({ hasPhoto, onDone }: { hasPhoto?: boolean; onDone?
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
       <label className="btn ghost" style={{ display: "inline-block" }}>
-        {busy ? "Working…" : hasPhoto ? "Change photo" : "Add photo"}
+        {busy ? "Working…" : "Change photo"}
         <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={pick} />
       </label>
-      {hasPhoto ? (
-        <button className="btn ghost" type="button" disabled={busy} onClick={remove}>
-          Delete photo
-        </button>
-      ) : null}
+      <button className="btn ghost" type="button" disabled={busy} onClick={remove}>
+        Delete photo
+      </button>
       {error ? <p className="error" style={{ width: "100%" }}>{error}</p> : null}
     </div>
   );

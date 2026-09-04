@@ -71,12 +71,12 @@ export function ProfileView() {
             {" · "}
             <Link href="/network">{followers} Followers</Link>
           </div>
-          <div style={{ marginTop: 10 }}>
-            <AvatarUpload hasPhoto={Boolean(user.avatar)} onDone={refresh} />
-          </div>
         </div>
       </div>
-      <p className="note">ICE Lite badge only. Photo is stored on Cloudflare R2.</p>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0 8px" }}>
+        <AvatarUpload onDone={refresh} />
+      </div>
+      <p className="note">ICE Lite badge only. Use Delete photo to remove the picture.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
