@@ -1,5 +1,5 @@
-export type LiteUser = { email: string; name: string; pass: string; phone?: string };
-export type PublicUser = { email: string; name: string; source: "lite" };
+export type LiteUser = { email: string; name: string; pass: string; phone?: string; avatar?: string };
+export type PublicUser = { email: string; name: string; source: "lite"; avatar?: string };
 
 const USERS = "ice-lite-users";
 const SESSION = "ice-lite-session";
@@ -53,7 +53,27 @@ export function currentUser(): LiteUser | null {
 }
 
 export function listPublicUsers(): PublicUser[] {
-  return readUsers().map((u) => ({ email: u.email, name: u.name, source: "lite" as const }));
+  return readUsers().map((u) => ({
+    email: u.email,
+    name: u.name,
+    source: "lite" as const,
+    avatar: u.avatar,
+  }));
+}
+
+export function setAvatar(url: string) {
+  const me = currentUser();
+  if (!me) throw new Error("Sign in first.");
+  const users = readUsers();
+  const idx = users.findIndex((u) => sameAccount(u, me.email));
+  if (idx < 0) throw new Error("Account not found.");
+  users[idx] = { ...users[idx], avatar: url };
+  writeUsers(users);
+  ping();
+}
+
+export function avatarFor(author: string) {
+  return readUsers().find((u) => sameAccount(u, author))?.avatar || "";
 }
 
 export function signUp(login: string, password: string, name: string) {

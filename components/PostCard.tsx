@@ -1,5 +1,5 @@
 "use client";
-import { currentUser } from "@/lib/auth-client";
+import { avatarFor, currentUser } from "@/lib/auth-client";
 import { deletePost } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -14,11 +14,13 @@ function when(ts: number) {
 
 export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => void }) {
   const [mine, setMine] = useState(false);
+  const [photo, setPhoto] = useState("");
   const door = doorForPost(post.author, post.id, post.source);
 
   useEffect(() => {
     const user = currentUser();
     setMine(!!user && user.email === post.author && door === "lite");
+    setPhoto(avatarFor(post.author));
   }, [post.author, door]);
 
   function remove() {
@@ -34,7 +36,11 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   return (
     <article className="glass post">
       <div className="post-top">
-        <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
+        {photo ? (
+          <img className="avatar" src={photo} alt="" />
+        ) : (
+          <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
+        )}
         <div>
           <b>
             {post.authorName}{" "}
