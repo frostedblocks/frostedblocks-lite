@@ -23,10 +23,10 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
     setPhoto(avatarFor(post.author));
   }, [post.author, door]);
 
-  function remove() {
+  async function remove() {
     if (!window.confirm("Delete this post?")) return;
     try {
-      deletePost(post.id);
+      await deletePost(post.id);
       onChange?.();
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Could not delete.");
@@ -55,7 +55,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         <span>{post.likes} likes · {post.loves} loves</span>
         <span>
           {mine ? (
-            <button className="delete-btn" type="button" onClick={remove}>Delete</button>
+            <button className="delete-btn" type="button" onClick={() => { void remove(); }}>Delete</button>
           ) : (
             "Comments"
           )}
