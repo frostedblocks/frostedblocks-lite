@@ -9,8 +9,32 @@ const TYPES: Record<string, string> = {
   "image/webp": "webp",
 };
 
+function flags() {
+  return {
+    R2_ACCOUNT_ID: Boolean(process.env.R2_ACCOUNT_ID),
+    R2_ACCESS_KEY_ID: Boolean(process.env.R2_ACCESS_KEY_ID),
+    R2_SECRET_ACCESS_KEY: Boolean(process.env.R2_SECRET_ACCESS_KEY),
+    R2_BUCKET: Boolean(process.env.R2_BUCKET),
+    R2_PUBLIC_URL: Boolean(process.env.R2_PUBLIC_URL),
+  };
+}
+
+export async function GET() {
+  return NextResponse.json({ ok: true, env: flags() });
+}
+
 export async function POST(req: Request) {
   try {
+    const missing = Object.entries(flags())
+      .filter(([, on]) => !on)
+      .map(([name]) => name);
+    if (missing.length) {
+      return NextResponse.json(
+        { error: `Missing on this deploy: ${missing.join(", ")}. Add them in Vercel Environment Variables for Production AND Preview, then Redeploy.` },
+        { status: 500 },
+      );
+    }
+
     const form = await req.formData();
     const file = form.get("file");
     const login = String(form.get("login") || "").trim();
