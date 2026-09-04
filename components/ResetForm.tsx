@@ -9,19 +9,23 @@ export function ResetForm() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (password !== confirm) {
       setError("Passwords do not match.");
       return;
     }
+    setBusy(true);
     try {
-      resetPassword(login, password);
+      await resetPassword(login, password);
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reset.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -42,14 +46,14 @@ export function ResetForm() {
       </label>
       <label>
         New password
-        <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" />
+        <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" />
       </label>
       <label>
         Confirm password
-        <input type="password" required minLength={6} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Type it again" />
+        <input type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Type it again" />
       </label>
       {error ? <p className="error">{error}</p> : null}
-      <button className="btn" type="submit">Reset password</button>
+      <button className="btn" type="submit" disabled={busy}>{busy ? "Please wait…" : "Reset password"}</button>
       <p className="note"><Link href="/signin">Back to sign in</Link></p>
     </form>
   );

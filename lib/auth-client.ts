@@ -1,7 +1,7 @@
 export type LiteUser = {
   email: string;
   name: string;
-  pass: string;
+  pass?: string;
   phone?: string;
   avatar?: string;
   google?: boolean;
@@ -21,7 +21,7 @@ function readUsers(): LiteUser[] {
 }
 
 function writeUsers(users: LiteUser[]) {
-  localStorage.setItem(USERS, JSON.stringify(users));
+  localStorage.setItem(USERS, JSON.stringify(users.map(({ pass, ...rest }) => rest)));
 }
 
 function ping() {
@@ -46,6 +46,14 @@ export function isPhone(value: string) {
 
 function sameAccount(user: LiteUser, login: string) {
   return user.email === login || user.phone === login;
+}
+
+function cacheUser(user: LiteUser) {
+  const users = readUsers().filter((u) => !sameAccount(u, user.email));
+  users.push({ email: user.email, name: user.name, avatar: user.avatar, phone: user.phone });
+  writeUsers(users);
+  localStorage.setItem(SESSION, user.email);
+  ping();
 }
 
 export function currentEmail(): string | null {
@@ -87,75 +95,49 @@ export function avatarFor(author: string) {
   return readUsers().find((u) => sameAccount(u, author))?.avatar || "";
 }
 
-export function signUp(login: string, password: string, name: string) {
-  const clean = normalizeLogin(login);
-  if (password.length < 6) throw new Error("Password must be at least 6 characters.");
-  if (!isEmail(clean) && !isPhone(clean)) {
-    throw new Error("Use an email or a phone number (10 or more digits).");
-  }
-  const users = readUsers();
-  if (users.some((u) => sameAccount(u, clean))) {
-    throw new Error("That email or phone already has an account.");
-  }
-  const phone = isPhone(clean) ? clean : undefined;
-  const email = isEmail(clean) ? clean : clean;
-  users.push({
-    email,
-    phone,
-    name: name.trim() || (isEmail(clean) ? clean.split("@")[0] : clean.slice(-4)),
-    pass: password,
+export async function signUp(login: string, password: string, name: string) {
+  const res = await fetch("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ login, password, name }),
   });
-  writeUsers(users);
-  localStorage.setItem(SESSION, email);
-  ping();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not sign up.");
+  cacheUser(data);
 }
 
-export function signIn(login: string, password: string) {
-  const clean = normalizeLogin(login);
-  const user = readUsers().find((u) => sameAccount(u, clean) && u.pass === password);
-  if (!user) throw new Error("Email, phone, or password is wrong.");
-  localStorage.setItem(SESSION, user.email);
-  ping();
-  return user;
+export async function signIn(login: string, password: string) {
+  const res = await fetch("/api/auth/signin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ login, password }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not sign in.");
+  cacheUser(data);
+  return data;
+}
+
+export async function resetPassword(login: string, nextPassword: string) {
+  const res = await fetch("/api/auth/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ login, password: nextPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not reset.");
 }
 
 export function signInWithGoogle(email: string, name: string, picture?: string) {
-  const clean = normalizeLogin(email);
-  if (!isEmail(clean)) throw new Error("Google did not return an email.");
-  const users = readUsers();
-  const idx = users.findIndex((u) => sameAccount(u, clean));
-  if (idx >= 0) {
-    users[idx] = {
-      ...users[idx],
-      name: users[idx].name || name || clean.split("@")[0],
-      avatar: users[idx].avatar || picture,
-      google: true,
-    };
-  } else {
-    users.push({
-      email: clean,
-      name: name || clean.split("@")[0],
-      pass: "",
-      avatar: picture,
-      google: true,
-    });
+  cacheUser({ email: normalizeLogin(email), name, avatar: picture, google: true });
+}
+
+export async function signOut() {
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    /* local sign out still happens */
   }
-  writeUsers(users);
-  localStorage.setItem(SESSION, clean);
-  ping();
-}
-
-export function resetPassword(login: string, nextPassword: string) {
-  const clean = normalizeLogin(login);
-  if (nextPassword.length < 6) throw new Error("New password must be at least 6 characters.");
-  const users = readUsers();
-  const idx = users.findIndex((u) => sameAccount(u, clean));
-  if (idx < 0) throw new Error("No Lite account with that email or phone on this device.");
-  users[idx] = { ...users[idx], pass: nextPassword };
-  writeUsers(users);
-}
-
-export function signOut() {
   localStorage.removeItem(SESSION);
   ping();
 }

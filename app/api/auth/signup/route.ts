@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { randomBytes } from "crypto";
+import { ensureSchema, sql } from "@/lib/db";
+import { hashPassword } from "@/lib/password";
+
+function normalize(login: string) {
+  const value = login.trim();
+  if (value.includes("@")) return value.toLowerCase();
+  const keepPlus = value.startsWith("+") ? "+" : "";
+  return keepPlus + value.replace(/\D/g, "");
+}
+
+export async function POST(req: Request) {
+  try {
+    await ensureSchema();
+    const { login, password, name } = await req.json();
+    const id = normalize(String(login || ""));
+    const pass = String(password || "");
+    if (pass.length < 8) return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+    const email = id.includes("@") && id.includes(".") ? id : null;
+    const phone = /^\+?\d{10,15}$/.test(id) ? id : null;
+    if (!email && !phone) return NextResponse.json({ error: "Use an email or a phone number." }, { status: 400 });
+
+    const q = sql();
+    const existing = email
+      ? await q`SELECT id FROM lite_users WHERE email = ${email}`
+      : await q`SELECT id FROM lite_users WHERE phone = ${phone}`;
+    if (existing.length) return NextResponse.json({ error: "That account already exists." }, { status: 409 });
+
+    const display = String(name || "").trim() || (email ? email.split("@")[0] : id.slice(-4));
+    const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash)
+      VALUES (${email}, ${phone}, ${display}, ${hashPassword(pass)})
+      RETURNING id, email, phone, name, avatar`;
+    const user = rows[0];
+    const token = randomBytes(24).toString("hex");
+    await q`INSERT INTO lite_sessions (token, user_id) VALUES (${token}, ${user.id})`;
+
+    const res = NextResponse.json({
+      email: user.email || user.phone,
+      name: user.name,
+      avatar: user.avatar,
+    });
+    res.cookies.set("ice_lite_session", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return res;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Sign up failed.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
