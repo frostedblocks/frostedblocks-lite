@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SEED_FEED } from "@/lib/seed-feed";
 import { ensureSchema, sql } from "@/lib/db";
 import { loginOf, userFromRequest } from "@/lib/session";
+import { fetchRecentPosts } from "@/lib/ice";
 
 function mapPost(row: any) {
   return {
@@ -19,6 +20,13 @@ function mapPost(row: any) {
 }
 
 export async function GET() {
+  let network: Awaited<ReturnType<typeof fetchRecentPosts>> = [];
+  try {
+    network = await fetchRecentPosts(50);
+  } catch (err) {
+    console.error("ICE Network feed failed", err);
+  }
+
   try {
     await ensureSchema();
     const q = sql();
@@ -26,10 +34,14 @@ export async function GET() {
       COALESCE(u.email, u.phone) AS author_login, u.name AS author_name
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT 50`;
-    return NextResponse.json({ posts: [...rows.map(mapPost), ...SEED_FEED] });
+    const lite = rows.map(mapPost);
+    const extra = network.length ? [] : SEED_FEED;
+    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    return NextResponse.json({ posts, networkCount: network.length });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Feed failed.";
-    return NextResponse.json({ error: message, posts: SEED_FEED }, { status: 200 });
+    const posts = network.length ? network : SEED_FEED;
+    return NextResponse.json({ error: message, posts, networkCount: network.length }, { status: 200 });
   }
 }
 
