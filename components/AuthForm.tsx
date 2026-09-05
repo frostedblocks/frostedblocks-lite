@@ -54,8 +54,10 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>
       {mode === "signin" ? (
-        <p className="note">Forgot the password? Sign in if you still can, then use Change password on your profile. Email reset links are not on yet.</p>
-      ) : null}
+        <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
+      ) : (
+        <p className="note">If you use email, we send a confirm link after you sign up.</p>
+      )}
       <p className="note">
         {mode === "signup" ? (
           <>Already have an account? <Link href="/signin">Sign in</Link></>

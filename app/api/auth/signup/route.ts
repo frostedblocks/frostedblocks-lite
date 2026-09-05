@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
+import { appUrl, sendMail } from "@/lib/mail";
 
 function normalize(login: string) {
   const value = login.trim();
@@ -28,19 +29,35 @@ export async function POST(req: Request) {
     if (existing.length) return NextResponse.json({ error: "That account already exists." }, { status: 409 });
 
     const display = String(name || "").trim() || (email ? email.split("@")[0] : id.slice(-4));
-    const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash)
-      VALUES (${email}, ${phone}, ${display}, ${hashPassword(pass)})
+    const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash, email_verified)
+      VALUES (${email}, ${phone}, ${display}, ${hashPassword(pass)}, ${false})
       RETURNING id, email, phone, name, avatar`;
     const user = rows[0];
-    const token = randomBytes(24).toString("hex");
-    await q`INSERT INTO lite_sessions (token, user_id) VALUES (${token}, ${user.id})`;
+    const session = randomBytes(24).toString("hex");
+    await q`INSERT INTO lite_sessions (token, user_id) VALUES (${session}, ${user.id})`;
+
+    if (email) {
+      const verify = randomBytes(24).toString("hex");
+      await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
+        VALUES (${verify}, ${user.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
+      try {
+        await sendMail(
+          email,
+          "Confirm your ICE Lite email",
+          `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${verify}\n\nIf you did not sign up, ignore this.`,
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     const res = NextResponse.json({
       email: user.email || user.phone,
       name: user.name,
       avatar: user.avatar,
+      mailed: Boolean(email),
     });
-    res.cookies.set("ice_lite_session", token, {
+    res.cookies.set("ice_lite_session", session, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",

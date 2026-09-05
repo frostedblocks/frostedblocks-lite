@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { resetPassword } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 
 export function ResetForm() {
+  const token = useSearchParams().get("token") || "";
   const { signedIn, ready } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +24,13 @@ export function ResetForm() {
     }
     setBusy(true);
     try {
-      await resetPassword(currentPassword, password);
+      const res = await fetch("/api/auth/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(token ? { token, password } : { currentPassword, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not change password.");
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not change password.");
@@ -31,13 +39,13 @@ export function ResetForm() {
     }
   }
 
-  if (!ready) return null;
+  if (!ready && !token) return null;
 
-  if (!signedIn) {
+  if (!token && !signedIn) {
     return (
       <div className="auth-form">
-        <p className="note">You must be signed in to change your password. Email reset links are not on yet.</p>
-        <Link className="btn" href="/signin">Sign in</Link>
+        <p className="note">Use the link from your email, or sign in first.</p>
+        <Link className="btn" href="/forgot">Email me a reset link</Link>
       </div>
     );
   }
@@ -46,17 +54,19 @@ export function ResetForm() {
     return (
       <div className="auth-form">
         <p className="note">Password updated.</p>
-        <Link className="btn" href="/profile">Back to profile</Link>
+        <Link className="btn" href="/signin">Sign in</Link>
       </div>
     );
   }
 
   return (
     <form className="auth-form" onSubmit={submit}>
-      <label>
-        Current password
-        <input type="password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-      </label>
+      {!token ? (
+        <label>
+          Current password
+          <input type="password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+        </label>
+      ) : null}
       <label>
         New password
         <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" />

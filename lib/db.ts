@@ -26,6 +26,7 @@ export async function ensureSchema() {
     name TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     avatar TEXT,
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     failed_attempts INTEGER NOT NULL DEFAULT 0,
     locked_until TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -33,10 +34,17 @@ export async function ensureSchema() {
   )`;
   await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS failed_attempts INTEGER NOT NULL DEFAULT 0`;
   await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMPTZ`;
+  await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE`;
   await q`CREATE TABLE IF NOT EXISTS lite_sessions (
     token TEXT PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_email_tokens (
+    token TEXT PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL
   )`;
   await q`CREATE TABLE IF NOT EXISTS lite_posts (
     id BIGSERIAL PRIMARY KEY,
