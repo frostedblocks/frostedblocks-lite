@@ -13,9 +13,9 @@ export function AuthButtons() {
         <Link className="btn ghost" href="/profile">Profile</Link>
         <button
           className="btn ghost"
-          onClick={() => {
-            signOut();
-            window.location.href = "/";
+          onClick={async () => {
+            await signOut();
+            window.location.replace("/");
           }}
         >
           Sign out

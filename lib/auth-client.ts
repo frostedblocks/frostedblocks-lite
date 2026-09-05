@@ -64,7 +64,7 @@ export function currentEmail(): string | null {
 export function currentUser(): LiteUser | null {
   const id = currentEmail();
   if (!id) return null;
-  return readUsers().find((u) => sameAccount(u, id)) || null;
+  return readUsers().find((u) => sameAccount(u, id)) || { email: id, name: id.split("@")[0] };
 }
 
 export function listPublicUsers(): PublicUser[] {
@@ -133,11 +133,11 @@ export function signInWithGoogle(email: string, name: string, picture?: string) 
 }
 
 export async function signOut() {
-  try {
-    await fetch("/api/auth/logout", { method: "POST" });
-  } catch {
-    /* local sign out still happens */
-  }
   localStorage.removeItem(SESSION);
   ping();
+  try {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  } catch {
+    /* already cleared locally */
+  }
 }
