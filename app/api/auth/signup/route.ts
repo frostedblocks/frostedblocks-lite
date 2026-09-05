@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { ensureSchema, sql } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { appUrl, sendMail } from "@/lib/mail";
+import { isPwnedPassword } from "@/lib/pwned";
 
 function normalize(login: string) {
   const value = login.trim();
@@ -18,6 +19,9 @@ export async function POST(req: Request) {
     const id = normalize(String(login || ""));
     const pass = String(password || "");
     if (pass.length < 8) return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+    if (await isPwnedPassword(pass)) {
+      return NextResponse.json({ error: "That password showed up in a public leak. Pick a different one." }, { status: 400 });
+    }
     const email = id.includes("@") && id.includes(".") ? id : null;
     const phone = /^\+?\d{10,15}$/.test(id) ? id : null;
     if (!email && !phone) return NextResponse.json({ error: "Use an email or a phone number." }, { status: 400 });

@@ -3,6 +3,7 @@ import { SEED_FEED } from "@/lib/seed-feed";
 import { ensureSchema, sql } from "@/lib/db";
 import { loginOf, userFromRequest } from "@/lib/session";
 import { fetchRecentPosts } from "@/lib/ice";
+import { cleanText } from "@/lib/text";
 
 function mapPost(row: any) {
   return {
@@ -36,7 +37,7 @@ export async function GET() {
       ORDER BY p.created_at DESC LIMIT 50`;
     const lite = rows.map(mapPost);
     const extra = network.length ? [] : SEED_FEED;
-    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) * 1 - Number(a.timestamp));
     return NextResponse.json({ posts, networkCount: network.length });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Feed failed.";
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     if (!me) return NextResponse.json({ error: "Sign in to post." }, { status: 401 });
     const { content } = await req.json();
-    const text = String(content || "").trim();
+    const text = cleanText(String(content || ""));
     if (!text) return NextResponse.json({ error: "Write something first." }, { status: 400 });
     if (text.length > 2000) return NextResponse.json({ error: "Keep it under 2000 characters." }, { status: 400 });
     const q = sql();

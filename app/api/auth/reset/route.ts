@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { hashPassword, checkPassword } from "@/lib/password";
 import { userFromRequest } from "@/lib/session";
+import { isPwnedPassword } from "@/lib/pwned";
 
 export async function POST(req: Request) {
   try {
     const { currentPassword, password, token } = await req.json();
     const next = String(password || "");
     if (next.length < 8) return NextResponse.json({ error: "New password must be at least 8 characters." }, { status: 400 });
+    if (await isPwnedPassword(next)) {
+      return NextResponse.json({ error: "That password showed up in a public leak. Pick a different one." }, { status: 400 });
+    }
     const q = sql();
 
     if (token) {

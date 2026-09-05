@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { currentUser } from "@/lib/auth-client";
+import { currentUser, signOutEverywhere } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
 import { loadFollows } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
@@ -77,6 +77,17 @@ export function ProfileView() {
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0 8px" }}>
         <AvatarUpload onDone={() => { void refresh(); }} />
+        <Link className="btn ghost" href="/reset">Change password</Link>
+        <button
+          className="btn ghost"
+          type="button"
+          onClick={async () => {
+            await signOutEverywhere();
+            window.location.replace("/");
+          }}
+        >
+          Sign out everywhere
+        </button>
       </div>
       <p className="note">Posts, follows, and messages now save in the ice-lite database.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>

@@ -141,3 +141,13 @@ export async function signOut() {
     /* already cleared locally */
   }
 }
+
+export async function signOutEverywhere() {
+  localStorage.removeItem(SESSION);
+  ping();
+  try {
+    await fetch("/api/auth/logout?all=1", { method: "POST", credentials: "include" });
+  } catch {
+    /* already cleared locally */
+  }
+}
