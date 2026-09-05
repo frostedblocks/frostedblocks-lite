@@ -1,20 +1,18 @@
 export type LiteMessage = {
   id: string;
   from: string;
+  fromName?: string;
   to: string;
+  toName?: string;
   text: string;
   at: number;
 };
 
-export function threadId(a: string, b: string) {
-  return [a.toLowerCase(), b.toLowerCase()].sort().join("|");
-}
-
-export async function listAllMessages(): Promise<LiteMessage[]> {
+export async function listAllMessages(): Promise<{ me: string; messages: LiteMessage[] }> {
   const res = await fetch("/api/messages", { cache: "no-store" });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not load messages.");
-  return (data.messages || []) as LiteMessage[];
+  return { me: data.me || "", messages: (data.messages || []) as LiteMessage[] };
 }
 
 export function listThreads(me: string, messages: LiteMessage[]) {
@@ -26,7 +24,11 @@ export function listThreads(me: string, messages: LiteMessage[]) {
     if (!prev || m.at > prev.at) map.set(other, m);
   }
   return [...map.entries()]
-    .map(([email, last]) => ({ email, last }))
+    .map(([handle, last]) => ({
+      handle,
+      name: last.from === handle ? last.fromName : last.toName,
+      last,
+    }))
     .sort((a, b) => b.last.at - a.last.at);
 }
 

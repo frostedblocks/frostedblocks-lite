@@ -1,21 +1,32 @@
 import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
-import { findUserByLogin, loginOf, userFromRequest } from "@/lib/session";
+import { findUserByLogin, userFromRequest } from "@/lib/session";
+import { handleOf, publicName } from "@/lib/public";
 
 export async function GET(req: Request) {
   try {
     const me = await userFromRequest(req);
     if (!me) return NextResponse.json({ following: [], followers: [] });
     const q = sql();
-    const following = await q`SELECT COALESCE(u.email, u.phone) AS target, u.name AS targetName
+    const following = await q`SELECT u.id, u.name
       FROM lite_follows f JOIN lite_users u ON u.id = f.followee_id
       WHERE f.follower_id = ${me.id}`;
-    const followers = await q`SELECT COALESCE(u.email, u.phone) AS follower, u.name AS followerName
+    const followers = await q`SELECT u.id, u.name
       FROM lite_follows f JOIN lite_users u ON u.id = f.follower_id
       WHERE f.followee_id = ${me.id}`;
     return NextResponse.json({
-      following: following.map((r) => ({ follower: loginOf(me), target: r.target, targetName: r.targetname || r.targetName, source: "lite" })),
-      followers: followers.map((r) => ({ follower: r.follower, target: loginOf(me), targetName: r.followername || r.followerName, source: "lite" })),
+      following: following.map((r) => ({
+        follower: handleOf(me.id),
+        target: handleOf(r.id),
+        targetName: publicName(r.name),
+        source: "lite",
+      })),
+      followers: followers.map((r) => ({
+        follower: handleOf(r.id),
+        target: handleOf(me.id),
+        targetName: publicName(r.name),
+        source: "lite",
+      })),
     });
   } catch {
     return NextResponse.json({ following: [], followers: [] });

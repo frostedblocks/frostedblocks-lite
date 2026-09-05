@@ -5,6 +5,14 @@ export type FollowRow = {
   source: "lite" | "network";
 };
 
+export type Person = {
+  handle: string;
+  name: string;
+  avatar?: string;
+  source: "lite";
+  me?: boolean;
+};
+
 export async function loadFollows() {
   const res = await fetch("/api/follows", { cache: "no-store" });
   const data = await res.json();
@@ -17,19 +25,7 @@ export async function loadFollows() {
 export async function loadPeople() {
   const res = await fetch("/api/people", { cache: "no-store" });
   const data = await res.json();
-  return (data.people || []) as { email: string; name: string; avatar?: string; source: "lite" }[];
-}
-
-export function followingOf(_follower: string) {
-  return [] as FollowRow[];
-}
-
-export function followersOf(_target: string) {
-  return [] as FollowRow[];
-}
-
-export function isFollowing(_follower: string, _target: string) {
-  return false;
+  return (data.people || []) as Person[];
 }
 
 export async function follow(_follower: string, target: string) {

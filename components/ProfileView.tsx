@@ -22,7 +22,7 @@ export function ProfileView() {
     setUser(u);
     if (u) {
       const feed = await loadFeed();
-      setPosts(feed.filter((p) => p.author === u.email && p.source === "lite"));
+      setPosts(feed.filter((p) => p.mine && p.source === "lite"));
       const graph = await loadFollows();
       setFollowing(graph.following.length);
       setFollowers(graph.followers.length);
@@ -58,16 +58,16 @@ export function ProfileView() {
           <img className="avatar" src={user.avatar} alt="" style={{ width: 64, height: 64, objectFit: "cover" }} />
         ) : (
           <div className="avatar" style={{ width: 64, height: 64, fontSize: 20 }}>
-            {(user.name || user.email).slice(0, 1).toUpperCase()}
+            {(user.name || "U").slice(0, 1).toUpperCase()}
           </div>
         )}
         <div>
           <div className="kicker">Lite profile · not on-chain</div>
           <h1 style={{ fontSize: 36, margin: "4px 0", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            {user.name || user.email.split("@")[0]}
+            {user.name || "Lite user"}
             <LiteBadge size="lg" />
           </h1>
-          <div className="meta">{user.email}</div>
+          <div className="meta">Only you see this login on your profile.</div>
           <div className="meta" style={{ marginTop: 6 }}>
             <Link href="/network">{following} Following</Link>
             {" · "}
@@ -89,7 +89,7 @@ export function ProfileView() {
           Sign out everywhere
         </button>
       </div>
-      <p className="note">Posts, follows, and messages now save in the ice-lite database.</p>
+      <p className="note">Other people see your name, not your email.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>

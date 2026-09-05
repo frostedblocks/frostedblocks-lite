@@ -1,21 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { loadPeople } from "@/lib/follow-client";
-import { useAuth } from "@/lib/use-auth";
+import { loadPeople, type Person } from "@/lib/follow-client";
 import { FollowButton } from "./FollowButton";
 import { LiteBadge } from "./LiteBadge";
 
-type Person = { email: string; name: string; avatar?: string; joined?: string };
-
 export function NewUsers() {
-  const { user } = useAuth();
   const [people, setPeople] = useState<Person[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     loadPeople()
-      .then((rows) => setPeople(rows as Person[]))
+      .then((rows) => setPeople(rows))
       .finally(() => setReady(true));
   }, []);
 
@@ -29,24 +25,23 @@ export function NewUsers() {
       </div>
       {people.length ? (
         people.map((p) => (
-          <div key={p.email} className="glass partner" style={{ marginBottom: 10, minWidth: 0 }}>
+          <div key={p.handle} className="glass partner" style={{ marginBottom: 10, minWidth: 0 }}>
             <div className="post-top" style={{ margin: 0 }}>
               {p.avatar ? (
                 <img className="avatar" src={p.avatar} alt="" />
               ) : (
-                <div className="avatar">{(p.name || p.email).slice(0, 1).toUpperCase()}</div>
+                <div className="avatar">{p.name.slice(0, 1).toUpperCase()}</div>
               )}
               <div>
                 <b>
-                  {p.name || p.email} <LiteBadge />
+                  {p.name} <LiteBadge />
                 </b>
-                <div className="meta">{p.email}</div>
               </div>
             </div>
-            {user?.email === p.email ? (
+            {p.me ? (
               <Link className="btn ghost" href="/profile">You</Link>
             ) : (
-              <FollowButton target={p.email} targetName={p.name || p.email} />
+              <FollowButton target={p.handle} targetName={p.name} />
             )}
           </div>
         ))

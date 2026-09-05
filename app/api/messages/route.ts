@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
-import { findUserByLogin, loginOf, userFromRequest } from "@/lib/session";
+import { findUserByLogin, userFromRequest } from "@/lib/session";
+import { handleOf, publicName } from "@/lib/public";
 
 export async function GET(req: Request) {
   try {
@@ -10,25 +11,25 @@ export async function GET(req: Request) {
     const q = sql();
     if (!otherLogin) {
       const rows = await q`SELECT m.id, m.body, m.created_at,
-        COALESCE(s.email, s.phone) AS sender, COALESCE(r.email, r.phone) AS receiver
+        s.id AS sid, s.name AS sname, r.id AS rid, r.name AS rname
         FROM lite_messages m
         JOIN lite_users s ON s.id = m.sender_id
         JOIN lite_users r ON r.id = m.receiver_id
         WHERE m.sender_id = ${me.id} OR m.receiver_id = ${me.id}
         ORDER BY m.created_at DESC LIMIT 200`;
-      return NextResponse.json({ messages: rows.map(mapMsg) });
+      return NextResponse.json({ me: handleOf(me.id), messages: rows.map(mapMsg) });
     }
     const other = await findUserByLogin(otherLogin);
-    if (!other) return NextResponse.json({ messages: [] });
+    if (!other) return NextResponse.json({ me: handleOf(me.id), messages: [] });
     const rows = await q`SELECT m.id, m.body, m.created_at,
-      COALESCE(s.email, s.phone) AS sender, COALESCE(r.email, r.phone) AS receiver
+      s.id AS sid, s.name AS sname, r.id AS rid, r.name AS rname
       FROM lite_messages m
       JOIN lite_users s ON s.id = m.sender_id
       JOIN lite_users r ON r.id = m.receiver_id
       WHERE (m.sender_id = ${me.id} AND m.receiver_id = ${other.id})
          OR (m.sender_id = ${other.id} AND m.receiver_id = ${me.id})
       ORDER BY m.created_at ASC`;
-    return NextResponse.json({ messages: rows.map(mapMsg) });
+    return NextResponse.json({ me: handleOf(me.id), messages: rows.map(mapMsg) });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Messages failed.";
     return NextResponse.json({ error: message, messages: [] }, { status: 200 });
@@ -52,8 +53,10 @@ export async function POST(req: Request) {
     return NextResponse.json({
       message: {
         id: String(rows[0].id),
-        from: loginOf(me),
-        to: loginOf(other),
+        from: handleOf(me.id),
+        fromName: publicName(me.name),
+        to: handleOf(other.id),
+        toName: publicName(other.name),
         text: body,
         at: new Date(rows[0].created_at).getTime(),
       },
@@ -67,8 +70,10 @@ export async function POST(req: Request) {
 function mapMsg(row: any) {
   return {
     id: String(row.id),
-    from: row.sender,
-    to: row.receiver,
+    from: handleOf(row.sid),
+    fromName: publicName(row.sname),
+    to: handleOf(row.rid),
+    toName: publicName(row.rname),
     text: row.body,
     at: new Date(row.created_at).getTime(),
   };

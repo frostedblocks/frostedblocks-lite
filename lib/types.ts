@@ -11,6 +11,7 @@ export type IcePost = {
   timestamp: number;
   category?: string;
   source?: IceDoor;
+  mine?: boolean;
 };
 
 export type IceProfile = {

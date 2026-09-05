@@ -1,26 +1,29 @@
 import { NextResponse } from "next/server";
 import { SEED_FEED } from "@/lib/seed-feed";
 import { ensureSchema, sql } from "@/lib/db";
-import { loginOf, userFromRequest } from "@/lib/session";
+import { userFromRequest } from "@/lib/session";
 import { fetchRecentPosts } from "@/lib/ice";
 import { cleanText } from "@/lib/text";
+import { handleOf, publicName } from "@/lib/public";
 
-function mapPost(row: any) {
+function mapPost(row: any, myId?: number) {
   return {
     id: String(row.id),
     content: row.content,
-    author: row.author_login,
-    authorName: row.author_name,
+    author: handleOf(row.author_id),
+    authorName: publicName(row.author_name),
     likes: 0,
     loves: 0,
     imageURL: null,
     timestamp: new Date(row.created_at).getTime() * 1e6,
     category: row.category || "Lite",
     source: "lite" as const,
+    mine: myId ? Number(row.author_id) === myId : false,
   };
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const me = await userFromRequest(req).catch(() => null);
   let network: Awaited<ReturnType<typeof fetchRecentPosts>> = [];
   try {
     network = await fetchRecentPosts(50);
@@ -31,13 +34,13 @@ export async function GET() {
   try {
     await ensureSchema();
     const q = sql();
-    const rows = await q`SELECT p.id, p.content, p.category, p.created_at,
-      COALESCE(u.email, u.phone) AS author_login, u.name AS author_name
+    const rows = await q`SELECT p.id, p.author_id, p.content, p.category, p.created_at,
+      u.name AS author_name
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT 50`;
-    const lite = rows.map(mapPost);
+    const lite = rows.map((row) => mapPost(row, me?.id));
     const extra = network.length ? [] : SEED_FEED;
-    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) * 1 - Number(a.timestamp));
+    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
     return NextResponse.json({ posts, networkCount: network.length });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Feed failed.";
@@ -56,14 +59,9 @@ export async function POST(req: Request) {
     if (text.length > 2000) return NextResponse.json({ error: "Keep it under 2000 characters." }, { status: 400 });
     const q = sql();
     const rows = await q`INSERT INTO lite_posts (author_id, content, category)
-      VALUES (${me.id}, ${text}, ${"Lite"}) RETURNING id, content, category, created_at`;
-    const row = rows[0];
+      VALUES (${me.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
     return NextResponse.json({
-      post: mapPost({
-        ...row,
-        author_login: loginOf(me),
-        author_name: me.name,
-      }),
+      post: mapPost({ ...rows[0], author_name: me.name }, me.id),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not post.";

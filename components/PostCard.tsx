@@ -1,6 +1,7 @@
 "use client";
-import { avatarFor, currentUser } from "@/lib/auth-client";
+import { avatarFor } from "@/lib/auth-client";
 import { deletePost } from "@/lib/posts-client";
+import { looksLikeEmail, publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -22,15 +23,13 @@ function when(ts: number) {
 }
 
 export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => void }) {
-  const [mine, setMine] = useState(false);
   const [photo, setPhoto] = useState("");
   const door = doorForPost(post.author, post.id, post.source);
+  const name = publicName(post.authorName);
 
   useEffect(() => {
-    const user = currentUser();
-    setMine(!!user && user.email === post.author && door === "lite");
-    setPhoto(avatarFor(post.author));
-  }, [post.author, door]);
+    setPhoto(looksLikeEmail(post.author) ? avatarFor(post.author) : "");
+  }, [post.author]);
 
   async function remove() {
     if (!window.confirm("Delete this post?")) return;
@@ -43,7 +42,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   }
 
   async function copy() {
-    const url = door === "network" ? "https://www.frostedblocks.com" : `https://lite.frostedblocks.com/feed`;
+    const url = door === "network" ? "https://www.frostedblocks.com" : "https://lite.frostedblocks.com/feed";
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -57,11 +56,11 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         {photo ? (
           <img className="avatar" src={photo} alt="" />
         ) : (
-          <div className="avatar">{(post.authorName || "U").slice(0, 1).toUpperCase()}</div>
+          <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
         )}
         <div>
           <b>
-            {post.authorName}{" "}
+            {name}{" "}
             <DoorBadge source={door} author={post.author} postId={post.id} />
           </b>
           <div className="meta">{when(post.timestamp)}</div>
@@ -84,7 +83,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
           {door === "network" ? (
             <a className="delete-btn" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">Open on Network</a>
           ) : null}
-          {mine ? (
+          {post.mine ? (
             <button className="delete-btn" type="button" onClick={() => { void remove(); }}>Delete</button>
           ) : null}
         </span>
