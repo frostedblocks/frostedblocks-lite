@@ -4,15 +4,13 @@ import Link from "next/link";
 import { LiteFeed } from "./LiteFeed";
 import { FollowButton } from "./FollowButton";
 import { LiteBadge } from "./LiteBadge";
-import { loadPeople } from "@/lib/follow-client";
-import { useAuth } from "@/lib/use-auth";
+import { loadPeople, type Person } from "@/lib/follow-client";
 
 type Tab = "feed" | "users";
 
 export function FeedTabs() {
-  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("feed");
-  const [people, setPeople] = useState<{ email: string; name: string; avatar?: string }[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
 
   async function refreshPeople() {
     setPeople(await loadPeople());
@@ -22,7 +20,7 @@ export function FeedTabs() {
     if (tab === "users") void refreshPeople();
   }, [tab]);
 
-  const others = people.filter((p) => p.email !== user?.email);
+  const others = people.filter((p) => !p.me);
 
   return (
     <div>
@@ -43,25 +41,24 @@ export function FeedTabs() {
           </div>
           <div style={{ display: "grid", gap: 10 }}>
             {others.map((p) => (
-              <div key={p.email} className="glass partner" style={{ minWidth: 0 }}>
+              <div key={p.handle} className="glass partner" style={{ minWidth: 0 }}>
                 <div className="post-top" style={{ margin: 0 }}>
                   {p.avatar ? (
                     <img className="avatar" src={p.avatar} alt="" />
                   ) : (
-                    <div className="avatar">{(p.name || p.email).slice(0, 1).toUpperCase()}</div>
+                    <div className="avatar">{p.name.slice(0, 1).toUpperCase()}</div>
                   )}
                   <div>
-                    <b>{p.name || p.email} <LiteBadge /></b>
-                    <div className="meta">{p.email}</div>
+                    <b>{p.name} <LiteBadge /></b>
                   </div>
                 </div>
-                <FollowButton target={p.email} targetName={p.name || p.email} onChange={() => { void refreshPeople(); }} />
+                <FollowButton target={p.handle} targetName={p.name} onChange={() => { void refreshPeople(); }} />
               </div>
             ))}
             {!others.length ? (
               <p className="note">
-                No other accounts yet. When someone signs up they show here first.{" "}
-                <Link href="/signup">Invite them to Lite</Link>
+                No other accounts yet.{" "}
+                <Link href="/signup">Create Lite account</Link>
               </p>
             ) : null}
           </div>

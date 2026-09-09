@@ -27,7 +27,7 @@ export function AuthButtons() {
   return (
     <>
       <Link className="btn ghost" href="/signin">Sign in</Link>
-      <Link className="btn" href="/signup">Sign up</Link>
+      <Link className="btn" href="/signup">Create Lite account</Link>
     </>
   );
 }

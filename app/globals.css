@@ -10,6 +10,7 @@
   --ice-blue: #38bdf8;
 }
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 html, body { margin: 0; min-height: 100%; }
 body {
   font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -61,6 +62,17 @@ button { font: inherit; }
 .delete-btn {
   background: none; border: 0; color: #fb7185; cursor: pointer; padding: 0; font-size: 13px;
 }
+.quiet-link {
+  color: var(--ice-dim);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.quiet-link:hover { color: #cbd5e1; }
+.cta-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin: 18px 0 8px;
+}
 .door-badge, .lite-badge {
   display: inline-flex; align-items: center; vertical-align: middle;
   margin-left: 6px; padding: 2px 8px; border-radius: 999px;
@@ -75,6 +87,8 @@ button { font: inherit; }
 }
 .door-badge-lg, .lite-badge-lg { margin-left: 0; font-size: 12px; padding: 4px 10px; }
 .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; align-items: start; }
+.home-hero { padding: 22px 24px; }
+.home-grid { margin-bottom: 18px; }
 @media (max-width: 860px) {
   .grid { grid-template-columns: 1fr; }
   .header { position: static; }
@@ -89,7 +103,7 @@ h1 em {
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .lead { color: #cbd5e1; line-height: 1.6; max-width: 48ch; font-size: 16px; }
-.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 0; }
 @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
 .feature { padding: 14px 12px; }
 .feature .ico { color: var(--ice-sky); margin-bottom: 8px; font-size: 14px; }
@@ -101,6 +115,7 @@ h1 em {
 .chip {
   font-size: 12px; color: #cbd5e1; border: 1px solid var(--ice-border);
   border-radius: 999px; padding: 6px 10px; background: rgba(15,17,28,.35);
+  cursor: pointer;
 }
 .founder {
   display: flex; justify-content: space-between; align-items: center;
@@ -108,7 +123,8 @@ h1 em {
 }
 .feed-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--ice-text-bright); font-size: 14px; }
 .dot { width: 8px; height: 8px; border-radius: 99px; background: #4ade80; display: inline-block; margin-right: 8px; }
-.feed { max-height: 620px; overflow: auto; padding: 10px; }
+.feed { padding: 10px; overflow: visible; max-height: none; }
+.feed-tall { min-height: 420px; }
 .post { padding: 16px; margin-bottom: 10px; background: rgba(15,17,28,.55); }
 .post-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .avatar {
@@ -132,6 +148,9 @@ h1 em {
 .page-card { padding: 32px; max-width: 720px; margin: 0 auto; }
 .stack { display: grid; gap: 12px; margin-top: 18px; }
 .stack-item { padding: 16px; }
+.trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0 16px; }
+@media (max-width: 860px) { .trust-grid { grid-template-columns: 1fr; } }
+.trust-block { padding: 18px 20px; margin-bottom: 20px; }
 .auth-card { padding: 32px; max-width: 480px; margin: 0 auto; }
 .auth-form { display: grid; gap: 12px; margin-top: 18px; }
 .auth-form label { display: grid; gap: 6px; font-size: 13px; color: #cbd5e1; }
@@ -143,10 +162,9 @@ h1 em {
 .error { color: #fb7185; margin: 0; font-size: 13px; }
 .compose { padding: 14px; margin-bottom: 10px; display: grid; gap: 10px; }
 .compose textarea { width: 100%; resize: vertical; }
-.compose .btn { justify-self: end; }
-.footer {
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
-  gap: 10px; margin: 8px auto 28px; padding: 14px 18px; color: var(--ice-dim); font-size: 13px;
+.compose .btn { justify-self: start; }
+.footer, .site-footer {
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+  gap: 14px; margin: 8px auto 28px; padding: 14px 18px; color: var(--ice-dim); font-size: 13px;
 }
-.footer nav { display: flex; gap: 14px; flex-wrap: wrap; }
-.footer a:hover { color: #e2e8f0; }
+.footer a:hover, .site-footer a:hover { color: #e2e8f0; }

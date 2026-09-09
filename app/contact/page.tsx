@@ -1,20 +1,26 @@
+import Link from "next/link";
+import { ONCHAIN_URL } from "@/lib/canisters";
+
 export default function ContactPage() {
   return (
     <main className="wrap page">
       <article className="glass page-card">
         <div className="kicker">Contact</div>
         <h1 style={{ fontSize: 42 }}>Talk to Lite</h1>
-        <p className="lead">This is the Web2 door. For canister help use ICE Network.</p>
+        <p className="lead">This is the free website door. For a canister, use ICE Network.</p>
         <div className="stack">
           <div className="glass stack-item">
-            <strong>Site</strong>
-            <p className="note">https://lite.frostedblocks.com</p>
+            <strong>Lite</strong>
+            <p className="note">https://lite.frostedblocks.com — feed, signup, and reset all stay on this host.</p>
           </div>
           <div className="glass stack-item">
-            <strong>On-chain door</strong>
-            <p className="note">https://www.frostedblocks.com</p>
+            <strong>ICE Network</strong>
+            <p className="note"><a href={ONCHAIN_URL} rel="noopener noreferrer">{ONCHAIN_URL}</a></p>
           </div>
         </div>
+        <p style={{ marginTop: 24 }}>
+          <Link className="btn" href="/signup">Create Lite account</Link>
+        </p>
       </article>
     </main>
   );

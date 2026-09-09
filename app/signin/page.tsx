@@ -6,9 +6,9 @@ export default function SignInPage() {
     <main className="wrap page">
       <AuthRedirect />
       <article className="glass auth-card">
-        <div className="kicker">Account</div>
+        <div className="kicker">ICE Lite</div>
         <h1 style={{ fontSize: 40 }}>Sign in</h1>
-        <p className="lead">Email or phone and the password you created on Lite.</p>
+        <p className="lead">Email or phone and the password you created on Lite. No wallet on this site.</p>
         <AuthForm mode="signin" />
       </article>
     </main>

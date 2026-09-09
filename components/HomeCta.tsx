@@ -1,24 +1,37 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/lib/use-auth";
+import { ONCHAIN_URL } from "@/lib/canisters";
 
 export function HomeCta() {
   const { signedIn, ready } = useAuth();
+
+  function explore() {
+    const el = document.getElementById("live-feed");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    else window.location.href = "/feed";
+  }
+
   if (!ready) return null;
+
   if (signedIn) {
     return (
-      <div className="glass cta-box">
-        <strong>You are signed in</strong>
-        <p className="note">Open the live feed to read and post.</p>
-        <Link className="btn" href="/feed">Open live feed</Link>
+      <div className="cta-row">
+        <Link className="btn" href="/feed">Explore the live feed</Link>
+        <Link className="btn ghost" href="/profile">Your Lite profile</Link>
+        <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Open ICE Network</a>
       </div>
     );
   }
+
   return (
-    <div className="glass cta-box">
-      <strong>Ready to enter?</strong>
-      <p className="note">Sign in with email. No wallet popups on this site.</p>
-      <Link className="btn" href="/signin">Sign in with email</Link>
+    <div className="cta-row">
+      <button className="btn" type="button" onClick={explore}>Explore the live feed</button>
+      <Link className="btn ghost" href="/signup">Create Lite account</Link>
+      <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Open ICE Network</a>
+      <p className="note" style={{ width: "100%", margin: "4px 0 0" }}>
+        Email or phone. About a minute. Password reset by email. No wallet on this site.
+      </p>
     </div>
   );
 }

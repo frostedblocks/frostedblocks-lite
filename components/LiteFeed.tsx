@@ -18,7 +18,7 @@ export function LiteFeed() {
   }
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
 
   async function publish(e: React.FormEvent) {
@@ -43,23 +43,29 @@ export function LiteFeed() {
     <div>
       <div className="feed-head">
         <span><i className="dot" />Live feed</span>
-        {signedIn ? null : <span className="meta">Public preview</span>}
+        <span className="meta">Posts save in the Lite database</span>
       </div>
+      <p className="note" style={{ margin: "0 0 10px" }}>
+        {signedIn
+          ? "Your Lite posts stay on this door. Public ICE Network posts can also appear here."
+          : "Public preview. Create a Lite account to post. Comments stay empty until you sign in."}
+      </p>
       <div className="glass" style={{ padding: 8 }}>
         {signedIn ? (
           <form className="compose" onSubmit={publish}>
-            <div className="meta">Post as {user?.name || user?.email}</div>
+            <div className="meta">Post as {user?.name || "you"}</div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="submit">Post</button>
           </form>
         ) : (
           <div className="compose">
-            <p className="note" style={{ margin: 0 }}>You must be signed in to post on ICE Lite.</p>
-            <Link className="btn" href="/signin">Sign in to post</Link>
+            <p className="note" style={{ margin: 0 }}>Sign in to post on ICE Lite.</p>
+            <Link className="btn" href="/signup">Create Lite account</Link>
+            <Link className="quiet-link" href="/signin">Sign in</Link>
           </div>
         )}
-        <div className="feed" style={{ maxHeight: 520 }}>
+        <div className="feed feed-tall">
           {posts.map((post) => (
             <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />
           ))}
