@@ -68,8 +68,9 @@ export async function ensureSchema() {
     body TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
-  // One-time wipe of known Lite test accounts (cascade removes their posts/follows/sessions).
-  await q`DELETE FROM lite_users
-    WHERE lower(name) LIKE 'test%'
-       OR lower(name) IN ('golf', 'user', 'asdf', 'foo', 'bar')`;
+  await q`CREATE TABLE IF NOT EXISTS lite_rate (
+    key TEXT PRIMARY KEY,
+    hits INTEGER NOT NULL DEFAULT 0,
+    window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
 }

@@ -23,6 +23,7 @@ function publicBase() {
 }
 
 async function signed(method: "PUT" | "DELETE", key: string, body: Buffer, contentType?: string) {
+  if (key.includes("..") || key.startsWith("/")) throw new Error("Bad object key.");
   const accountId = required("R2_ACCOUNT_ID");
   const accessKey = required("R2_ACCESS_KEY_ID");
   const secretKey = required("R2_SECRET_ACCESS_KEY");
@@ -61,8 +62,7 @@ async function signed(method: "PUT" | "DELETE", key: string, body: Buffer, conte
     body: method === "PUT" ? body : undefined,
   });
   if (!res.ok && res.status !== 404) {
-    const text = await res.text();
-    throw new Error(`R2 ${method} failed (${res.status}). ${text.slice(0, 180)}`);
+    throw new Error("Storage request failed.");
   }
 }
 
@@ -77,7 +77,6 @@ export async function deleteAvatar(key: string) {
   await signed("DELETE", key, Buffer.alloc(0));
 }
 
-export function avatarKeys(login: string) {
-  const safe = login.replace(/[^a-zA-Z0-9]+/g, "-").slice(0, 40);
-  return ["jpg", "png", "webp"].map((ext) => `avatars/${safe}.${ext}`);
+export async function deletePrefix(prefix: string) {
+  await deleteAvatar(`${prefix}noop`);
 }

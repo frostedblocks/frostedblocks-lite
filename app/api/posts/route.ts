@@ -5,6 +5,7 @@ import { userFromRequest } from "@/lib/session";
 import { fetchRecentPosts } from "@/lib/ice";
 import { cleanText } from "@/lib/text";
 import { handleOf, publicName } from "@/lib/public";
+import { publicError } from "@/lib/http";
 
 function mapPost(row: any, myId?: number) {
   return {
@@ -24,11 +25,12 @@ function mapPost(row: any, myId?: number) {
 
 export async function GET(req: Request) {
   const me = await userFromRequest(req).catch(() => null);
+  const limit = Math.min(50, Math.max(1, Number(new URL(req.url).searchParams.get("limit") || 50)));
   let network: Awaited<ReturnType<typeof fetchRecentPosts>> = [];
   try {
-    network = await fetchRecentPosts(50);
-  } catch (err) {
-    console.error("ICE Network feed failed", err);
+    network = await fetchRecentPosts(limit);
+  } catch {
+    network = [];
   }
 
   try {
@@ -37,49 +39,46 @@ export async function GET(req: Request) {
     const rows = await q`SELECT p.id, p.author_id, p.content, p.category, p.created_at,
       u.name AS author_name
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
-      ORDER BY p.created_at DESC LIMIT 50`;
+      ORDER BY p.created_at DESC LIMIT ${limit}`;
     const lite = rows.map((row) => mapPost(row, me?.id));
     const extra = network.length ? [] : SEED_FEED;
-    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).slice(0, limit);
     return NextResponse.json({ posts, networkCount: network.length });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Feed failed.";
+  } catch {
     const posts = network.length ? network : SEED_FEED;
-    return NextResponse.json({ error: message, posts, networkCount: network.length }, { status: 200 });
+    return NextResponse.json({ posts, networkCount: network.length });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in to post." }, { status: 401 });
+    if (!me) return publicError(401, "Sign in to post.");
     const { content } = await req.json();
     const text = cleanText(String(content || ""));
-    if (!text) return NextResponse.json({ error: "Write something first." }, { status: 400 });
-    if (text.length > 2000) return NextResponse.json({ error: "Keep it under 2000 characters." }, { status: 400 });
+    if (!text) return publicError(400, "Write something first.");
+    if (text.length > 2000) return publicError(400, "Keep it under 2000 characters.");
     const q = sql();
     const rows = await q`INSERT INTO lite_posts (author_id, content, category)
       VALUES (${me.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
     return NextResponse.json({
       post: mapPost({ ...rows[0], author_name: me.name }, me.id),
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Could not post.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return publicError(500, "Could not post.");
   }
 }
 
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in to delete." }, { status: 401 });
+    if (!me) return publicError(401, "Sign in to delete.");
     const { id } = await req.json();
     const q = sql();
     const rows = await q`DELETE FROM lite_posts WHERE id = ${Number(id)} AND author_id = ${me.id} RETURNING id`;
-    if (!rows.length) return NextResponse.json({ error: "You can only delete your own posts." }, { status: 403 });
+    if (!rows.length) return publicError(403, "You can only delete your own posts.");
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Could not delete.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return publicError(500, "Could not delete.");
   }
 }

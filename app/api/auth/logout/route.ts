@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { userFromRequest } from "@/lib/session";
+import { sessionCookie } from "@/lib/http";
 
 export async function POST(req: Request) {
   const all = new URL(req.url).searchParams.get("all") === "1";
@@ -25,7 +26,5 @@ export async function POST(req: Request) {
   } catch {
     /* still clear cookie */
   }
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set("ice_lite_session", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
-  return res;
+  return sessionCookie(NextResponse.json({ ok: true }), null);
 }
