@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { ensureSchema, sql } from "./db";
+import { dbUrl, ensureSchema, sql } from "./db";
 
 export type DbUser = {
   id: number;
@@ -26,6 +26,7 @@ function rowUser(row: any): DbUser {
 }
 
 export async function userFromRequest(req?: Request): Promise<DbUser | null> {
+  if (!dbUrl()) return null;
   await ensureSchema();
   let token = "";
   if (req) {
@@ -47,6 +48,7 @@ export async function userFromRequest(req?: Request): Promise<DbUser | null> {
 }
 
 export async function findUserByLogin(login: string): Promise<DbUser | null> {
+  if (!dbUrl()) return null;
   await ensureSchema();
   const raw = String(login || "").trim();
   if (!raw) return null;
