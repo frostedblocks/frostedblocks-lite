@@ -7,6 +7,7 @@ export type DbUser = {
   phone: string | null;
   name: string;
   avatar: string | null;
+  emailVerified: boolean;
 };
 
 export function loginOf(user: { email: string | null; phone: string | null }) {
@@ -20,8 +21,11 @@ function rowUser(row: any): DbUser {
     phone: row.phone,
     name: row.name,
     avatar: row.avatar,
+    emailVerified: Boolean(row.email_verified) || (!row.email && Boolean(row.phone)),
   };
 }
+
+const COLS = "u.id, u.email, u.phone, u.name, u.avatar, u.email_verified";
 
 export async function userFromRequest(req?: Request): Promise<DbUser | null> {
   await ensureSchema();
@@ -38,10 +42,11 @@ export async function userFromRequest(req?: Request): Promise<DbUser | null> {
   }
   if (!token) return null;
   const q = sql();
-  const rows = await q`SELECT u.id, u.email, u.phone, u.name, u.avatar
+  const rows = await q`SELECT ${sql()}`.catch(() => []);
+  const found = await q`SELECT u.id, u.email, u.phone, u.name, u.avatar, u.email_verified
     FROM lite_sessions s JOIN lite_users u ON u.id = s.user_id
     WHERE s.token = ${token} LIMIT 1`;
-  return rows[0] ? rowUser(rows[0]) : null;
+  return found[0] ? rowUser(found[0]) : null;
 }
 
 export async function findUserByLogin(login: string): Promise<DbUser | null> {
@@ -51,10 +56,14 @@ export async function findUserByLogin(login: string): Promise<DbUser | null> {
   const q = sql();
   const handle = raw.match(/^u(\d+)$/i);
   if (handle) {
-    const rows = await q`SELECT id, email, phone, name, avatar FROM lite_users WHERE id = ${Number(handle[1])} LIMIT 1`;
+    const rows = await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users WHERE id = ${Number(handle[1])} LIMIT 1`;
     return rows[0] ? rowUser(rows[0]) : null;
   }
-  const rows = await q`SELECT id, email, phone, name, avatar FROM lite_users
+  const rows = await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users
     WHERE email = ${raw.toLowerCase()} OR phone = ${raw} LIMIT 1`;
   return rows[0] ? rowUser(rows[0]) : null;
+}
+
+export function needsEmailVerify(user: DbUser) {
+  return Boolean(user.email) && !user.emailVerified;
 }
