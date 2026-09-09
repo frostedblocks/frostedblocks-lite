@@ -8,7 +8,7 @@ export default function SignUpPage() {
       <article className="glass auth-card">
         <div className="kicker">ICE Lite</div>
         <h1 style={{ fontSize: 40 }}>Create Lite account</h1>
-        <p className="lead">Email or phone and a password. Free. No wallet. About a minute.</p>
+        <p className="lead">Use an email you can open. We send a confirm link. You cannot post until you tap it.</p>
         <AuthForm mode="signup" />
       </article>
     </main>

@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { findUserByLogin, userFromRequest } from "@/lib/session";
 import { handleOf, publicName } from "@/lib/public";
+import { denyUnverified } from "@/lib/guard";
+import { publicError } from "@/lib/http";
 
 export async function GET(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in to message." }, { status: 401 });
+    if (!me) return publicError(401, "Sign in to message.");
     const otherLogin = new URL(req.url).searchParams.get("with") || "";
     const q = sql();
     if (!otherLogin) {
@@ -30,9 +32,8 @@ export async function GET(req: Request) {
          OR (m.sender_id = ${other.id} AND m.receiver_id = ${me.id})
       ORDER BY m.created_at ASC`;
     return NextResponse.json({ me: handleOf(me.id), messages: rows.map(mapMsg) });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Messages failed.";
-    return NextResponse.json({ error: message, messages: [] }, { status: 200 });
+  } catch {
+    return publicError(500, "Messages failed.");
   }
 }
 
@@ -40,30 +41,30 @@ export async function POST(req: Request) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in to send a message." }, { status: 401 });
+    const blocked = denyUnverified(me);
+    if (blocked) return blocked;
     const { to, text } = await req.json();
     const body = String(text || "").trim().slice(0, 2000);
-    if (!body) return NextResponse.json({ error: "Write a message first." }, { status: 400 });
+    if (!body) return publicError(400, "Write a message first.");
     const other = await findUserByLogin(String(to || ""));
-    if (!other) return NextResponse.json({ error: "That Lite user was not found." }, { status: 404 });
-    if (other.id === me.id) return NextResponse.json({ error: "You cannot message yourself." }, { status: 400 });
+    if (!other) return publicError(404, "That Lite user was not found.");
+    if (other.id === me!.id) return publicError(400, "You cannot message yourself.");
     const q = sql();
     const rows = await q`INSERT INTO lite_messages (sender_id, receiver_id, body)
-      VALUES (${me.id}, ${other.id}, ${body}) RETURNING id, created_at`;
+      VALUES (${me!.id}, ${other.id}, ${body}) RETURNING id, created_at`;
     return NextResponse.json({
       message: {
         id: String(rows[0].id),
-        from: handleOf(me.id),
-        fromName: publicName(me.name),
+        from: handleOf(me!.id),
+        fromName: publicName(me!.name),
         to: handleOf(other.id),
         toName: publicName(other.name),
         text: body,
         at: new Date(rows[0].created_at).getTime(),
       },
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Send failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return publicError(500, "Send failed.");
   }
 }
 

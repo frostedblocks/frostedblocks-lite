@@ -23,8 +23,12 @@ export default function VerifyPage({
       <article className="glass auth-card">
         <div className="kicker">Email</div>
         <h1 style={{ fontSize: 40 }}>{ok ? "Email confirmed" : "Link did not work"}</h1>
-        <p className="lead">{ok ? "You can use ICE Lite with this email." : "That confirm link is old or already used. Sign in and we can send another later."}</p>
-        <p style={{ marginTop: 20 }}><Link className="btn" href="/signin">Sign in</Link></p>
+        <p className="lead">
+          {ok
+            ? "You can post, follow, and message on ICE Lite now."
+            : "That confirm link is old or already used. Sign in and tap Send confirm email on the feed."}
+        </p>
+        <p style={{ marginTop: 20 }}><Link className="btn" href="/feed">Open live feed</Link></p>
       </article>
     </main>
   );

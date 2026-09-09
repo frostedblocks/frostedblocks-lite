@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { findUserByLogin, userFromRequest } from "@/lib/session";
 import { handleOf, publicName } from "@/lib/public";
+import { denyUnverified } from "@/lib/guard";
+import { publicError } from "@/lib/http";
 
 export async function GET(req: Request) {
   try {
@@ -37,33 +39,33 @@ export async function POST(req: Request) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in to follow someone." }, { status: 401 });
+    const blocked = denyUnverified(me);
+    if (blocked) return blocked;
     const { target } = await req.json();
     const other = await findUserByLogin(String(target || ""));
-    if (!other) return NextResponse.json({ error: "That Lite user was not found." }, { status: 404 });
-    if (other.id === me.id) return NextResponse.json({ error: "You cannot follow yourself." }, { status: 400 });
+    if (!other) return publicError(404, "That Lite user was not found.");
+    if (other.id === me!.id) return publicError(400, "You cannot follow yourself.");
     const q = sql();
     await q`INSERT INTO lite_follows (follower_id, followee_id)
-      VALUES (${me.id}, ${other.id}) ON CONFLICT DO NOTHING`;
+      VALUES (${me!.id}, ${other.id}) ON CONFLICT DO NOTHING`;
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Follow failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return publicError(500, "Follow failed.");
   }
 }
 
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
+    const blocked = denyUnverified(me);
+    if (blocked) return blocked;
     const { target } = await req.json();
     const other = await findUserByLogin(String(target || ""));
     if (!other) return NextResponse.json({ ok: true });
     const q = sql();
-    await q`DELETE FROM lite_follows WHERE follower_id = ${me.id} AND followee_id = ${other.id}`;
+    await q`DELETE FROM lite_follows WHERE follower_id = ${me!.id} AND followee_id = ${other.id}`;
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unfollow failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return publicError(500, "Unfollow failed.");
   }
 }

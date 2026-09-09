@@ -6,6 +6,7 @@ import { fetchRecentPosts } from "@/lib/ice";
 import { cleanText } from "@/lib/text";
 import { handleOf, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
+import { denyUnverified } from "@/lib/guard";
 
 function mapPost(row: any, myId?: number) {
   return {
@@ -53,16 +54,17 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return publicError(401, "Sign in to post.");
+    const blocked = denyUnverified(me);
+    if (blocked) return blocked;
     const { content } = await req.json();
     const text = cleanText(String(content || ""));
     if (!text) return publicError(400, "Write something first.");
     if (text.length > 2000) return publicError(400, "Keep it under 2000 characters.");
     const q = sql();
     const rows = await q`INSERT INTO lite_posts (author_id, content, category)
-      VALUES (${me.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
+      VALUES (${me!.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
     return NextResponse.json({
-      post: mapPost({ ...rows[0], author_name: me.name }, me.id),
+      post: mapPost({ ...rows[0], author_name: me!.name }, me!.id),
     });
   } catch {
     return publicError(500, "Could not post.");
@@ -72,10 +74,11 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return publicError(401, "Sign in to delete.");
+    const blocked = denyUnverified(me);
+    if (blocked) return blocked;
     const { id } = await req.json();
     const q = sql();
-    const rows = await q`DELETE FROM lite_posts WHERE id = ${Number(id)} AND author_id = ${me.id} RETURNING id`;
+    const rows = await q`DELETE FROM lite_posts WHERE id = ${Number(id)} AND author_id = ${me!.id} RETURNING id`;
     if (!rows.length) return publicError(403, "You can only delete your own posts.");
     return NextResponse.json({ ok: true });
   } catch {

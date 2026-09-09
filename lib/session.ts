@@ -25,8 +25,6 @@ function rowUser(row: any): DbUser {
   };
 }
 
-const COLS = "u.id, u.email, u.phone, u.name, u.avatar, u.email_verified";
-
 export async function userFromRequest(req?: Request): Promise<DbUser | null> {
   await ensureSchema();
   let token = "";
@@ -42,7 +40,6 @@ export async function userFromRequest(req?: Request): Promise<DbUser | null> {
   }
   if (!token) return null;
   const q = sql();
-  const rows = await q`SELECT ${sql()}`.catch(() => []);
   const found = await q`SELECT u.id, u.email, u.phone, u.name, u.avatar, u.email_verified
     FROM lite_sessions s JOIN lite_users u ON u.id = s.user_id
     WHERE s.token = ${token} LIMIT 1`;

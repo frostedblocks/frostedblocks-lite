@@ -8,10 +8,11 @@ import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 
 export function LiteFeed() {
-  const { user, ready, signedIn } = useAuth();
+  const { user, ready, signedIn, verified, hasEmail } = useAuth();
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
   async function refresh() {
     setPosts(await loadFeed());
@@ -37,6 +38,18 @@ export function LiteFeed() {
     }
   }
 
+  async function resend() {
+    setError("");
+    try {
+      const res = await fetch("/api/auth/resend", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not send email.");
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send email.");
+    }
+  }
+
   if (!ready) return null;
 
   return (
@@ -48,10 +61,19 @@ export function LiteFeed() {
       <p className="note" style={{ margin: "0 0 10px" }}>
         {signedIn
           ? "Your Lite posts stay on this door. Public ICE Network posts can also appear here."
-          : "Public preview. Create a Lite account to post. Comments stay empty until you sign in."}
+          : "Public preview. Create a Lite account to post. Confirm your email before you write."}
       </p>
       <div className="glass" style={{ padding: 8 }}>
-        {signedIn ? (
+        {signedIn && hasEmail && !verified ? (
+          <div className="compose">
+            <p className="note" style={{ margin: 0 }}>
+              Confirm your email to post, follow, or message. Open the link we sent, or send it again.
+            </p>
+            {sent ? <p className="note">Check your inbox and spam.</p> : null}
+            {error ? <p className="error">{error}</p> : null}
+            <button className="btn" type="button" onClick={() => { void resend(); }}>Send confirm email</button>
+          </div>
+        ) : signedIn ? (
           <form className="compose" onSubmit={publish}>
             <div className="meta">Post as {user?.name || "you"}</div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
@@ -60,7 +82,7 @@ export function LiteFeed() {
           </form>
         ) : (
           <div className="compose">
-            <p className="note" style={{ margin: 0 }}>Sign in to post on ICE Lite.</p>
+            <p className="note" style={{ margin: 0 }}>Sign in with a confirmed email to post on ICE Lite.</p>
             <Link className="btn" href="/signup">Create Lite account</Link>
             <Link className="quiet-link" href="/signin">Sign in</Link>
           </div>
