@@ -3,23 +3,30 @@ export function appUrl() {
 }
 
 const TEST_FROM = "ICE Lite <beth.t@example.com>";
+const APEX_FROM = "ICE Lite <noreply@frostedblocks.com>";
+const SEND_FROM = "ICE Lite <noreply@send.frostedblocks.com>";
 
 export async function sendMail(to: string, subject: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY is missing on Vercel.");
-  const preferred = process.env.MAIL_FROM || "ICE Lite <noreply@send.frostedblocks.com>";
-  const first = await deliver(key, preferred, to, subject, text);
-  if (first.ok) return;
+  const preferred = process.env.MAIL_FROM || APEX_FROM;
+  const tried = new Set<string>();
+  const order = [preferred, APEX_FROM, SEND_FROM];
+  let last = { ok: false, status: 0, body: "" };
+  for (const from of order) {
+    if (tried.has(from)) continue;
+    tried.add(from);
+    last = await deliver(key, from, to, subject, text);
+    if (last.ok) return;
+  }
   const needFallback =
-    first.status === 403 &&
-    /not verified|validation_error/i.test(first.body) &&
-    preferred !== TEST_FROM;
-  if (needFallback) {
+    last.status === 403 && /not verified|validation_error|only send testing/i.test(last.body);
+  if (needFallback && !tried.has(TEST_FROM)) {
     const second = await deliver(key, TEST_FROM, to, subject, text);
     if (second.ok) return;
     throw new Error(hint(second.status, second.body));
   }
-  throw new Error(hint(first.status, first.body));
+  throw new Error(hint(last.status, last.body));
 }
 
 async function deliver(key: string, from: string, to: string, subject: string, text: string) {
@@ -36,8 +43,8 @@ async function deliver(key: string, from: string, to: string, subject: string, t
 }
 
 function hint(status: number, body: string) {
-  if (status === 403 && /not verified/i.test(body)) {
-    return "Resend will not send until you verify a domain at resend.com/domains, or send only to the email on that Resend account.";
+  if (status === 403 && /not verified|only send testing/i.test(body)) {
+    return "Resend rejected the from-address. In Vercel set MAIL_FROM to ICE Lite <noreply@frostedblocks.com> and confirm frostedblocks.com is Verified in Resend.";
   }
   return `Email failed (${status}). ${body.slice(0, 180)}`;
 }
