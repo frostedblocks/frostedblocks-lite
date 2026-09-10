@@ -61,7 +61,7 @@ export function LiteFeed() {
       <p className="note" style={{ margin: "0 0 10px" }}>
         {signedIn
           ? "Your Lite posts stay on this door. Public ICE Network posts can also appear here."
-          : "Public preview. Create a Lite account to post. Confirm your email before you write."}
+          : "Public preview. Create a Lite account with email or phone to post."}
       </p>
       <div className="glass" style={{ padding: 8 }}>
         {signedIn && hasEmail && !verified ? (
@@ -82,7 +82,7 @@ export function LiteFeed() {
           </form>
         ) : (
           <div className="compose">
-            <p className="note" style={{ margin: 0 }}>Sign in with a confirmed email to post on ICE Lite.</p>
+            <p className="note" style={{ margin: 0 }}>Sign in with email or phone to post on ICE Lite.</p>
             <Link className="btn" href="/signup">Create Lite account</Link>
             <Link className="quiet-link" href="/signin">Sign in</Link>
           </div>

@@ -1,3 +1,5 @@
+import { normalizeLogin } from "./login";
+
 export type LiteUser = {
   email: string;
   name: string;
@@ -28,31 +30,21 @@ function ping() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("ice-auth"));
 }
 
-export function normalizeLogin(raw: string) {
-  const value = raw.trim();
-  if (!value) return "";
-  if (value.includes("@")) return value.toLowerCase();
-  const keepPlus = value.startsWith("+") ? "+" : "";
-  return keepPlus + value.replace(/\D/g, "");
-}
-
-export function isEmail(value: string) {
-  return value.includes("@") && value.includes(".");
-}
-
-export function isPhone(value: string) {
-  return /^\+?\d{10,15}$/.test(value);
-}
+export { normalizeLogin, isEmail, isPhone } from "./login";
+import { isEmail, isPhone } from "./login";
+export { isEmail, isPhone };
 
 function sameAccount(user: LiteUser, login: string) {
-  return user.email === login || user.phone === login;
+  const id = normalizeLogin(login);
+  return normalizeLogin(user.email) === id || normalizeLogin(user.phone || "") === id;
 }
 
 function cacheUser(user: LiteUser) {
-  const users = readUsers().filter((u) => !sameAccount(u, user.email));
+  const id = normalizeLogin(user.email || user.phone || "");
+  const users = readUsers().filter((u) => !sameAccount(u, id));
   users.push({ email: user.email, name: user.name, avatar: user.avatar, phone: user.phone });
   writeUsers(users);
-  localStorage.setItem(SESSION, user.email);
+  localStorage.setItem(SESSION, id);
   ping();
 }
 
@@ -64,7 +56,7 @@ export function currentEmail(): string | null {
 export function currentUser(): LiteUser | null {
   const id = currentEmail();
   if (!id) return null;
-  return readUsers().find((u) => sameAccount(u, id)) || { email: id, name: id.split("@")[0] };
+  return readUsers().find((u) => sameAccount(u, id)) || { email: id, name: id.includes("@") ? id.split("@")[0] : "Lite user" };
 }
 
 export function listPublicUsers(): PublicUser[] {

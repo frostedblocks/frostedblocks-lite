@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { dbUrl, ensureSchema, sql } from "./db";
+import { isEmail, normalizeLogin, phoneKeys } from "./login";
 
 export type DbUser = {
   id: number;
@@ -58,8 +59,13 @@ export async function findUserByLogin(login: string): Promise<DbUser | null> {
     const rows = await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users WHERE id = ${Number(handle[1])} LIMIT 1`;
     return rows[0] ? rowUser(rows[0]) : null;
   }
-  const rows = await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users
-    WHERE email = ${raw.toLowerCase()} OR phone = ${raw} LIMIT 1`;
+  const id = normalizeLogin(raw);
+  const keys = phoneKeys(id);
+  const rows = isEmail(id)
+    ? await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users WHERE email = ${id} LIMIT 1`
+    : keys.length
+      ? await q`SELECT id, email, phone, name, avatar, email_verified FROM lite_users WHERE phone = ANY(${keys}) LIMIT 1`
+      : [];
   return rows[0] ? rowUser(rows[0]) : null;
 }
 

@@ -43,7 +43,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       ) : null}
       <label>
         Email or phone
-        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" />
+        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" inputMode="email" autoComplete={mode === "signup" ? "username" : "username"} />
       </label>
       <label>
         Password
@@ -56,7 +56,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       {mode === "signin" ? (
         <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
       ) : (
-        <p className="note">Takes about a minute. If you use email, we send a confirm link. Forgot password uses that same email.</p>
+        <p className="note">Email gets a confirm link. Phone can post now. Forgot password only works for email accounts.</p>
       )}
       <p className="note">No wallet on this site. Lite posts stay in the Lite database until you choose to open ICE Network later.</p>
       <p className="note">

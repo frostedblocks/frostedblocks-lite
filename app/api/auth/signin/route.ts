@@ -4,19 +4,13 @@ import { ensureSchema, sql } from "@/lib/db";
 import { checkPassword } from "@/lib/password";
 import { clientIp, publicError, sessionCookie } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-
-function normalize(login: string) {
-  const value = login.trim();
-  if (value.includes("@")) return value.toLowerCase();
-  const keepPlus = value.startsWith("+") ? "+" : "";
-  return keepPlus + value.replace(/\D/g, "");
-}
+import { isEmail, normalizeLogin, phoneKeys } from "@/lib/login";
 
 export async function POST(req: Request) {
   try {
     await ensureSchema();
     const { login, password } = await req.json();
-    const id = normalize(String(login || ""));
+    const id = normalizeLogin(String(login || ""));
     const pass = String(password || "");
     const ip = clientIp(req);
     const limited = await rateLimit(`signin:${ip}:${id}`, 8, 15 * 60);
@@ -26,8 +20,14 @@ export async function POST(req: Request) {
       return res;
     }
     const q = sql();
-    const rows = await q`SELECT id, email, phone, name, avatar, password_hash, failed_attempts, locked_until FROM lite_users
-      WHERE email = ${id} OR phone = ${id} LIMIT 1`;
+    const keys = phoneKeys(id);
+    const rows = isEmail(id)
+      ? await q`SELECT id, email, phone, name, avatar, password_hash, failed_attempts, locked_until FROM lite_users
+          WHERE email = ${id} LIMIT 1`
+      : keys.length
+        ? await q`SELECT id, email, phone, name, avatar, password_hash, failed_attempts, locked_until FROM lite_users
+            WHERE phone = ANY(${keys}) LIMIT 1`
+        : [];
     const user = rows[0];
     const generic = "Email, phone, or password is wrong.";
     if (!user) return publicError(401, generic);
@@ -52,6 +52,7 @@ export async function POST(req: Request) {
     await q`INSERT INTO lite_sessions (token, user_id) VALUES (${token}, ${user.id})`;
     const res = NextResponse.json({
       email: user.email || user.phone,
+      phone: user.phone,
       name: user.name,
       avatar: user.avatar,
     });
