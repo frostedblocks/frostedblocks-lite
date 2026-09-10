@@ -1,4 +1,4 @@
-import { normalizeLogin } from "./login";
+import { isEmail, normalizeLogin } from "./login";
 
 export type LiteUser = {
   email: string;
@@ -31,8 +31,6 @@ function ping() {
 }
 
 export { normalizeLogin, isEmail, isPhone } from "./login";
-import { isEmail, isPhone } from "./login";
-export { isEmail, isPhone };
 
 function sameAccount(user: LiteUser, login: string) {
   const id = normalizeLogin(login);
