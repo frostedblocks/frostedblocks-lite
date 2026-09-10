@@ -1,4 +1,4 @@
-import { isEmail, normalizeLogin } from "./login";
+import { normalizeLogin } from "./login";
 
 export type LiteUser = {
   email: string;
