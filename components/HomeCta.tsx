@@ -26,11 +26,11 @@ export function HomeCta() {
 
   return (
     <div className="cta-row">
-      <button className="btn" type="button" onClick={explore}>Explore the live feed</button>
-      <Link className="btn ghost" href="/signup">Create Lite account</Link>
-      <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Open ICE Network</a>
+      <Link className="btn" href="/signup">Try it free</Link>
+      <button className="btn ghost" type="button" onClick={explore}>Explore the live feed</button>
+      <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Own it on-chain</a>
       <p className="note" style={{ width: "100%", margin: "4px 0 0" }}>
-        Email or phone. About a minute. Password reset by email. No wallet on this site.
+        Email or phone. About a minute. No wallet on this site.
       </p>
     </div>
   );

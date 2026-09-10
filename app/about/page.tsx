@@ -23,9 +23,9 @@ export default function AboutPage() {
           </div>
         </div>
         <p style={{ marginTop: 24, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <Link className="btn" href="/signup">Create Lite account</Link>
+          <Link className="btn" href="/signup">Try Lite free</Link>
           <Link className="btn ghost" href="/feed">Explore the live feed</Link>
-          <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Open ICE Network</a>
+          <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">Own it on ICE Network</a>
         </p>
       </article>
     </main>
