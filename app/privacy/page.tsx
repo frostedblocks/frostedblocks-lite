@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function PrivacyPage() {
   return (
     <main className="wrap page">
@@ -5,6 +7,9 @@ export default function PrivacyPage() {
         <div className="kicker">Legal</div>
         <h1 style={{ fontSize: 42 }}>Privacy</h1>
         <p className="lead">ICE Lite stores only what the site needs to run.</p>
+        <p className="note" style={{ marginTop: 0 }}>
+          Effective September 10, 2026. Last updated September 10, 2026.
+        </p>
         <div className="stack">
           <div className="glass stack-item">
             <strong>What we keep</strong>
@@ -21,6 +26,14 @@ export default function PrivacyPage() {
           <div className="glass stack-item">
             <strong>Retention</strong>
             <p className="note">Account data stays until you delete the account or ask on the contact page. Sign-out everywhere drops active sessions.</p>
+          </div>
+          <div className="glass stack-item">
+            <strong>Your rights</strong>
+            <p className="note">You can request access, correction, or deletion of your data by emailing hello@frostedblocks.com or using the contact form. We do not sell your data.</p>
+          </div>
+          <div className="glass stack-item">
+            <strong>Contact</strong>
+            <p className="note">Questions about this policy: hello@frostedblocks.com or the <Link href="/contact">contact page</Link>.</p>
           </div>
         </div>
       </article>
