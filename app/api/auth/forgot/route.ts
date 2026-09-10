@@ -4,19 +4,19 @@ import { ensureSchema, sql } from "@/lib/db";
 import { appUrl, sendMail } from "@/lib/mail";
 import { clientIp, publicError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-
-function normalize(login: string) {
-  const value = login.trim();
-  if (value.includes("@")) return value.toLowerCase();
-  const keepPlus = value.startsWith("+") ? "+" : "";
-  return keepPlus + value.replace(/\D/g, "");
-}
+import { isEmail, normalizeLogin } from "@/lib/login";
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return publicError(503, "Reset email is not set up. Add RESEND_API_KEY on Vercel.");
+    }
     await ensureSchema();
     const { login } = await req.json();
-    const id = normalize(String(login || ""));
+    const id = normalizeLogin(String(login || ""));
+    if (!isEmail(id)) {
+      return publicError(400, "Use the email on the account. Phone-only accounts cannot reset this way.");
+    }
     const limited = await rateLimit(`forgot:${clientIp(req)}:${id}`, 5, 60 * 60);
     if (!limited.ok) {
       const res = publicError(429, "Too many reset attempts. Try later.");
@@ -36,12 +36,16 @@ export async function POST(req: Request) {
           "Reset your ICE Lite password",
           `Reset your ICE Lite password:\n${appUrl()}/reset?token=${token}\n\nThis link lasts 2 hours. If you did not ask, ignore this.`,
         );
-      } catch {
-        /* same response either way */
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Could not send email.";
+        console.error("reset mail failed", message);
+        return publicError(503, message);
       }
     }
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Could not start a reset.";
+    console.error("forgot failed", message);
+    return publicError(500, "Could not start a reset.");
   }
 }

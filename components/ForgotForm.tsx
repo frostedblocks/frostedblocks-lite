@@ -16,6 +16,7 @@ export function ForgotForm() {
       const res = await fetch("/api/auth/forgot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ login }),
       });
       const data = await res.json();
@@ -31,7 +32,7 @@ export function ForgotForm() {
   if (done) {
     return (
       <div className="auth-form">
-        <p className="note">If that email has a Lite account, a reset link is on the way. Check spam too.</p>
+        <p className="note">If that email has a Lite account, a reset link is on the way. Check inbox and spam. The link lasts 2 hours.</p>
         <Link className="btn" href="/signin">Back to sign in</Link>
       </div>
     );
@@ -41,10 +42,11 @@ export function ForgotForm() {
     <form className="auth-form" onSubmit={submit}>
       <label>
         Email
-        <input required type="email" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com" />
+        <input required type="email" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com" autoComplete="email" />
       </label>
       {error ? <p className="error">{error}</p> : null}
       <button className="btn" type="submit" disabled={busy}>{busy ? "Sending…" : "Send reset link"}</button>
+      <p className="note">Phone-only accounts cannot reset by email. Sign in with the phone and password you set.</p>
       <p className="note"><Link href="/signin">Back to sign in</Link></p>
     </form>
   );
