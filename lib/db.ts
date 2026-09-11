@@ -73,4 +73,12 @@ export async function ensureSchema() {
     hits INTEGER NOT NULL DEFAULT 0,
     window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_replies (
+    id BIGSERIAL PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_replies_post_idx ON lite_replies (post_id)`;
 }

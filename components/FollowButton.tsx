@@ -7,11 +7,13 @@ import Link from "next/link";
 export function FollowButton({
   target,
   targetName,
+  compact,
   onChange,
 }: {
   target: string;
   targetName: string;
   source?: "lite" | "network";
+  compact?: boolean;
   onChange?: () => void;
 }) {
   const { user, ready, signedIn } = useAuth();
@@ -26,14 +28,19 @@ export function FollowButton({
   }, [user, target]);
 
   if (!ready) return null;
+  if (!/^u\d+$/i.test(target)) return null;
   if (!signedIn || !user) {
-    return <Link className="btn ghost" href="/signin">Sign in to follow</Link>;
+    return compact ? (
+      <Link className="quiet-link" href="/signin">Follow</Link>
+    ) : (
+      <Link className="btn ghost" href="/signin">Sign in to follow</Link>
+    );
   }
   if (user.email === target) return null;
 
   return (
     <button
-      className={on ? "btn ghost" : "btn"}
+      className={compact ? "delete-btn" : on ? "btn ghost" : "btn"}
       type="button"
       disabled={busy}
       onClick={async () => {
@@ -50,7 +57,8 @@ export function FollowButton({
         }
       }}
     >
-      {on ? "Following" : "Follow"} {targetName ? "" : ""}
+      {on ? "Following" : "Follow"}
+      {!compact && targetName ? "" : ""}
     </button>
   );
 }
