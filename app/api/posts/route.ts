@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { SEED_FEED } from "@/lib/seed-feed";
 import { ensureSchema, sql } from "@/lib/db";
 import { userFromRequest } from "@/lib/session";
 import { fetchRecentPosts } from "@/lib/ice";
@@ -42,12 +41,10 @@ export async function GET(req: Request) {
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT ${limit}`;
     const lite = rows.map((row) => mapPost(row, me?.id));
-    const extra = network.length ? [] : SEED_FEED;
-    const posts = [...lite, ...network, ...extra].sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).slice(0, limit);
+    const posts = [...lite, ...network].sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).slice(0, limit);
     return NextResponse.json({ posts, networkCount: network.length });
   } catch {
-    const posts = network.length ? network : SEED_FEED;
-    return NextResponse.json({ posts, networkCount: network.length });
+    return NextResponse.json({ posts: network, networkCount: network.length });
   }
 }
 

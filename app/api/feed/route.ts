@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { SEED_FEED } from "@/lib/seed-feed";
+import { fetchRecentPosts } from "@/lib/ice";
 
 export const dynamic = "force-dynamic";
 
-/** ICP read is off until lite.frostedblocks.com is live. */
 export async function GET() {
-  return NextResponse.json({ source: "lite", posts: SEED_FEED });
+  try {
+    const posts = await fetchRecentPosts(50);
+    return NextResponse.json({ source: "network", posts, cached: true });
+  } catch {
+    return NextResponse.json({ source: "network", posts: [], cached: false });
+  }
 }

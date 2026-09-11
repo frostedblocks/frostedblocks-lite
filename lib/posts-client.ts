@@ -1,13 +1,12 @@
 import type { IcePost } from "./types";
-import { SEED_FEED } from "./seed-feed";
 
 export async function loadFeed(): Promise<IcePost[]> {
   try {
     const res = await fetch("/api/posts", { cache: "no-store" });
     const data = await res.json();
-    return (data.posts || SEED_FEED) as IcePost[];
+    return (data.posts || []) as IcePost[];
   } catch {
-    return SEED_FEED;
+    return [];
   }
 }
 

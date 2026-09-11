@@ -3,6 +3,11 @@ import { IDL } from "@dfinity/candid";
 import { CANISTERS, HOST } from "./canisters";
 import type { IcePost } from "./types";
 
+const TTL_MS = 90_000;
+
+let cache: { at: number; limit: number; posts: IcePost[] } | null = null;
+let pending: Promise<IcePost[]> | null = null;
+
 const idlFactory = ({ IDL: e }: { IDL: typeof IDL }) => {
   const post = e.Record({
     id: e.Nat,
@@ -31,7 +36,7 @@ function shortName(author: string) {
   return author.length > 12 ? `${author.slice(0, 5)}…${author.slice(-5)}` : author;
 }
 
-export async function fetchRecentPosts(limit = 50): Promise<IcePost[]> {
+async function loadRecentPosts(limit: number): Promise<IcePost[]> {
   const agent = new HttpAgent({ host: HOST });
   const actor = Actor.createActor(idlFactory as any, {
     agent,
@@ -83,4 +88,23 @@ export async function fetchRecentPosts(limit = 50): Promise<IcePost[]> {
       source: "network" as const,
     };
   });
+}
+
+export async function fetchRecentPosts(limit = 50): Promise<IcePost[]> {
+  const n = Math.min(50, Math.max(1, limit));
+  if (cache && cache.limit >= n && Date.now() - cache.at < TTL_MS) {
+    return cache.posts.slice(0, n);
+  }
+  if (!pending) {
+    pending = loadRecentPosts(Math.max(n, cache?.limit || 0, 50))
+      .then((posts) => {
+        cache = { at: Date.now(), limit: Math.max(n, 50), posts };
+        return posts;
+      })
+      .finally(() => {
+        pending = null;
+      });
+  }
+  const posts = await pending;
+  return posts.slice(0, n);
 }
