@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
 import { currentUser } from "@/lib/auth-client";
@@ -7,12 +7,16 @@ import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 
+const PAGE_SIZE = 10;
+
 export function LiteFeed() {
   const { user, ready, signedIn, verified, hasEmail } = useAuth();
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [category, setCategory] = useState("All");
+  const [page, setPage] = useState(0);
 
   async function refresh() {
     setPosts(await loadFeed());
@@ -21,6 +25,29 @@ export function LiteFeed() {
   useEffect(() => {
     void refresh();
   }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of posts) {
+      const c = (p.category || "").trim();
+      if (c) set.add(c);
+    }
+    return ["All", ...[...set].sort((a, b) => a.localeCompare(b))];
+  }, [posts]);
+
+  const filtered = useMemo(() => {
+    if (category === "All") return posts;
+    return posts.filter((p) => (p.category || "") === category);
+  }, [posts, category]);
+
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pages - 1);
+  const slice = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
+  function pickCategory(next: string) {
+    setCategory(next);
+    setPage(0);
+  }
 
   async function publish(e: React.FormEvent) {
     e.preventDefault();
@@ -32,6 +59,8 @@ export function LiteFeed() {
     try {
       await createPost(text);
       setText("");
+      setCategory("All");
+      setPage(0);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not post.");
@@ -56,13 +85,20 @@ export function LiteFeed() {
     <div>
       <div className="feed-head">
         <span><i className="dot" />Live feed</span>
-        <span className="meta">Posts save in the Lite database</span>
+        <span className="meta">{filtered.length} posts</span>
       </div>
-      <p className="note" style={{ margin: "0 0 10px" }}>
-        {signedIn
-          ? "Your Lite posts stay on this door. Public ICE Network posts can also appear here."
-          : "Public preview. Create a Lite account with email or phone to post."}
-      </p>
+      <div className="chips" style={{ marginTop: 0 }}>
+        {categories.map((c) => (
+          <button
+            key={c}
+            className={category === c ? "btn" : "chip"}
+            type="button"
+            onClick={() => pickCategory(c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
       <div className="glass" style={{ padding: 8 }}>
         {signedIn && hasEmail && !verified ? (
           <div className="compose">
@@ -82,16 +118,28 @@ export function LiteFeed() {
           </form>
         ) : (
           <div className="compose">
-            <p className="note" style={{ margin: 0 }}>Sign in with email or phone to post on ICE Lite.</p>
+            <p className="note" style={{ margin: 0 }}>Sign in to post on ICE Lite.</p>
             <Link className="btn" href="/signup">Create Lite account</Link>
             <Link className="quiet-link" href="/signin">Sign in</Link>
           </div>
         )}
-        <div className="feed feed-tall">
-          {posts.map((post) => (
+        <div className="feed">
+          {slice.map((post) => (
             <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />
           ))}
+          {!slice.length ? <p className="note" style={{ padding: 12 }}>No posts in this category.</p> : null}
         </div>
+        {pages > 1 ? (
+          <div className="cta-row" style={{ justifyContent: "space-between", padding: "8px 10px 12px" }}>
+            <button className="btn ghost" type="button" disabled={safePage === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+              Previous
+            </button>
+            <span className="meta">Page {safePage + 1} of {pages}</span>
+            <button className="btn ghost" type="button" disabled={safePage >= pages - 1} onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}>
+              Next
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
