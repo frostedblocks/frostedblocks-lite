@@ -1,10 +1,12 @@
 "use client";
 import { avatarFor } from "@/lib/auth-client";
+import { postPath, postUrl } from "@/lib/get-post";
 import { deletePost } from "@/lib/posts-client";
 import { looksLikeEmail, publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { DoorBadge, doorForPost } from "./LiteBadge";
 
 function when(ts: number) {
@@ -26,6 +28,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   const [photo, setPhoto] = useState("");
   const door = doorForPost(post.author, post.id, post.source);
   const name = publicName(post.authorName);
+  const href = postPath(post.id);
 
   useEffect(() => {
     setPhoto(looksLikeEmail(post.author) ? avatarFor(post.author) : "");
@@ -42,7 +45,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   }
 
   async function copy() {
-    const url = door === "network" ? "https://www.frostedblocks.com" : "https://lite.frostedblocks.com/feed";
+    const url = postUrl(post.id);
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -63,7 +66,9 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
             {name}{" "}
             <DoorBadge source={door} author={post.author} postId={post.id} />
           </b>
-          <div className="meta">{when(post.timestamp)}</div>
+          <div className="meta">
+            <Link href={href}>{when(post.timestamp)}</Link>
+          </div>
         </div>
         {post.category ? <span className="tag">{post.category}</span> : null}
       </div>
@@ -79,6 +84,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
       <div className="post-foot">
         <span>{post.likes} likes · {post.loves} loves</span>
         <span style={{ display: "flex", gap: 10 }}>
+          <Link className="delete-btn" href={href}>Open</Link>
           <button className="delete-btn" type="button" onClick={() => { void copy(); }}>Copy link</button>
           {door === "network" ? (
             <a className="delete-btn" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">Open on Network</a>
