@@ -4,6 +4,8 @@ import { fetchRecentPosts } from "./ice";
 import { handleOf, publicName } from "./public";
 import type { IcePost } from "./types";
 
+export { postPath, postUrl } from "./post-url";
+
 export function mapLiteRow(row: any, myId?: number): IcePost {
   return {
     id: String(row.id),
@@ -18,14 +20,6 @@ export function mapLiteRow(row: any, myId?: number): IcePost {
     source: "lite",
     mine: myId ? Number(row.author_id) === myId : false,
   };
-}
-
-export function postPath(id: string) {
-  return `/p/${encodeURIComponent(id)}`;
-}
-
-export function postUrl(id: string) {
-  return `https://lite.frostedblocks.com${postPath(id)}`;
 }
 
 export async function getPost(id: string): Promise<IcePost | null> {

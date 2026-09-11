@@ -1,6 +1,6 @@
 "use client";
 import { avatarFor } from "@/lib/auth-client";
-import { postPath, postUrl } from "@/lib/get-post";
+import { postPath, postUrl } from "@/lib/post-url";
 import { deletePost } from "@/lib/posts-client";
 import { looksLikeEmail, publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
