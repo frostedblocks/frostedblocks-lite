@@ -43,7 +43,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       ) : null}
       <label>
         Email or phone
-        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" inputMode="email" autoComplete={mode === "signup" ? "username" : "username"} />
+        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" inputMode="email" autoComplete="username" />
       </label>
       <label>
         Password
@@ -51,19 +51,18 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       </label>
       {error ? <p className="error">{error}</p> : null}
       <button className="btn" type="submit" disabled={busy}>
-        {busy ? "Please wait…" : mode === "signup" ? "Create Lite account" : "Sign in"}
+        {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>
       {mode === "signin" ? (
         <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
       ) : (
-        <p className="note">Email gets a confirm link. Phone can post now. Forgot password only works for email accounts.</p>
+        <p className="note">Email gets a confirm link. Phone can post now.</p>
       )}
-      <p className="note">No wallet on this site. Lite posts stay in the Lite database until you choose to open ICE Network later.</p>
       <p className="note">
         {mode === "signup" ? (
           <>Already have an account? <Link href="/signin">Sign in</Link></>
         ) : (
-          <>No account yet? <Link href="/signup">Create Lite account</Link></>
+          <>No account yet? <Link href="/signup">Create account</Link></>
         )}
       </p>
     </form>

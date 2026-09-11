@@ -7,19 +7,14 @@ export default function ContactPage() {
       <article className="glass page-card">
         <div className="kicker">Contact</div>
         <h1 style={{ fontSize: 42 }}>Talk to Lite</h1>
-        <p className="lead">This is the free website door. For a canister, use ICE Network.</p>
+        <p className="lead">Report a problem or ask about your account.</p>
         <div className="stack">
-          <div className="glass stack-item">
-            <strong>Lite</strong>
-            <p className="note">https://lite.frostedblocks.com — feed, signup, and reset all stay on this host.</p>
-          </div>
           <div className="glass stack-item">
             <strong>ICE Network</strong>
             <p className="note"><a href={ONCHAIN_URL} rel="noopener noreferrer">{ONCHAIN_URL}</a></p>
           </div>
           <div className="glass stack-item">
             <strong>Report a problem</strong>
-            <p className="note">Something broken, abusive, or unsafe? Tell us here and we will look into it.</p>
             <form className="contact-form" action="mailto:hello@frostedblocks.com" method="post" encType="text/plain">
               <label className="note" htmlFor="topic">Topic</label>
               <select id="topic" name="topic" defaultValue="report">
@@ -37,7 +32,7 @@ export default function ContactPage() {
           </div>
         </div>
         <p style={{ marginTop: 24 }}>
-          <Link className="btn" href="/signup">Create Lite account</Link>
+          <Link className="btn" href="/signup">Create account</Link>
         </p>
       </article>
     </main>

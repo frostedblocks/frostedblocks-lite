@@ -8,7 +8,7 @@ export default function SignInPage() {
       <article className="glass auth-card">
         <div className="kicker">ICE Lite</div>
         <h1 style={{ fontSize: 40 }}>Sign in</h1>
-        <p className="lead">Email or phone and the password you created on Lite. No wallet on this site.</p>
+        <p className="lead">Email or phone and your password.</p>
         <AuthForm mode="signin" />
       </article>
     </main>
