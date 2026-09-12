@@ -199,6 +199,21 @@ export async function requestAccountDelete(note?: string) {
   if (!res.ok) throw new Error(data.error || "Could not send delete request.");
 }
 
+/** Permanently delete this Lite account (posts, follows, messages, sessions). */
+export async function deleteAccount(confirm: string, password?: string) {
+  const res = await fetch("/api/auth/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ confirm, password: password || "" }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not delete account.");
+  memoryUser = null;
+  clearLegacyLocalAuth();
+  ping();
+}
+
 export async function signOut() {
   memoryUser = null;
   clearLegacyLocalAuth();

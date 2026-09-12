@@ -63,9 +63,10 @@ export default function PrivacyPage() {
           <div className="glass stack-item">
             <strong>Retention</strong>
             <p className="note">
-              Account data stays until you delete the account or ask us to. You can request deletion from{" "}
-              <Link href="/settings">Settings</Link> or the <Link href="/contact">contact page</Link>.
-              Sign-out everywhere drops active sessions.
+              Account data stays until you delete it. You can wipe your Lite account anytime from{" "}
+              <Link href="/settings">Settings</Link> (posts, follows, messages, photo, and login). You can
+              also reach us on the <Link href="/contact">contact page</Link>. Sign-out everywhere drops
+              active sessions.
             </p>
           </div>
           <div className="glass stack-item">
