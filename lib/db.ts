@@ -87,4 +87,29 @@ export async function ensureSchema() {
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
   await q`CREATE INDEX IF NOT EXISTS lite_replies_post_idx ON lite_replies (post_id)`;
+
+  // Privacy circles — separate from public lite_posts (never mixed).
+  await q`CREATE TABLE IF NOT EXISTS lite_circles (
+    id BIGSERIAL PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    owner_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    invite_token TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_circle_members (
+    circle_id BIGINT NOT NULL REFERENCES lite_circles(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member',
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (circle_id, user_id)
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_circle_posts (
+    id BIGSERIAL PRIMARY KEY,
+    circle_id BIGINT NOT NULL REFERENCES lite_circles(id) ON DELETE CASCADE,
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_circle_posts_circle_idx ON lite_circle_posts (circle_id, created_at DESC)`;
 }
