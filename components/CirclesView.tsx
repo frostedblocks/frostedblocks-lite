@@ -2,7 +2,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/use-auth";
-import { createCircle, listCircles, type CircleSummary } from "@/lib/circles-client";
+import {
+  createCircle,
+  deleteCircle,
+  listCircles,
+  type CircleSummary,
+} from "@/lib/circles-client";
 
 export function CirclesView() {
   const { signedIn, ready, verified, hasEmail } = useAuth();
@@ -10,6 +15,7 @@ export function CirclesView() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   async function refresh() {
@@ -42,6 +48,28 @@ export function CirclesView() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create room.");
       setBusy(false);
+    }
+  }
+
+  async function removeRoom(c: CircleSummary) {
+    if (
+      !window.confirm(
+        `Delete “${c.name}”? This wipes the private feed and removes every member. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    const typed = window.prompt(`Type DELETE to permanently remove “${c.name}”.`, "");
+    if (typed !== "DELETE" && typed !== c.name) return;
+    setError("");
+    setDeleting(c.slug);
+    try {
+      await deleteCircle(c.slug, typed || "DELETE");
+      setCircles((list) => list.filter((x) => x.slug !== c.slug));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete circle.");
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -112,12 +140,32 @@ export function CirclesView() {
       <div className="stack" style={{ marginTop: 22 }}>
         {circles.length ? (
           circles.map((c) => (
-            <div key={c.id} className="glass stack-item" style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div
+              key={c.id}
+              className="glass stack-item"
+              style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}
+            >
               <div>
                 <strong>{c.name}</strong>
                 <p className="note" style={{ margin: "4px 0 0" }}>{c.owner ? "Owner" : "Member"}</p>
               </div>
-              <Link className="btn ghost" href={c.invitePath}>Open</Link>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <Link className="btn ghost" href={c.invitePath}>
+                  Open
+                </Link>
+                {c.owner ? (
+                  <button
+                    className="btn ghost"
+                    type="button"
+                    disabled={deleting === c.slug}
+                    onClick={() => {
+                      void removeRoom(c);
+                    }}
+                  >
+                    {deleting === c.slug ? "Deleting…" : "Delete"}
+                  </button>
+                ) : null}
+              </div>
             </div>
           ))
         ) : (
