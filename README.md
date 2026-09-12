@@ -2,7 +2,7 @@
 
 Web2 site for lite.frostedblocks.com.
 
-Does **not** run on ICP. First goal is get the site up on Vercel. The ICE canister feed hook is already written in `lib/ice.ts` and stays unused until you say to connect it.
+Does **not** run on ICP itself. Lite accounts, posts, and mail live on Vercel + Postgres. The public ICE Network feed is read from the mainnet canister in `lib/ice.ts` and merged into `/api/posts` (see `CANISTER.md`). On-chain writes stay on frostedblocks.com.
 
 ```bash
 npm install
