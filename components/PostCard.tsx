@@ -97,6 +97,8 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
           </b>
           <div className="meta">
             <Link href={href}>{when(post.timestamp)}</Link>
+            {" · "}
+            {door === "lite" ? "ICE Lite" : "ICE Network"}
           </div>
         </div>
         {canFollow ? <FollowButton compact target={post.author} targetName={name} /> : null}
