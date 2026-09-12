@@ -1,11 +1,13 @@
 const csp = [
   "default-src 'self'",
-  // Next.js still needs inline scripts/styles in this app; eval removed.
+  // Next.js App Router still needs inline scripts/styles without a nonce pipeline.
   "script-src 'self' 'unsafe-inline'",
+  "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "connect-src 'self' https://icp-api.io https://ic0.app https://*.icp0.io https://api.pwnedpasswords.com",
   "font-src 'self'",
+  "frame-src 'none'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -17,8 +19,7 @@ const csp = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // No ESLint config in-repo yet; enforce TypeScript on build instead.
-  eslint: { ignoreDuringBuilds: true },
+  eslint: { ignoreDuringBuilds: false },
   typescript: { ignoreBuildErrors: false },
   async headers() {
     return [
