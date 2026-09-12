@@ -7,7 +7,7 @@ export default function HomePage() {
       <section className="glass home-hero home-hero-compact">
         <div>
           <div className="kicker">ICE Lite</div>
-          <h1 className="home-title"><em>Simple social,</em> owned by you</h1>
+          <h1 className="home-title"><em>Lite Frost before the ICE,</em> a door to the ICE Network</h1>
         </div>
         <HomeCta />
       </section>

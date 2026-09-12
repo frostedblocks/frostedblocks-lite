@@ -6,8 +6,8 @@ export default function AboutPage() {
     <main className="wrap page">
       <article className="glass page-card">
         <div className="kicker">About</div>
-        <h1 style={{ fontSize: 42 }}>Simple social, owned by you</h1>
-        <p className="lead">ICE Lite is the free site. ICE Network is optional if you want your own canister later.</p>
+        <h1 style={{ fontSize: 42 }}>Lite Frost before the ICE</h1>
+        <p className="lead">A door to the ICE Network. ICE Lite is the free site. ICE Network is optional if you want your own canister later.</p>
         <div className="stack">
           <div className="glass stack-item">
             <strong>Lite</strong>

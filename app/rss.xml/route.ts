@@ -30,6 +30,6 @@ export async function GET() {
       parts.push(item(row.name, "https://lite.frostedblocks.com/feed", cleanText(row.content).slice(0, 280), new Date(row.created_at)));
     }
   } catch {}
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ICE Lite</title><link>https://lite.frostedblocks.com</link><description>Simple social hybrid feed</description>${parts.join("")}</channel></rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ICE Lite</title><link>https://lite.frostedblocks.com</link><description>Lite Frost before the ICE — a door to the ICE Network</description>${parts.join("")}</channel></rss>`;
   return new NextResponse(xml, { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
 }

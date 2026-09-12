@@ -7,7 +7,7 @@ export const contentType = "image/png";
 export default async function Image({ params }: { params: { id: string } }) {
   const post = await getPost(params.id);
   const name = post?.authorName || "ICE Lite";
-  const body = (post?.content || "Simple social, owned by you.").replace(/\s+/g, " ").slice(0, 180);
+  const body = (post?.content || "Lite Frost before the ICE — a door to the ICE Network.").replace(/\s+/g, " ").slice(0, 180);
 
   return new ImageResponse(
     (
