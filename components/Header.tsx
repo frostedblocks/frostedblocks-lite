@@ -9,6 +9,7 @@ import { MessagesNavLink } from "./MessagesNavLink";
 
 const links = [
   { href: "/feed", label: "Feed" },
+  { href: "/circles", label: "Circles" },
   { href: "/network", label: "Network" },
 ];
 

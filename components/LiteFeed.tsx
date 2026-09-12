@@ -6,11 +6,13 @@ import { LiteBadge, NetworkBadge } from "./LiteBadge";
 import { currentUser, MAIL_FAILED_KEY } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
+import { createCirclePost, listCircles, type CircleSummary } from "@/lib/circles-client";
 import { doorForPost } from "./LiteBadge";
 import type { IceDoor, IcePost } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 type SourceFilter = "all" | IceDoor;
+type Dest = { kind: "public" } | { kind: "circle"; slug: string; name: string };
 
 export function LiteFeed() {
   const { user, ready, signedIn, verified, hasEmail } = useAuth();
@@ -22,6 +24,8 @@ export function LiteFeed() {
   const [source, setSource] = useState<SourceFilter>("all");
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(0);
+  const [circles, setCircles] = useState<CircleSummary[]>([]);
+  const [dest, setDest] = useState<Dest>({ kind: "public" });
 
   async function refresh() {
     setPosts(await loadFeed());
@@ -38,6 +42,17 @@ export function LiteFeed() {
       sessionStorage.removeItem(MAIL_FAILED_KEY);
     }
   }, []);
+
+  useEffect(() => {
+    if (!signedIn || !verified) {
+      setCircles([]);
+      setDest({ kind: "public" });
+      return;
+    }
+    listCircles()
+      .then(setCircles)
+      .catch(() => setCircles([]));
+  }, [signedIn, verified]);
 
   const counts = useMemo(() => {
     let lite = 0;
@@ -92,6 +107,12 @@ export function LiteFeed() {
       return;
     }
     try {
+      if (dest.kind === "circle") {
+        await createCirclePost(dest.slug, text);
+        setText("");
+        window.location.href = `/c/${dest.slug}`;
+        return;
+      }
       await createPost(text);
       setText("");
       setSource("all");
@@ -126,6 +147,7 @@ export function LiteFeed() {
       </div>
       <p className="note" style={{ margin: "0 0 10px" }}>
         Lite Frost before the ICE — posts from <LiteBadge /> and live <NetworkBadge /> in one feed.
+        Private rooms live under <Link href="/circles">Circles</Link>.
       </p>
       <div className="chips" style={{ marginTop: 0 }} aria-label="Post source">
         <button className={source === "all" ? "btn" : "chip"} type="button" onClick={() => pickSource("all")}>
@@ -164,10 +186,38 @@ export function LiteFeed() {
           </div>
         ) : signedIn ? (
           <form className="compose" onSubmit={publish}>
-            <div className="meta">Post as {user?.name || "you"} on ICE Lite</div>
+            <div className="chips" style={{ margin: "0 0 8px" }} aria-label="Post destination">
+              <button
+                className={dest.kind === "public" ? "btn" : "chip"}
+                type="button"
+                onClick={() => setDest({ kind: "public" })}
+              >
+                Public
+              </button>
+              {circles.map((c) => (
+                <button
+                  key={c.id}
+                  className={dest.kind === "circle" && dest.slug === c.slug ? "btn" : "chip"}
+                  type="button"
+                  onClick={() => setDest({ kind: "circle", slug: c.slug, name: c.name })}
+                >
+                  {c.name}
+                </button>
+              ))}
+              {!circles.length ? (
+                <Link className="chip" href="/circles">+ Circle</Link>
+              ) : null}
+            </div>
+            <div className="meta">
+              {dest.kind === "public"
+                ? `Post as ${user?.name || "you"} on the public ICE Lite feed`
+                : `Post as ${user?.name || "you"} in circle “${dest.name}” (not public)`}
+            </div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
             {error ? <p className="error">{error}</p> : null}
-            <button className="btn" type="submit">Post</button>
+            <button className="btn" type="submit">
+              {dest.kind === "public" ? "Post publicly" : "Post to circle"}
+            </button>
           </form>
         ) : (
           <div className="compose">
