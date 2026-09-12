@@ -40,7 +40,7 @@ export function listThreads(me: string, messages: LiteMessage[]) {
     const prev = map.get(other);
     if (!prev || m.at > prev.at) map.set(other, m);
   }
-  return [...map.entries()]
+  return Array.from(map.entries())
     .map(([handle, last]) => ({
       handle,
       name: last.from === handle ? last.fromName : last.toName,
@@ -66,7 +66,7 @@ export function totalUnread(me: string, messages: LiteMessage[], reads: MessageR
     if (m.to === me) peers.add(m.from);
   }
   let n = 0;
-  for (const peer of peers) n += unreadForPeer(me, peer, messages, reads);
+  for (const peer of Array.from(peers)) n += unreadForPeer(me, peer, messages, reads);
   return n;
 }
 
