@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
 import { LiteBadge, NetworkBadge } from "./LiteBadge";
-import { currentUser, MAIL_FAILED_KEY } from "@/lib/auth-client";
+import { currentUser, MAIL_FAILED_KEY, refreshSession } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
 import { createCirclePost, listCircles, type CircleSummary } from "@/lib/circles-client";
@@ -127,9 +127,18 @@ export function LiteFeed() {
   async function resend() {
     setError("");
     try {
-      const res = await fetch("/api/auth/resend", { method: "POST" });
+      const res = await fetch("/api/auth/resend", {
+        method: "POST",
+        credentials: "include",
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not send email.");
+      if (data.alreadyVerified) {
+        await refreshSession();
+        setSent(false);
+        setMailFailed(false);
+        return;
+      }
       setSent(true);
       setMailFailed(false);
     } catch (err) {
@@ -178,9 +187,9 @@ export function LiteFeed() {
             <p className="note" style={{ margin: 0 }}>
               {mailFailed
                 ? "We couldn't send the confirm email just now. Tap Send confirm email below, then check inbox and spam."
-                : "Confirm your email to post, follow, or message. Open the link we sent, or send it again."}
+                : "Confirm your email to post, follow, or message. Open the link we sent, tap Confirm my email, or send a new link."}
             </p>
-            {sent ? <p className="note">Check your inbox and spam.</p> : null}
+            {sent ? <p className="note">Check your inbox and spam. Open the new link, then tap Confirm my email.</p> : null}
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="button" onClick={() => { void resend(); }}>Send confirm email</button>
           </div>

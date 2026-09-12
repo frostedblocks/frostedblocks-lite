@@ -12,20 +12,31 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     if (!me) return publicError(401, "Sign in first.");
     if (!me.email) return publicError(400, "This account has no email to confirm.");
-    if (!needsEmailVerify(me)) return NextResponse.json({ ok: true });
+    if (!needsEmailVerify(me)) {
+      return NextResponse.json({ ok: true, alreadyVerified: true, mailed: false });
+    }
+
     const limited = await rateLimit(`resend:${clientIp(req)}:${me.id}`, 10, 15 * 60);
     if (!limited.ok) return publicError(429, "Wait a few minutes before asking for another email.");
+
     const token = newEmailToken();
     const q = sql();
     await q`DELETE FROM lite_email_tokens WHERE user_id = ${me.id} AND kind = ${"verify"}`;
     await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
       VALUES (${hashToken(token)}, ${me.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
-    await sendMail(
-      me.email,
-      "Confirm your ICE Lite email",
-      `Confirm this email for ICE Lite:\n${appUrl()}/api/auth/verify?token=${token}\n\nIf you did not ask, ignore this.`,
-    );
-    return NextResponse.json({ ok: true });
+
+    try {
+      await sendMail(
+        me.email,
+        "Confirm your ICE Lite email",
+        `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${token}\n\nOpen the link, then tap Confirm my email.\n\nIf you did not ask, ignore this.`,
+      );
+    } catch (err) {
+      console.error("resend mail failed", err instanceof Error ? err.message : err);
+      return publicError(500, "Could not send that email yet. Try again in a minute.");
+    }
+
+    return NextResponse.json({ ok: true, mailed: true });
   } catch {
     return publicError(500, "Could not send that email yet.");
   }
