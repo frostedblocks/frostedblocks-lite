@@ -16,6 +16,8 @@ export const MAIL_FAILED_KEY = "ice-lite-mail-failed";
 
 /** In-tab only — never written to localStorage. */
 let memoryUser: LiteUser | null = null;
+let memoryVerified = true;
+let memoryHasEmail = false;
 
 function ping() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("ice-auth"));
@@ -53,6 +55,11 @@ export function currentEmail(): string | null {
 
 export function currentUser(): LiteUser | null {
   return memoryUser;
+}
+
+/** Last known verify flags from /api/auth/me (updated by refreshSession). */
+export function sessionFlags() {
+  return { verified: memoryVerified, hasEmail: memoryHasEmail };
 }
 
 export function listPublicUsers(): PublicUser[] {
@@ -103,9 +110,13 @@ export async function refreshSession(): Promise<SessionInfo> {
     const login = String(data.user?.login || "");
     if (!login) {
       memoryUser = null;
+      memoryVerified = true;
+      memoryHasEmail = false;
       ping();
       return { user: null, verified: true, hasEmail: false };
     }
+    memoryVerified = Boolean(data.user.verified);
+    memoryHasEmail = Boolean(data.user.hasEmail);
     cacheUser({
       email: normalizeLogin(login),
       name: data.user.name || "Lite user",
@@ -117,11 +128,13 @@ export async function refreshSession(): Promise<SessionInfo> {
     });
     return {
       user: memoryUser,
-      verified: Boolean(data.user.verified),
-      hasEmail: Boolean(data.user.hasEmail),
+      verified: memoryVerified,
+      hasEmail: memoryHasEmail,
     };
   } catch {
     memoryUser = null;
+    memoryVerified = true;
+    memoryHasEmail = false;
     ping();
     return { user: null, verified: true, hasEmail: false };
   }
@@ -136,6 +149,9 @@ export async function signUp(login: string, password: string, name: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not sign up.");
+  // New email accounts start unverified until they open the confirm link.
+  memoryVerified = false;
+  memoryHasEmail = true;
   cacheUser(data);
   if (data.mailed === false && typeof window !== "undefined") {
     sessionStorage.setItem(MAIL_FAILED_KEY, "1");
@@ -153,6 +169,8 @@ export async function signIn(login: string, password: string) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not sign in.");
   cacheUser(data);
+  // Pull verified/hasEmail from the server (signin JSON may not include them).
+  await refreshSession();
   return data;
 }
 
@@ -210,12 +228,16 @@ export async function deleteAccount(confirm: string, password?: string) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not delete account.");
   memoryUser = null;
+  memoryVerified = true;
+  memoryHasEmail = false;
   clearLegacyLocalAuth();
   ping();
 }
 
 export async function signOut() {
   memoryUser = null;
+  memoryVerified = true;
+  memoryHasEmail = false;
   clearLegacyLocalAuth();
   ping();
   try {
@@ -227,6 +249,8 @@ export async function signOut() {
 
 export async function signOutEverywhere() {
   memoryUser = null;
+  memoryVerified = true;
+  memoryHasEmail = false;
   clearLegacyLocalAuth();
   ping();
   try {

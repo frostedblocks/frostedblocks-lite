@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       await sendMail(
         email,
         "Confirm your ICE Lite email",
-        `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${verify}\n\nIf you did not sign up, ignore this.`,
+        `Confirm this email for ICE Lite:\n${appUrl()}/api/auth/verify?token=${verify}\n\nIf you did not sign up, ignore this.`,
       );
       mailed = true;
     } catch (err) {

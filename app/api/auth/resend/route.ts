@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     await sendMail(
       me.email,
       "Confirm your ICE Lite email",
-      `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${token}\n\nIf you did not ask, ignore this.`,
+      `Confirm this email for ICE Lite:\n${appUrl()}/api/auth/verify?token=${token}\n\nIf you did not ask, ignore this.`,
     );
     return NextResponse.json({ ok: true });
   } catch {
