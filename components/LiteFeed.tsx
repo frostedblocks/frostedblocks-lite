@@ -2,12 +2,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
+import { LiteBadge, NetworkBadge } from "./LiteBadge";
 import { currentUser, MAIL_FAILED_KEY } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
-import type { IcePost } from "@/lib/types";
+import { doorForPost } from "./LiteBadge";
+import type { IceDoor, IcePost } from "@/lib/types";
 
 const PAGE_SIZE = 10;
+type SourceFilter = "all" | IceDoor;
 
 export function LiteFeed() {
   const { user, ready, signedIn, verified, hasEmail } = useAuth();
@@ -16,6 +19,7 @@ export function LiteFeed() {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [mailFailed, setMailFailed] = useState(false);
+  const [source, setSource] = useState<SourceFilter>("all");
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(0);
 
@@ -35,23 +39,44 @@ export function LiteFeed() {
     }
   }, []);
 
+  const counts = useMemo(() => {
+    let lite = 0;
+    let network = 0;
+    for (const p of posts) {
+      if (doorForPost(p.author, p.id, p.source) === "lite") lite += 1;
+      else network += 1;
+    }
+    return { lite, network, all: posts.length };
+  }, [posts]);
+
+  const bySource = useMemo(() => {
+    if (source === "all") return posts;
+    return posts.filter((p) => doorForPost(p.author, p.id, p.source) === source);
+  }, [posts, source]);
+
   const categories = useMemo(() => {
     const set = new Set<string>();
-    for (const p of posts) {
+    for (const p of bySource) {
       const c = (p.category || "").trim();
       if (c) set.add(c);
     }
     return ["All", ...[...set].sort((a, b) => a.localeCompare(b))];
-  }, [posts]);
+  }, [bySource]);
 
   const filtered = useMemo(() => {
-    if (category === "All") return posts;
-    return posts.filter((p) => (p.category || "") === category);
-  }, [posts, category]);
+    if (category === "All") return bySource;
+    return bySource.filter((p) => (p.category || "") === category);
+  }, [bySource, category]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pages - 1);
   const slice = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
+  function pickSource(next: SourceFilter) {
+    setSource(next);
+    setCategory("All");
+    setPage(0);
+  }
 
   function pickCategory(next: string) {
     setCategory(next);
@@ -68,6 +93,7 @@ export function LiteFeed() {
     try {
       await createPost(text);
       setText("");
+      setSource("all");
       setCategory("All");
       setPage(0);
       await refresh();
@@ -97,7 +123,21 @@ export function LiteFeed() {
         <span><i className="dot" />Live feed</span>
         <span className="meta">{filtered.length} posts</span>
       </div>
-      <div className="chips" style={{ marginTop: 0 }}>
+      <p className="note" style={{ margin: "0 0 10px" }}>
+        Lite Frost before the ICE — posts from <LiteBadge /> and live <NetworkBadge /> in one feed.
+      </p>
+      <div className="chips" style={{ marginTop: 0 }} aria-label="Post source">
+        <button className={source === "all" ? "btn" : "chip"} type="button" onClick={() => pickSource("all")}>
+          All ({counts.all})
+        </button>
+        <button className={source === "lite" ? "btn" : "chip"} type="button" onClick={() => pickSource("lite")}>
+          ICE Lite ({counts.lite})
+        </button>
+        <button className={source === "network" ? "btn" : "chip"} type="button" onClick={() => pickSource("network")}>
+          ICE Network ({counts.network})
+        </button>
+      </div>
+      <div className="chips" style={{ marginTop: 0 }} aria-label="Category">
         {categories.map((c) => (
           <button
             key={c}
@@ -123,7 +163,7 @@ export function LiteFeed() {
           </div>
         ) : signedIn ? (
           <form className="compose" onSubmit={publish}>
-            <div className="meta">Post as {user?.name || "you"}</div>
+            <div className="meta">Post as {user?.name || "you"} on ICE Lite</div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a post…" rows={4} maxLength={2000} />
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="submit">Post</button>
@@ -139,7 +179,15 @@ export function LiteFeed() {
           {slice.map((post) => (
             <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />
           ))}
-          {!slice.length ? <p className="note" style={{ padding: 12 }}>No posts in this category.</p> : null}
+          {!slice.length ? (
+            <p className="note" style={{ padding: 12 }}>
+              {source === "lite"
+                ? "No ICE Lite posts yet. Be the first to post."
+                : source === "network"
+                  ? "No ICE Network posts loaded right now."
+                  : "No posts in this filter."}
+            </p>
+          ) : null}
         </div>
         {pages > 1 ? (
           <div className="cta-row" style={{ justifyContent: "space-between", padding: "8px 10px 12px" }}>

@@ -2,7 +2,10 @@ import type { IceDoor } from "@/lib/types";
 
 export function LiteBadge({ size = "sm" }: { size?: "sm" | "lg" }) {
   return (
-    <span className={size === "lg" ? "door-badge door-lite door-badge-lg" : "door-badge door-lite"} title="Signed up on ICE Lite">
+    <span
+      className={size === "lg" ? "door-badge door-lite door-badge-lg" : "door-badge door-lite"}
+      title="Posted on ICE Lite"
+    >
       ICE Lite
     </span>
   );
@@ -10,7 +13,10 @@ export function LiteBadge({ size = "sm" }: { size?: "sm" | "lg" }) {
 
 export function NetworkBadge({ size = "sm" }: { size?: "sm" | "lg" }) {
   return (
-    <span className={size === "lg" ? "door-badge door-network door-badge-lg" : "door-badge door-network"} title="On ICE Network">
+    <span
+      className={size === "lg" ? "door-badge door-network door-badge-lg" : "door-badge door-network"}
+      title="From the ICE Network canister"
+    >
       ICE Network
     </span>
   );
@@ -24,8 +30,8 @@ function isLiteAuthor(author: string, postId?: string, source?: IceDoor) {
 }
 
 export function doorForPost(author: string, postId?: string, source?: IceDoor): IceDoor {
+  if (source === "lite" || source === "network") return source;
   if (isLiteAuthor(author, postId, source)) return "lite";
-  if (source === "network") return "network";
   return "network";
 }
 
@@ -40,7 +46,11 @@ export function DoorBadge({
   postId?: string;
   size?: "sm" | "lg";
 }) {
-  const door = doorForPost(author || "", postId, source === "lite" || source === "network" ? source : undefined);
+  const door = doorForPost(
+    author || "",
+    postId,
+    source === "lite" || source === "network" ? source : undefined,
+  );
   if (door === "lite") return <LiteBadge size={size} />;
   return <NetworkBadge size={size} />;
 }
