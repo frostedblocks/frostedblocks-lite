@@ -9,6 +9,7 @@ export async function GET(req: Request) {
     if (!me) return NextResponse.json({ user: null });
     return NextResponse.json({
       user: {
+        login: me.email || me.phone || "",
         name: me.name,
         avatar: me.avatar,
         verified: !needsEmailVerify(me),

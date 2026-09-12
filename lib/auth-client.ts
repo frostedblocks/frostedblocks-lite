@@ -123,8 +123,18 @@ export async function resetPassword(currentPassword: string, nextPassword: strin
   if (!res.ok) throw new Error(data.error || "Could not change password.");
 }
 
-export function signInWithGoogle(email: string, name: string, picture?: string) {
-  cacheUser({ email: normalizeLogin(email), name, avatar: picture, google: true });
+/** Finish Google OAuth after the server set the session cookie (no PII in the URL). */
+export async function finishGoogleSession() {
+  const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
+  const data = await res.json();
+  const login = String(data.user?.login || "");
+  if (!login) throw new Error("Google sign-in failed. Try again.");
+  cacheUser({
+    email: normalizeLogin(login),
+    name: data.user.name || "Lite user",
+    avatar: data.user.avatar || undefined,
+    google: true,
+  });
 }
 
 export async function signOut() {
