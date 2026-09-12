@@ -5,11 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthButtons } from "./AuthButtons";
 import { BrandLink } from "./BrandLink";
+import { MessagesNavLink } from "./MessagesNavLink";
 
 const links = [
   { href: "/feed", label: "Feed" },
   { href: "/network", label: "Network" },
-  { href: "/messages", label: "Messages" },
 ];
 
 export function Header() {
@@ -39,6 +39,7 @@ export function Header() {
               {l.label}
             </Link>
           ))}
+          <MessagesNavLink />
           <AuthButtons />
         </nav>
         <button
@@ -59,6 +60,7 @@ export function Header() {
               {l.label}
             </Link>
           ))}
+          <MessagesNavLink onNavigate={() => setOpen(false)} />
           <AuthButtons />
         </nav>
       ) : null}
