@@ -51,7 +51,7 @@ async function loadRecentPosts(limit: number): Promise<IcePost[]> {
   const visible = (raw || []).filter((p) => !p.isHidden);
 
   const names = new Map<string, string>();
-  const authors = [...new Set(visible.map((p) => p.author.toText()))];
+  const authors = Array.from(new Set(visible.map((p) => p.author.toText())));
   await Promise.all(
     authors.slice(0, 30).map(async (id) => {
       try {
