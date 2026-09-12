@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  deleteAccount,
   refreshSession,
-  requestAccountDelete,
   signOut,
   signOutEverywhere,
   updateDisplayName,
@@ -23,8 +23,8 @@ export function SettingsView() {
   const [resendMsg, setResendMsg] = useState("");
   const [resendErr, setResendErr] = useState("");
   const [resendBusy, setResendBusy] = useState(false);
-  const [deleteNote, setDeleteNote] = useState("");
-  const [deleteMsg, setDeleteMsg] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteErr, setDeleteErr] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -88,19 +88,22 @@ export function SettingsView() {
     }
   }
 
-  async function sendDelete(e: React.FormEvent) {
+  async function wipeAccount(e: React.FormEvent) {
     e.preventDefault();
-    if (!window.confirm("Send a delete request for this Lite account?")) return;
+    if (
+      !window.confirm(
+        "This permanently deletes your Lite account, posts, follows, and messages. This cannot be undone.",
+      )
+    ) {
+      return;
+    }
     setDeleteErr("");
-    setDeleteMsg("");
     setDeleteBusy(true);
     try {
-      await requestAccountDelete(deleteNote);
-      setDeleteMsg("Delete request sent. We’ll email you when the account is removed.");
-      setDeleteNote("");
+      await deleteAccount(deleteConfirm, deletePassword);
+      window.location.replace("/");
     } catch (err) {
-      setDeleteErr(err instanceof Error ? err.message : "Could not send delete request.");
-    } finally {
+      setDeleteErr(err instanceof Error ? err.message : "Could not delete account.");
       setDeleteBusy(false);
     }
   }
@@ -184,27 +187,37 @@ export function SettingsView() {
         <div className="glass stack-item">
           <strong>Privacy & delete</strong>
           <p className="note" style={{ marginBottom: 10 }}>
-            Read what Lite stores, or request account deletion. Delete requests are handled by email (not instant self-serve).
+            Deleting wipes your Lite account, posts, follows, messages, and photo right away. Type{" "}
+            <code>DELETE</code> to confirm. Password accounts should also enter their password; Google-only
+            sign-in can leave password blank.
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
             <Link className="btn ghost" href="/privacy">Privacy policy</Link>
             <Link className="btn ghost" href="/contact">Other account help</Link>
           </div>
-          <form className="auth-form" onSubmit={sendDelete} style={{ marginTop: 0 }}>
+          <form className="auth-form" onSubmit={wipeAccount} style={{ marginTop: 0 }}>
             <label>
-              Optional note
-              <textarea
-                value={deleteNote}
-                onChange={(e) => setDeleteNote(e.target.value)}
-                rows={3}
-                maxLength={1000}
-                placeholder="Anything we should know before deleting…"
+              Password (if you have one)
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+            <label>
+              Type DELETE to confirm
+              <input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder="DELETE"
+                autoComplete="off"
+                required
               />
             </label>
             {deleteErr ? <p className="error">{deleteErr}</p> : null}
-            {deleteMsg ? <p className="note">{deleteMsg}</p> : null}
-            <button className="btn ghost" type="submit" disabled={deleteBusy}>
-              {deleteBusy ? "Sending…" : "Request account deletion"}
+            <button className="btn ghost" type="submit" disabled={deleteBusy || deleteConfirm !== "DELETE"}>
+              {deleteBusy ? "Deleting…" : "Delete my account forever"}
             </button>
           </form>
         </div>
