@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { appUrl, sendMail } from "@/lib/mail";
 import { needsEmailVerify, userFromRequest } from "@/lib/session";
-import { publicError, clientIp } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
+import { publicError } from "@/lib/http";
+import { checkRateLimit, recordRateHit } from "@/lib/rate-limit";
 import { hashToken, newEmailToken } from "@/lib/token";
+
+const WINDOW_SEC = 60 * 60;
+const MAX_OK_SENDS = 8;
 
 export async function POST(req: Request) {
   try {
@@ -16,8 +19,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, alreadyVerified: true, mailed: false });
     }
 
-    const limited = await rateLimit(`resend:${clientIp(req)}:${me.id}`, 10, 15 * 60);
-    if (!limited.ok) return publicError(429, "Wait a few minutes before asking for another email.");
+    // User-scoped key (v4): failed attempts no longer burn the budget; old resend:ip:id locks are ignored.
+    const rateKey = `confirm-mail:v4:${me.id}`;
+    const limited = await checkRateLimit(rateKey, MAX_OK_SENDS, WINDOW_SEC);
+    if (!limited.ok) {
+      return publicError(
+        429,
+        `Wait about ${Math.ceil(limited.retryAfter / 60)} minutes before asking for another email.`,
+      );
+    }
 
     const token = newEmailToken();
     const q = sql();
@@ -32,10 +42,13 @@ export async function POST(req: Request) {
         `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${token}\n\nOpen the link, then tap Confirm my email.\n\nIf you did not ask, ignore this.`,
       );
     } catch (err) {
-      console.error("resend mail failed", err instanceof Error ? err.message : err);
-      return publicError(500, "Could not send that email yet. Try again in a minute.");
+      const detail = err instanceof Error ? err.message : "mail failed";
+      console.error("resend mail failed", detail);
+      // Do not recordRateHit — failures must not lock the user out.
+      return publicError(500, `Could not send that email yet. ${detail.slice(0, 140)}`);
     }
 
+    await recordRateHit(rateKey, WINDOW_SEC);
     return NextResponse.json({ ok: true, mailed: true });
   } catch {
     return publicError(500, "Could not send that email yet.");

@@ -80,7 +80,13 @@ export function SettingsView() {
       const res = await fetch("/api/auth/resend", { method: "POST", credentials: "include" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not send email.");
-      setResendMsg("Confirm email sent. Check inbox and spam.");
+      if (data.alreadyVerified) {
+        setResendMsg("Email already confirmed. Reloading…");
+        await refreshSession();
+        window.location.reload();
+        return;
+      }
+      setResendMsg("Confirm email sent. Check inbox and spam, open the link, then tap Confirm my email.");
     } catch (err) {
       setResendErr(err instanceof Error ? err.message : "Could not send email.");
     } finally {
@@ -149,13 +155,17 @@ export function SettingsView() {
           ) : (
             <>
               <p className="note" style={{ marginBottom: 10 }}>
-                Email not confirmed yet. Confirm to post, follow, or message. Check inbox and spam for the link we sent.
+                Email not confirmed yet. Tap Send confirm email, open the new link, then tap Confirm my email.
+                Or use Google sign-in with the same address to confirm in one step.
               </p>
               {resendErr ? <p className="error">{resendErr}</p> : null}
               {resendMsg ? <p className="note">{resendMsg}</p> : null}
-              <button className="btn" type="button" disabled={resendBusy} onClick={() => { void resendConfirm(); }}>
-                {resendBusy ? "Sending…" : "Send confirm email"}
-              </button>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button className="btn" type="button" disabled={resendBusy} onClick={() => { void resendConfirm(); }}>
+                  {resendBusy ? "Sending…" : "Send confirm email"}
+                </button>
+                <Link className="btn ghost" href="/signin">Sign in with Google</Link>
+              </div>
             </>
           )}
         </div>
