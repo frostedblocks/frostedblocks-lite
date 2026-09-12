@@ -137,6 +137,31 @@ export async function finishGoogleSession() {
   });
 }
 
+export async function updateDisplayName(name: string) {
+  const res = await fetch("/api/auth/profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ name }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not save name.");
+  const me = currentUser();
+  if (me) cacheUser({ ...me, name: data.name || name });
+  return String(data.name || name);
+}
+
+export async function requestAccountDelete(note?: string) {
+  const res = await fetch("/api/auth/delete-request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ note: note || "" }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not send delete request.");
+}
+
 export async function signOut() {
   localStorage.removeItem(SESSION);
   ping();
