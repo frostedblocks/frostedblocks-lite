@@ -7,6 +7,13 @@ export type CircleSummary = {
   invitePath: string;
 };
 
+export type CircleMember = {
+  id: string;
+  name: string;
+  role: string;
+  owner: boolean;
+};
+
 export type CircleDetail = {
   id: string;
   slug: string;
@@ -16,6 +23,7 @@ export type CircleDetail = {
   member: boolean;
   canJoin: boolean;
   invitePath: string | null;
+  members?: CircleMember[];
 };
 
 export async function listCircles(): Promise<CircleSummary[]> {
@@ -46,6 +54,17 @@ export async function loadCircle(slug: string, invite?: string): Promise<CircleD
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not load circle.");
   return data.circle as CircleDetail;
+}
+
+export async function deleteCircle(slug: string, confirm: string) {
+  const res = await fetch(`/api/circles/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ confirm }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not delete circle.");
 }
 
 export async function joinCircle(slug: string, invite: string) {

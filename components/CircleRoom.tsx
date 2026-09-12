@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/use-auth";
 import {
   createCirclePost,
+  deleteCircle,
   joinCircle,
   loadCircle,
   loadCirclePosts,
@@ -22,6 +23,7 @@ export function CircleRoom({ slug }: { slug: string }) {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function refresh() {
@@ -81,6 +83,28 @@ export function CircleRoom({ slug }: { slug: string }) {
     }
   }
 
+  async function removeRoom() {
+    if (!circle?.owner) return;
+    if (
+      !window.confirm(
+        `Delete “${circle.name}”? This wipes the private feed and removes every member. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    const typed = window.prompt(`Type DELETE to permanently remove “${circle.name}”.`, "");
+    if (typed !== "DELETE" && typed !== circle.name) return;
+    setDeleting(true);
+    setError("");
+    try {
+      await deleteCircle(slug, typed || "DELETE");
+      window.location.replace("/circles");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete circle.");
+      setDeleting(false);
+    }
+  }
+
   if (!ready) return null;
 
   if (!circle && error) {
@@ -127,6 +151,8 @@ export function CircleRoom({ slug }: { slug: string }) {
     );
   }
 
+  const members = circle.members || [];
+
   return (
     <article className="glass" style={{ padding: 22, maxWidth: 720, margin: "0 auto" }}>
       <div className="kicker">Private circle</div>
@@ -141,6 +167,27 @@ export function CircleRoom({ slug }: { slug: string }) {
             {copied ? "Invite copied" : "Copy guest link"}
           </button>
         ) : null}
+        {circle.owner ? (
+          <button className="btn ghost" type="button" disabled={deleting} onClick={() => { void removeRoom(); }}>
+            {deleting ? "Deleting…" : "Delete room"}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="glass stack-item" style={{ marginBottom: 14 }}>
+        <strong>People in this circle</strong>
+        <p className="note" style={{ marginBottom: 8 }}>
+          {members.length} {members.length === 1 ? "person" : "people"} — display names only.
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          {members.map((m) => (
+            <li key={m.id} style={{ marginBottom: 4 }}>
+              {m.name}
+              {m.owner ? " · Owner" : m.role === "owner" ? " · Owner" : ""}
+            </li>
+          ))}
+        </ul>
+        {!members.length ? <p className="note">No members listed yet.</p> : null}
       </div>
 
       <form className="compose" onSubmit={publish}>
