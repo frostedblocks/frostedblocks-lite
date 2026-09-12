@@ -1,12 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { currentUser, signOutEverywhere } from "@/lib/auth-client";
+import { currentUser } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
 import { loadFollows } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
-import { AvatarUpload } from "./AvatarUpload";
 import type { IcePost } from "@/lib/types";
 import type { LiteUser } from "@/lib/auth-client";
 
@@ -76,20 +75,9 @@ export function ProfileView() {
         </div>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "12px 0 8px" }}>
-        <AvatarUpload onDone={() => { void refresh(); }} />
-        <Link className="btn ghost" href="/reset">Change password</Link>
-        <button
-          className="btn ghost"
-          type="button"
-          onClick={async () => {
-            await signOutEverywhere();
-            window.location.replace("/");
-          }}
-        >
-          Sign out everywhere
-        </button>
+        <Link className="btn" href="/settings">Settings</Link>
       </div>
-      <p className="note">Other people see your name, not your email.</p>
+      <p className="note">Other people see your name, not your email. Account options live in Settings.</p>
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>

@@ -12,7 +12,7 @@ export function HomeCta() {
     return (
       <div className="cta-row">
         <Link className="btn" href="/feed">Open feed</Link>
-        <Link className="btn ghost" href="/profile">Profile</Link>
+        <Link className="btn ghost" href="/settings">Settings</Link>
         <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">ICE Network</a>
       </div>
     );

@@ -11,6 +11,7 @@ export function AuthButtons() {
     return (
       <>
         <Link className="btn ghost" href="/profile">Profile</Link>
+        <Link className="btn ghost" href="/settings">Settings</Link>
         <button
           className="btn ghost"
           onClick={async () => {
