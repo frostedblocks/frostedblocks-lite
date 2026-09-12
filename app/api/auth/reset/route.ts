@@ -3,6 +3,7 @@ import { sql } from "@/lib/db";
 import { hashPassword, checkPassword } from "@/lib/password";
 import { userFromRequest } from "@/lib/session";
 import { isPwnedPassword } from "@/lib/pwned";
+import { hashToken } from "@/lib/token";
 
 export async function POST(req: Request) {
   try {
@@ -15,11 +16,13 @@ export async function POST(req: Request) {
     const q = sql();
 
     if (token) {
-      const rows = await q`SELECT user_id FROM lite_email_tokens
-        WHERE token = ${String(token)} AND kind = ${"reset"} AND expires_at > NOW()`;
+      const raw = String(token);
+      const dig = hashToken(raw);
+      const rows = await q`SELECT token, user_id FROM lite_email_tokens
+        WHERE (token = ${dig} OR token = ${raw}) AND kind = ${"reset"} AND expires_at > NOW()`;
       if (!rows.length) return NextResponse.json({ error: "That reset link is old or wrong." }, { status: 400 });
       await q`UPDATE lite_users SET password_hash = ${hashPassword(next)}, failed_attempts = 0, locked_until = NULL WHERE id = ${rows[0].user_id}`;
-      await q`DELETE FROM lite_email_tokens WHERE token = ${String(token)}`;
+      await q`DELETE FROM lite_email_tokens WHERE token = ${rows[0].token}`;
       return NextResponse.json({ ok: true });
     }
 

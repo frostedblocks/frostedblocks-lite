@@ -20,10 +20,18 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   const origin = req.headers.get("origin");
-  if (origin && !allowedOrigin(origin)) {
-    return NextResponse.json({ error: "Request blocked." }, { status: 403 });
+  if (origin) {
+    if (!allowedOrigin(origin)) {
+      return NextResponse.json({ error: "Request blocked." }, { status: 403 });
+    }
+    return NextResponse.next();
   }
-  return NextResponse.next();
+  // No Origin: only allow same-site browser fetches (not cross-site CSRF).
+  const site = (req.headers.get("sec-fetch-site") || "").toLowerCase();
+  if (site === "same-origin" || site === "same-site" || site === "none") {
+    return NextResponse.next();
+  }
+  return NextResponse.json({ error: "Request blocked." }, { status: 403 });
 }
 
 export const config = { matcher: ["/api/:path*"] };
