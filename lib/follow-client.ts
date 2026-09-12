@@ -11,6 +11,7 @@ export type Person = {
   avatar?: string;
   source: "lite";
   me?: boolean;
+  joined?: string;
 };
 
 export async function loadFollows() {

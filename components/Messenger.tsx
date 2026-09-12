@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/use-auth";
 import {
   listAllMessages,
@@ -16,6 +17,7 @@ import { loadPeople, type Person } from "@/lib/follow-client";
 
 export function Messenger() {
   const { ready, signedIn } = useAuth();
+  const search = useSearchParams();
   const [me, setMe] = useState("");
   const [messages, setMessages] = useState<LiteMessage[]>([]);
   const [reads, setReads] = useState<MessageReads>({});
@@ -58,6 +60,13 @@ export function Messenger() {
       setError(err instanceof Error ? err.message : "Could not open thread.");
     }
   }
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const withHandle = (search.get("with") || "").trim();
+    if (/^u\d+$/i.test(withHandle)) void pick(withHandle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, search]);
 
   if (!ready) return null;
   if (!signedIn) {
