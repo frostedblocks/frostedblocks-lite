@@ -90,7 +90,7 @@ export function CircleRoom({ slug }: { slug: string }) {
         <h1 style={{ fontSize: 40 }}>Can’t open this room</h1>
         <p className="error">{error}</p>
         <p style={{ marginTop: 16 }}>
-          <Link className="btn ghost" href="/circles">Your circles</Link>
+          <Link className="btn ghost" href="/circles">Back to Circles</Link>
         </p>
       </article>
     );
@@ -103,7 +103,7 @@ export function CircleRoom({ slug }: { slug: string }) {
       <article className="glass page-card">
         <div className="kicker">Join this circle</div>
         <h1 style={{ fontSize: 40 }}>{circle.name}</h1>
-        <p className="lead">Sign in with email to join this private room. Posts stay out of the public feed.</p>
+        <p className="lead">Sign in with email to join this private room. Only members can see the posts.</p>
         <p style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Link className="btn" href={`/signin?next=${encodeURIComponent(`/c/${slug}${invite ? `?i=${invite}` : ""}`)}`}>Sign in</Link>
           <Link className="btn ghost" href="/signup">Create account</Link>
@@ -132,7 +132,7 @@ export function CircleRoom({ slug }: { slug: string }) {
       <div className="kicker">Private circle</div>
       <h1 style={{ fontSize: 36, margin: "4px 0 8px" }}>{circle.name}</h1>
       <p className="note" style={{ marginTop: 0 }}>
-        Members only — never the public feed. (Not end-to-end encrypted yet.)
+        Members only — never the public feed.
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
         <Link className="btn ghost" href="/circles">All circles</Link>

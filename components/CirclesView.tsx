@@ -65,9 +65,9 @@ export function CirclesView() {
       <article className="glass page-card">
         <div className="kicker">Circles</div>
         <h1 style={{ fontSize: 40 }}>Private rooms</h1>
-        <p className="lead">Create a named circle for ~10 people. Posts stay out of the public feed.</p>
+        <p className="lead">Create a private room for 10 people. Only members can see the posts.</p>
         <p style={{ marginTop: 16 }}>
-          <Link className="btn" href="/signin">Sign in</Link>
+          <Link className="btn" href="/signin">Sign in to create a room</Link>
         </p>
       </article>
     );
