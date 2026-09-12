@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { currentUser, refreshSession, type LiteUser } from "./auth-client";
+import { currentUser, refreshSession, sessionFlags, type LiteUser } from "./auth-client";
 
 export function useAuth() {
   const [user, setUser] = useState<LiteUser | null>(null);
@@ -9,14 +9,19 @@ export function useAuth() {
   const [hasEmail, setHasEmail] = useState(false);
 
   useEffect(() => {
-    const read = () => setUser(currentUser());
     let cancelled = false;
+
+    const applyFlags = () => {
+      const flags = sessionFlags();
+      setUser(currentUser());
+      setVerified(flags.verified);
+      setHasEmail(flags.hasEmail);
+    };
+
     refreshSession()
-      .then((session) => {
+      .then(() => {
         if (cancelled) return;
-        setUser(session.user);
-        setVerified(session.verified);
-        setHasEmail(session.hasEmail);
+        applyFlags();
       })
       .catch(() => {
         if (!cancelled) setUser(null);
@@ -24,10 +29,13 @@ export function useAuth() {
       .finally(() => {
         if (!cancelled) setReady(true);
       });
-    window.addEventListener("ice-auth", read);
+
+    // Keep verified/hasEmail in sync when other code refreshes the session
+    // (without re-fetching — sessionFlags is updated inside refreshSession).
+    window.addEventListener("ice-auth", applyFlags);
     return () => {
       cancelled = true;
-      window.removeEventListener("ice-auth", read);
+      window.removeEventListener("ice-auth", applyFlags);
     };
   }, []);
 
