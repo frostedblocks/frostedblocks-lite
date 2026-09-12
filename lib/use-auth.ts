@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { currentUser, type LiteUser } from "./auth-client";
+import { currentUser, refreshSession, type LiteUser } from "./auth-client";
 
 export function useAuth() {
   const [user, setUser] = useState<LiteUser | null>(null);
@@ -10,24 +10,23 @@ export function useAuth() {
 
   useEffect(() => {
     const read = () => setUser(currentUser());
-    read();
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.user) {
-          setVerified(Boolean(data.user.verified));
-          setHasEmail(Boolean(data.user.hasEmail));
-          if (data.user.name) {
-            setUser((prev) => (prev ? { ...prev, name: data.user.name, avatar: data.user.avatar } : prev));
-          }
-        }
+    let cancelled = false;
+    refreshSession()
+      .then((session) => {
+        if (cancelled) return;
+        setUser(session.user);
+        setVerified(session.verified);
+        setHasEmail(session.hasEmail);
       })
-      .catch(() => {})
-      .finally(() => setReady(true));
-    window.addEventListener("storage", read);
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setReady(true);
+      });
     window.addEventListener("ice-auth", read);
     return () => {
-      window.removeEventListener("storage", read);
+      cancelled = true;
       window.removeEventListener("ice-auth", read);
     };
   }, []);

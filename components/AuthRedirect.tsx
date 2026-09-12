@@ -1,10 +1,12 @@
 "use client";
 import { useEffect } from "react";
-import { currentUser } from "@/lib/auth-client";
+import { refreshSession } from "@/lib/auth-client";
 
 export function AuthRedirect() {
   useEffect(() => {
-    if (currentUser()) window.location.replace("/feed");
+    void refreshSession().then((session) => {
+      if (session.user) window.location.replace("/feed");
+    });
   }, []);
   return null;
 }

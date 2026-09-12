@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  currentUser,
+  refreshSession,
   requestAccountDelete,
   signOut,
   signOutEverywhere,
@@ -28,15 +28,16 @@ export function SettingsView() {
   const [deleteErr, setDeleteErr] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
 
-  function refresh() {
-    const u = currentUser();
+  async function refresh() {
+    const session = await refreshSession();
+    const u = session.user;
     setUser(u);
     setName(u?.name || "");
     setReady(true);
   }
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
 
   if (!ready || !authReady) return null;
@@ -63,7 +64,7 @@ export function SettingsView() {
       const next = await updateDisplayName(name);
       setName(next);
       setNameMsg("Display name saved.");
-      refresh();
+      await refresh();
     } catch (err) {
       setNameErr(err instanceof Error ? err.message : "Could not save name.");
     } finally {
@@ -159,7 +160,7 @@ export function SettingsView() {
         <div className="glass stack-item">
           <strong>Photo</strong>
           <p className="note" style={{ marginBottom: 10 }}>JPG, PNG, or WEBP up to 2MB.</p>
-          <AvatarUpload onDone={refresh} />
+          <AvatarUpload onDone={() => { void refresh(); }} />
         </div>
 
         <div className="glass stack-item">

@@ -10,71 +10,68 @@ export type LiteUser = {
 };
 export type PublicUser = { email: string; name: string; source: "lite"; avatar?: string };
 
-const USERS = "ice-lite-users";
-const SESSION = "ice-lite-session";
+const LEGACY_USERS = "ice-lite-users";
+const LEGACY_SESSION = "ice-lite-session";
 export const MAIL_FAILED_KEY = "ice-lite-mail-failed";
 
-function readUsers(): LiteUser[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(USERS) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function writeUsers(users: LiteUser[]) {
-  localStorage.setItem(USERS, JSON.stringify(users.map(({ pass, ...rest }) => rest)));
-}
+/** In-tab only — never written to localStorage. */
+let memoryUser: LiteUser | null = null;
 
 function ping() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("ice-auth"));
 }
 
-export { normalizeLogin, isEmail, isPhone } from "./login";
-
-function sameAccount(user: LiteUser, login: string) {
-  const id = normalizeLogin(login);
-  return normalizeLogin(user.email) === id || normalizeLogin(user.phone || "") === id;
+/** Drop old client caches that stored email/phone on disk. */
+export function clearLegacyLocalAuth() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(LEGACY_USERS);
+    localStorage.removeItem(LEGACY_SESSION);
+  } catch {
+    /* ignore quota / private mode */
+  }
 }
 
+export { normalizeLogin, isEmail, isPhone } from "./login";
+
 function cacheUser(user: LiteUser) {
-  const id = normalizeLogin(user.email || user.phone || "");
-  const users = readUsers().filter((u) => !sameAccount(u, id));
-  users.push({ email: user.email, name: user.name, avatar: user.avatar, phone: user.phone });
-  writeUsers(users);
-  localStorage.setItem(SESSION, id);
+  clearLegacyLocalAuth();
+  const login = normalizeLogin(user.email || user.phone || "");
+  memoryUser = {
+    email: login,
+    name: user.name,
+    avatar: user.avatar,
+    phone: user.phone ? normalizeLogin(user.phone) : undefined,
+    google: user.google,
+  };
   ping();
 }
 
 export function currentEmail(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(SESSION);
+  return memoryUser?.email || null;
 }
 
 export function currentUser(): LiteUser | null {
-  const id = currentEmail();
-  if (!id) return null;
-  return readUsers().find((u) => sameAccount(u, id)) || { email: id, name: id.includes("@") ? id.split("@")[0] : "Lite user" };
+  return memoryUser;
 }
 
 export function listPublicUsers(): PublicUser[] {
-  return readUsers().map((u) => ({
-    email: u.email,
-    name: u.name,
-    source: "lite" as const,
-    avatar: u.avatar,
-  }));
+  return memoryUser
+    ? [
+        {
+          email: memoryUser.email,
+          name: memoryUser.name,
+          source: "lite" as const,
+          avatar: memoryUser.avatar,
+        },
+      ]
+    : [];
 }
 
 export function setAvatar(url: string) {
-  const me = currentUser();
-  if (!me) throw new Error("Sign in first.");
-  const users = readUsers();
-  const idx = users.findIndex((u) => sameAccount(u, me.email));
-  if (idx < 0) throw new Error("Account not found.");
-  users[idx] = { ...users[idx], avatar: url || undefined };
-  writeUsers(users);
+  if (!memoryUser) throw new Error("Sign in first.");
+  memoryUser = { ...memoryUser, avatar: url || undefined };
+  clearLegacyLocalAuth();
   ping();
 }
 
@@ -83,13 +80,58 @@ export function clearAvatar() {
 }
 
 export function avatarFor(author: string) {
-  return readUsers().find((u) => sameAccount(u, author))?.avatar || "";
+  if (!memoryUser) return "";
+  const id = normalizeLogin(author);
+  if (normalizeLogin(memoryUser.email) === id || normalizeLogin(memoryUser.phone || "") === id) {
+    return memoryUser.avatar || "";
+  }
+  return "";
+}
+
+export type SessionInfo = {
+  user: LiteUser | null;
+  verified: boolean;
+  hasEmail: boolean;
+};
+
+/** Source of truth: HttpOnly cookie via /api/auth/me. */
+export async function refreshSession(): Promise<SessionInfo> {
+  clearLegacyLocalAuth();
+  try {
+    const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
+    const data = await res.json();
+    const login = String(data.user?.login || "");
+    if (!login) {
+      memoryUser = null;
+      ping();
+      return { user: null, verified: true, hasEmail: false };
+    }
+    cacheUser({
+      email: normalizeLogin(login),
+      name: data.user.name || "Lite user",
+      avatar: data.user.avatar || undefined,
+      phone:
+        data.user.hasEmail === false && !String(login).includes("@")
+          ? normalizeLogin(login)
+          : undefined,
+    });
+    return {
+      user: memoryUser,
+      verified: Boolean(data.user.verified),
+      hasEmail: Boolean(data.user.hasEmail),
+    };
+  } catch {
+    memoryUser = null;
+    ping();
+    return { user: null, verified: true, hasEmail: false };
+  }
 }
 
 export async function signUp(login: string, password: string, name: string) {
   const res = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ login, password, name }),
   });
   const data = await res.json();
@@ -105,6 +147,7 @@ export async function signIn(login: string, password: string) {
   const res = await fetch("/api/auth/signin", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ login, password }),
   });
   const data = await res.json();
@@ -117,6 +160,7 @@ export async function resetPassword(currentPassword: string, nextPassword: strin
   const res = await fetch("/api/auth/reset", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ currentPassword, password: nextPassword }),
   });
   const data = await res.json();
@@ -125,16 +169,10 @@ export async function resetPassword(currentPassword: string, nextPassword: strin
 
 /** Finish Google OAuth after the server set the session cookie (no PII in the URL). */
 export async function finishGoogleSession() {
-  const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
-  const data = await res.json();
-  const login = String(data.user?.login || "");
-  if (!login) throw new Error("Google sign-in failed. Try again.");
-  cacheUser({
-    email: normalizeLogin(login),
-    name: data.user.name || "Lite user",
-    avatar: data.user.avatar || undefined,
-    google: true,
-  });
+  const session = await refreshSession();
+  if (!session.user) throw new Error("Google sign-in failed. Try again.");
+  memoryUser = { ...session.user, google: true };
+  ping();
 }
 
 export async function updateDisplayName(name: string) {
@@ -146,8 +184,7 @@ export async function updateDisplayName(name: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not save name.");
-  const me = currentUser();
-  if (me) cacheUser({ ...me, name: data.name || name });
+  if (memoryUser) cacheUser({ ...memoryUser, name: data.name || name });
   return String(data.name || name);
 }
 
@@ -163,7 +200,8 @@ export async function requestAccountDelete(note?: string) {
 }
 
 export async function signOut() {
-  localStorage.removeItem(SESSION);
+  memoryUser = null;
+  clearLegacyLocalAuth();
   ping();
   try {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -173,7 +211,8 @@ export async function signOut() {
 }
 
 export async function signOutEverywhere() {
-  localStorage.removeItem(SESSION);
+  memoryUser = null;
+  clearLegacyLocalAuth();
   ping();
   try {
     await fetch("/api/auth/logout?all=1", { method: "POST", credentials: "include" });
