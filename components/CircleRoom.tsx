@@ -136,7 +136,6 @@ export function CircleRoom({ slug }: { slug: string }) {
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
         <Link className="btn ghost" href="/circles">All circles</Link>
-        <Link className="btn ghost" href="/feed">Public feed</Link>
         {circle.invitePath ? (
           <button className="btn ghost" type="button" onClick={() => { void copyInvite(); }}>
             {copied ? "Invite copied" : "Copy guest link"}
@@ -149,12 +148,14 @@ export function CircleRoom({ slug }: { slug: string }) {
           <span className="btn" style={{ pointerEvents: "none" }}>
             Circle · {circle.name}
           </span>
-          <Link className="chip" href="/feed">Public feed →</Link>
         </div>
         <div className="meta">Post as {user?.name || "you"} in this circle only</div>
         <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write to this circle…" rows={4} maxLength={2000} />
         {error ? <p className="error">{error}</p> : null}
         <button className="btn" type="submit">Post to circle</button>
+        <p className="note" style={{ marginBottom: 0 }}>
+          <Link className="quiet-link" href="/feed">Public feed</Link>
+        </p>
       </form>
 
       <div className="feed" style={{ marginTop: 12 }}>

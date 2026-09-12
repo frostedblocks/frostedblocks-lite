@@ -45,7 +45,20 @@ export function CirclesView() {
     }
   }
 
-  if (!ready || !loaded) return null;
+  if (!ready || !loaded) {
+    return (
+      <article className="glass page-card" aria-busy="true">
+        <div className="kicker">Circles</div>
+        <h1 style={{ fontSize: 40 }}>Your rooms</h1>
+        <p className="note">Loading your circles…</p>
+        <div className="stack" style={{ marginTop: 18 }}>
+          <div className="glass stack-item" style={{ minHeight: 56, opacity: 0.55 }} />
+          <div className="glass stack-item" style={{ minHeight: 56, opacity: 0.4 }} />
+          <div className="glass stack-item" style={{ minHeight: 56, opacity: 0.25 }} />
+        </div>
+      </article>
+    );
+  }
 
   if (!signedIn) {
     return (
