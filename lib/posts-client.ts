@@ -2,7 +2,7 @@ import type { IcePost } from "./types";
 
 export async function loadFeed(): Promise<IcePost[]> {
   try {
-    const res = await fetch("/api/posts", { cache: "no-store" });
+    const res = await fetch("/api/posts", { cache: "no-store", credentials: "include" });
     const data = await res.json();
     return (data.posts || []) as IcePost[];
   } catch {
@@ -14,6 +14,7 @@ export async function createPost(content: string): Promise<IcePost> {
   const res = await fetch("/api/posts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ content }),
   });
   const data = await res.json();
@@ -25,6 +26,7 @@ export async function deletePost(id: string) {
   const res = await fetch("/api/posts", {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ id }),
   });
   const data = await res.json();
