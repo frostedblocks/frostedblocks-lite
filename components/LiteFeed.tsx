@@ -55,12 +55,13 @@ export function LiteFeed() {
   }, [posts, source]);
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
+    const list: string[] = [];
     for (const p of bySource) {
       const c = (p.category || "").trim();
-      if (c) set.add(c);
+      if (c && !list.includes(c)) list.push(c);
     }
-    return ["All", ...[...set].sort((a, b) => a.localeCompare(b))];
+    list.sort((a, b) => a.localeCompare(b));
+    return ["All", ...list];
   }, [bySource]);
 
   const filtered = useMemo(() => {

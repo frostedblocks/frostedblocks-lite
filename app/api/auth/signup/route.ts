@@ -7,6 +7,7 @@ import { isPwnedPassword } from "@/lib/pwned";
 import { clientIp, publicError, sessionCookie } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { isEmail, normalizeLogin, normalizePhone, phoneKeys } from "@/lib/login";
+import { hashToken, newEmailToken } from "@/lib/token";
 
 export async function POST(req: Request) {
   try {
@@ -46,9 +47,9 @@ export async function POST(req: Request) {
 
     let mailed = false;
     if (email) {
-      const verify = randomBytes(24).toString("hex");
+      const verify = newEmailToken();
       await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
-        VALUES (${verify}, ${user.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
+        VALUES (${hashToken(verify)}, ${user.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
       try {
         await sendMail(
           email,

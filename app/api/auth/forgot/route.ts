@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { randomBytes } from "crypto";
 import { ensureSchema, sql } from "@/lib/db";
 import { appUrl, sendMail } from "@/lib/mail";
 import { clientIp, publicError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { isEmail, normalizeLogin } from "@/lib/login";
+import { hashToken, newEmailToken } from "@/lib/token";
 
 export async function POST(req: Request) {
   try {
@@ -26,10 +26,10 @@ export async function POST(req: Request) {
     const q = sql();
     const rows = await q`SELECT id, email FROM lite_users WHERE email = ${id} LIMIT 1`;
     if (rows[0]?.email) {
-      const token = randomBytes(24).toString("hex");
+      const token = newEmailToken();
       await q`DELETE FROM lite_email_tokens WHERE user_id = ${rows[0].id} AND kind = ${"reset"}`;
       await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
-        VALUES (${token}, ${rows[0].id}, ${"reset"}, NOW() + INTERVAL '2 hours')`;
+        VALUES (${hashToken(token)}, ${rows[0].id}, ${"reset"}, NOW() + INTERVAL '2 hours')`;
       try {
         await sendMail(
           rows[0].email,
