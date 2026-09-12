@@ -7,13 +7,13 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   metadataBase: new URL("https://lite.frostedblocks.com"),
   title: {
-    default: "ICE Lite | Quiet social",
+    default: "ICE Lite | Simple social",
     template: "%s | ICE Lite",
   },
   description: "Post, follow, and message on ICE Lite. Email or phone login. Public ICE Network posts appear in the feed.",
-  keywords: ["ICE Lite", "ICE Network", "quiet social network", "email login social"],
+  keywords: ["ICE Lite", "ICE Network", "simple social network", "email login social"],
   openGraph: {
-    title: "ICE Lite | Quiet social",
+    title: "ICE Lite | Simple social",
     description: "Post, follow, and message. Email or phone login.",
     url: "https://lite.frostedblocks.com",
     siteName: "ICE Lite",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ICE Lite | Quiet social",
+    title: "ICE Lite | Simple social",
     description: "Post, follow, and message. Email or phone login.",
   },
   alternates: {

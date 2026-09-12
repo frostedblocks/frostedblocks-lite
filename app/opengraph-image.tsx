@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "ICE Lite — Quiet social, owned by you";
+export const alt = "ICE Lite — Simple social, owned by you";
 
 export default function Image() {
   return new ImageResponse(
@@ -24,7 +24,7 @@ export default function Image() {
           ICE Lite
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 750, lineHeight: 0.95 }}>
-          Quiet social,
+          Simple social,
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 750, lineHeight: 0.95, color: "#7dd3fc" }}>
           owned by you
