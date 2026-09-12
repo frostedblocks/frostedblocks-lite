@@ -1,20 +1,3 @@
-const csp = [
-  "default-src 'self'",
-  // Next.js App Router still needs inline scripts/styles without a nonce pipeline.
-  "script-src 'self' 'unsafe-inline'",
-  "script-src-attr 'none'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://icp-api.io https://ic0.app https://*.icp0.io https://api.pwnedpasswords.com",
-  "font-src 'self'",
-  "frame-src 'none'",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -22,11 +5,11 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: false },
   typescript: { ignoreBuildErrors: false },
   async headers() {
+    // CSP is set per-request in middleware.ts (nonce + strict-dynamic).
     return [
       {
         source: "/:path*",
         headers: [
-          { key: "Content-Security-Policy", value: csp },
           { key: "Strict-Transport-Security", value: "max-age=63072000" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
