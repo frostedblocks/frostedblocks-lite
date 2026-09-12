@@ -1,18 +1,37 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { currentUser, signOut, signOutEverywhere } from "@/lib/auth-client";
+import {
+  currentUser,
+  requestAccountDelete,
+  signOut,
+  signOutEverywhere,
+  updateDisplayName,
+  type LiteUser,
+} from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { AvatarUpload } from "./AvatarUpload";
-import type { LiteUser } from "@/lib/auth-client";
 
 export function SettingsView() {
   const { verified, hasEmail, ready: authReady } = useAuth();
   const [user, setUser] = useState<LiteUser | null>(null);
   const [ready, setReady] = useState(false);
+  const [name, setName] = useState("");
+  const [nameMsg, setNameMsg] = useState("");
+  const [nameErr, setNameErr] = useState("");
+  const [nameBusy, setNameBusy] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
+  const [resendErr, setResendErr] = useState("");
+  const [resendBusy, setResendBusy] = useState(false);
+  const [deleteNote, setDeleteNote] = useState("");
+  const [deleteMsg, setDeleteMsg] = useState("");
+  const [deleteErr, setDeleteErr] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   function refresh() {
-    setUser(currentUser());
+    const u = currentUser();
+    setUser(u);
+    setName(u?.name || "");
     setReady(true);
   }
 
@@ -35,6 +54,56 @@ export function SettingsView() {
     );
   }
 
+  async function saveName(e: React.FormEvent) {
+    e.preventDefault();
+    setNameErr("");
+    setNameMsg("");
+    setNameBusy(true);
+    try {
+      const next = await updateDisplayName(name);
+      setName(next);
+      setNameMsg("Display name saved.");
+      refresh();
+    } catch (err) {
+      setNameErr(err instanceof Error ? err.message : "Could not save name.");
+    } finally {
+      setNameBusy(false);
+    }
+  }
+
+  async function resendConfirm() {
+    setResendErr("");
+    setResendMsg("");
+    setResendBusy(true);
+    try {
+      const res = await fetch("/api/auth/resend", { method: "POST", credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not send email.");
+      setResendMsg("Confirm email sent. Check inbox and spam.");
+    } catch (err) {
+      setResendErr(err instanceof Error ? err.message : "Could not send email.");
+    } finally {
+      setResendBusy(false);
+    }
+  }
+
+  async function sendDelete(e: React.FormEvent) {
+    e.preventDefault();
+    if (!window.confirm("Send a delete request for this Lite account?")) return;
+    setDeleteErr("");
+    setDeleteMsg("");
+    setDeleteBusy(true);
+    try {
+      await requestAccountDelete(deleteNote);
+      setDeleteMsg("Delete request sent. We’ll email you when the account is removed.");
+      setDeleteNote("");
+    } catch (err) {
+      setDeleteErr(err instanceof Error ? err.message : "Could not send delete request.");
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
   return (
     <article className="glass page-card">
       <div className="kicker">Settings</div>
@@ -43,15 +112,48 @@ export function SettingsView() {
 
       <div className="stack" style={{ marginTop: 20 }}>
         <div className="glass stack-item">
-          <strong>Profile</strong>
+          <strong>Display name</strong>
           <p className="note" style={{ marginBottom: 10 }}>
-            {user.name || "Lite user"}
-            {hasEmail ? (verified ? " · email confirmed" : " · email not confirmed yet") : " · phone account"}
+            Other people see this name and your photo — not your email or phone.
           </p>
-          <p className="note">Other people see your name and photo, not your email or phone.</p>
+          <form className="auth-form" onSubmit={saveName} style={{ marginTop: 0 }}>
+            <label>
+              Name
+              <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} required />
+            </label>
+            {nameErr ? <p className="error">{nameErr}</p> : null}
+            {nameMsg ? <p className="note">{nameMsg}</p> : null}
+            <button className="btn" type="submit" disabled={nameBusy}>
+              {nameBusy ? "Saving…" : "Save name"}
+            </button>
+          </form>
           <p style={{ marginTop: 12 }}>
             <Link className="btn ghost" href="/profile">Open profile</Link>
           </p>
+        </div>
+
+        <div className="glass stack-item">
+          <strong>Email status</strong>
+          {!hasEmail ? (
+            <p className="note" style={{ marginBottom: 0 }}>
+              Phone account — no email confirm needed. You can post, follow, and message.
+            </p>
+          ) : verified ? (
+            <p className="note" style={{ marginBottom: 0 }}>
+              Email confirmed. You’re cleared to post, follow, and message on ICE Lite.
+            </p>
+          ) : (
+            <>
+              <p className="note" style={{ marginBottom: 10 }}>
+                Email not confirmed yet. Confirm to post, follow, or message. Check inbox and spam for the link we sent.
+              </p>
+              {resendErr ? <p className="error">{resendErr}</p> : null}
+              {resendMsg ? <p className="note">{resendMsg}</p> : null}
+              <button className="btn" type="button" disabled={resendBusy} onClick={() => { void resendConfirm(); }}>
+                {resendBusy ? "Sending…" : "Send confirm email"}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="glass stack-item">
@@ -79,14 +181,31 @@ export function SettingsView() {
         </div>
 
         <div className="glass stack-item">
-          <strong>Privacy</strong>
+          <strong>Privacy & delete</strong>
           <p className="note" style={{ marginBottom: 10 }}>
-            Read what Lite stores, or ask to access or delete your data.
+            Read what Lite stores, or request account deletion. Delete requests are handled by email (not instant self-serve).
           </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
             <Link className="btn ghost" href="/privacy">Privacy policy</Link>
-            <Link className="btn ghost" href="/contact">Request data help</Link>
+            <Link className="btn ghost" href="/contact">Other account help</Link>
           </div>
+          <form className="auth-form" onSubmit={sendDelete} style={{ marginTop: 0 }}>
+            <label>
+              Optional note
+              <textarea
+                value={deleteNote}
+                onChange={(e) => setDeleteNote(e.target.value)}
+                rows={3}
+                maxLength={1000}
+                placeholder="Anything we should know before deleting…"
+              />
+            </label>
+            {deleteErr ? <p className="error">{deleteErr}</p> : null}
+            {deleteMsg ? <p className="note">{deleteMsg}</p> : null}
+            <button className="btn ghost" type="submit" disabled={deleteBusy}>
+              {deleteBusy ? "Sending…" : "Request account deletion"}
+            </button>
+          </form>
         </div>
 
         <div className="glass stack-item">
