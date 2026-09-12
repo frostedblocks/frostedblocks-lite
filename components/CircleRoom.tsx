@@ -103,7 +103,7 @@ export function CircleRoom({ slug }: { slug: string }) {
       <article className="glass page-card">
         <div className="kicker">Join this circle</div>
         <h1 style={{ fontSize: 40 }}>{circle.name}</h1>
-        <p className="lead">Sign in with email to join this private room. Posts never hit the public feed.</p>
+        <p className="lead">Sign in with email to join this private room. Posts stay out of the public feed.</p>
         <p style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Link className="btn" href={`/signin?next=${encodeURIComponent(`/c/${slug}${invite ? `?i=${invite}` : ""}`)}`}>Sign in</Link>
           <Link className="btn ghost" href="/signup">Create account</Link>
@@ -132,7 +132,7 @@ export function CircleRoom({ slug }: { slug: string }) {
       <div className="kicker">Private circle</div>
       <h1 style={{ fontSize: 36, margin: "4px 0 8px" }}>{circle.name}</h1>
       <p className="note" style={{ marginTop: 0 }}>
-        Destination locked to this circle — never the public feed.
+        Members only — never the public feed. (Not end-to-end encrypted yet.)
       </p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
         <Link className="btn ghost" href="/circles">All circles</Link>
@@ -175,11 +175,13 @@ export function CircleRoom({ slug }: { slug: string }) {
 
       <div className="glass stack-item" style={{ marginTop: 18 }}>
         <strong>Claim on ICE Network</strong>
-        <p className="note" style={{ marginBottom: 0 }}>
-          Draft CTA (not live): Later you can claim this Lite circle as its own Network room so the circle’s
-          data sits on a canister — guest links stay for friends without Internet Identity. Fee copy TBD
-          against live Factory Join pricing; this does not dump history into the public ICE stream.
+        <p className="note">
+          Claim on ICE Network — own this room on a canister. New Network accounts: 5 ICP one-time Join.
+          Friends can stay on guest links. Does not dump history into the public ICE stream.
         </p>
+        <button className="btn ghost" type="button" disabled>
+          Coming soon
+        </button>
       </div>
     </article>
   );
