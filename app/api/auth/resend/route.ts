@@ -4,6 +4,8 @@ import { ensureSchema, sql } from "@/lib/db";
 import { appUrl, sendMail } from "@/lib/mail";
 import { needsEmailVerify, userFromRequest } from "@/lib/session";
 import { publicError } from "@/lib/http";
+import { clientIp } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +14,8 @@ export async function POST(req: Request) {
     if (!me) return publicError(401, "Sign in first.");
     if (!me.email) return publicError(400, "This account has no email to confirm.");
     if (!needsEmailVerify(me)) return NextResponse.json({ ok: true });
-    // TEMPORARY: email rate limits disabled while Resend deliverability is being fixed.
+    const limited = await rateLimit(`resend:${clientIp(req)}:${me.id}`, 10, 15 * 60);
+    if (!limited.ok) return publicError(429, "Wait a few minutes before asking for another email.");
     const token = randomBytes(24).toString("hex");
     const q = sql();
     await q`DELETE FROM lite_email_tokens WHERE user_id = ${me.id} AND kind = ${"verify"}`;
