@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     default: "ICE Lite | Lite Frost before the ICE",
     template: "%s | ICE Lite",
   },
-  description: "Lite Frost before the ICE — a door to the ICE Network. Post, follow, and message on ICE Lite with email or phone login.",
+  description: "Lite Frost before the ICE — a door to the ICE Network. Post, follow, and message on ICE Lite with email login.",
   keywords: ["ICE Lite", "ICE Network", "Lite Frost", "email login social"],
   openGraph: {
     title: "ICE Lite | Lite Frost before the ICE",
-    description: "A door to the ICE Network. Post, follow, and message with email or phone login.",
+    description: "A door to the ICE Network. Post, follow, and message with email login.",
     url: "https://lite.frostedblocks.com",
     siteName: "ICE Lite",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ICE Lite | Lite Frost before the ICE",
-    description: "A door to the ICE Network. Post, follow, and message with email or phone login.",
+    description: "A door to the ICE Network. Post, follow, and message with email login.",
   },
   alternates: {
     canonical: "https://lite.frostedblocks.com",

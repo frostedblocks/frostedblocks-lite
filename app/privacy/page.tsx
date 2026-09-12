@@ -14,9 +14,9 @@ export default function PrivacyPage() {
           <div className="glass stack-item">
             <strong>What we keep</strong>
             <p className="note">
-              Email or phone, name, hashed password, posts, follows, messages, and optional profile photo.
-              Other people see your name, not your email or phone. Google sign-in may also use your Google
-              account email and profile name to create or open a Lite session.
+              New accounts use email (or Google). We store email, name, hashed password, posts, follows,
+              messages, and optional profile photo. Older phone-only accounts may still have a phone on
+              file. Other people see your name, not your email or phone.
             </p>
           </div>
           <div className="glass stack-item">

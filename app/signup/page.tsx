@@ -1,5 +1,6 @@
 import { AuthForm } from "@/components/AuthForm";
 import { AuthRedirect } from "@/components/AuthRedirect";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export default function SignUpPage() {
   return (
@@ -8,8 +9,9 @@ export default function SignUpPage() {
       <article className="glass auth-card">
         <div className="kicker">ICE Lite</div>
         <h1 style={{ fontSize: 40 }}>Create Lite account</h1>
-        <p className="lead">Email or a US phone number. Email accounts must tap the confirm link before posting. Phone accounts can post right away.</p>
+        <p className="lead">Email and a password. Confirm the link we send before posting. Or continue with Google.</p>
         <AuthForm mode="signup" />
+        <GoogleButton />
       </article>
     </main>
   );

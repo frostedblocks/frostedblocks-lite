@@ -42,8 +42,16 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         </label>
       ) : null}
       <label>
-        Email or phone
-        <input required value={login} onChange={(e) => setLogin(e.target.value)} placeholder="you@email.com or 3025551234" inputMode="email" autoComplete="username" />
+        {mode === "signup" ? "Email" : "Email or phone"}
+        <input
+          required
+          type={mode === "signup" ? "email" : undefined}
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          placeholder={mode === "signup" ? "you@email.com" : "you@email.com or phone"}
+          inputMode="email"
+          autoComplete={mode === "signup" ? "email" : "username"}
+        />
       </label>
       <label>
         Password
@@ -56,7 +64,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       {mode === "signin" ? (
         <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
       ) : (
-        <p className="note">Email gets a confirm link. Phone can post now.</p>
+        <p className="note">We’ll email a confirm link before you can post, follow, or message.</p>
       )}
       <p className="note">
         {mode === "signup" ? (
