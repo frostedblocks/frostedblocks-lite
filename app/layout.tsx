@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import "./globals.css";
+import "./messenger.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
