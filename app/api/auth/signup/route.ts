@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     const session = randomBytes(32).toString("hex");
     await q`INSERT INTO lite_sessions (token, user_id) VALUES (${session}, ${user.id})`;
 
+    let mailed = false;
     if (email) {
       const verify = randomBytes(24).toString("hex");
       await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
@@ -54,8 +55,9 @@ export async function POST(req: Request) {
           "Confirm your ICE Lite email",
           `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${verify}\n\nIf you did not sign up, ignore this.`,
         );
-      } catch {
-        /* do not leak mail status */
+        mailed = true;
+      } catch (err) {
+        console.error("signup mail failed", err instanceof Error ? err.message : err);
       }
     }
 
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
       phone: user.phone,
       name: user.name,
       avatar: user.avatar,
-      mailed: Boolean(email),
+      mailed,
     });
     return sessionCookie(res, session);
   } catch {

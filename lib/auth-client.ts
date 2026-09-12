@@ -12,6 +12,7 @@ export type PublicUser = { email: string; name: string; source: "lite"; avatar?:
 
 const USERS = "ice-lite-users";
 const SESSION = "ice-lite-session";
+export const MAIL_FAILED_KEY = "ice-lite-mail-failed";
 
 function readUsers(): LiteUser[] {
   if (typeof window === "undefined") return [];
@@ -94,6 +95,10 @@ export async function signUp(login: string, password: string, name: string) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not sign up.");
   cacheUser(data);
+  if (data.mailed === false && typeof window !== "undefined") {
+    sessionStorage.setItem(MAIL_FAILED_KEY, "1");
+  }
+  return data;
 }
 
 export async function signIn(login: string, password: string) {
