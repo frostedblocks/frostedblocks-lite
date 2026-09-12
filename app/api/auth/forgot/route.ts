@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { ensureSchema, sql } from "@/lib/db";
 import { appUrl, sendMail } from "@/lib/mail";
-import { clientIp, publicError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
+import { publicError } from "@/lib/http";
 import { isEmail, normalizeLogin } from "@/lib/login";
 
 export async function POST(req: Request) {
@@ -17,12 +16,7 @@ export async function POST(req: Request) {
     if (!isEmail(id)) {
       return publicError(400, "Use the email on the account. Phone-only accounts cannot reset this way.");
     }
-    const limited = await rateLimit(`forgot:${clientIp(req)}:${id}`, 5, 60 * 60);
-    if (!limited.ok) {
-      const res = publicError(429, "Too many reset attempts. Try later.");
-      res.headers.set("Retry-After", String(limited.retryAfter));
-      return res;
-    }
+    // TEMPORARY: email rate limits disabled while Resend deliverability is being fixed.
     const q = sql();
     const rows = await q`SELECT id, email FROM lite_users WHERE email = ${id} LIMIT 1`;
     if (rows[0]?.email) {
