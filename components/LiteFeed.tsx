@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
-import { currentUser } from "@/lib/auth-client";
+import { currentUser, MAIL_FAILED_KEY } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
@@ -15,6 +15,7 @@ export function LiteFeed() {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [mailFailed, setMailFailed] = useState(false);
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(0);
 
@@ -24,6 +25,14 @@ export function LiteFeed() {
 
   useEffect(() => {
     void refresh();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(MAIL_FAILED_KEY) === "1") {
+      setMailFailed(true);
+      sessionStorage.removeItem(MAIL_FAILED_KEY);
+    }
   }, []);
 
   const categories = useMemo(() => {
@@ -74,6 +83,7 @@ export function LiteFeed() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not send email.");
       setSent(true);
+      setMailFailed(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send email.");
     }
@@ -103,7 +113,9 @@ export function LiteFeed() {
         {signedIn && hasEmail && !verified ? (
           <div className="compose">
             <p className="note" style={{ margin: 0 }}>
-              Confirm your email to post, follow, or message. Open the link we sent, or send it again.
+              {mailFailed
+                ? "We couldn't send the confirm email just now. Tap Send confirm email below, then check inbox and spam."
+                : "Confirm your email to post, follow, or message. Open the link we sent, or send it again."}
             </p>
             {sent ? <p className="note">Check your inbox and spam.</p> : null}
             {error ? <p className="error">{error}</p> : null}
