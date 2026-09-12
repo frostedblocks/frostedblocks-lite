@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { currentUser } from "@/lib/auth-client";
+import { refreshSession, type LiteUser } from "@/lib/auth-client";
 import { loadFeed } from "@/lib/posts-client";
 import { loadFollows } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
 import type { IcePost } from "@/lib/types";
-import type { LiteUser } from "@/lib/auth-client";
 
 export function ProfileView() {
   const [user, setUser] = useState<LiteUser | null>(null);
@@ -17,7 +16,8 @@ export function ProfileView() {
   const [followers, setFollowers] = useState(0);
 
   async function refresh() {
-    const u = currentUser();
+    const session = await refreshSession();
+    const u = session.user;
     setUser(u);
     if (u) {
       const feed = await loadFeed();

@@ -52,10 +52,12 @@ export default function PrivacyPage() {
             </ul>
           </div>
           <div className="glass stack-item">
-            <strong>Cookies</strong>
+            <strong>Cookies & browser storage</strong>
             <p className="note">
               One HttpOnly sign-in cookie (`ice_lite_session`) keeps you logged in for seven days. It is
-              not readable by page scripts. Ads later may add their own cookies.
+              not readable by page scripts. We do not keep your email or phone in localStorage — the
+              signed-in UI reads the session cookie through the Lite API. Ads later may add their own
+              cookies.
             </p>
           </div>
           <div className="glass stack-item">
