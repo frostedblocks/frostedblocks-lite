@@ -60,7 +60,7 @@ export function LiteFeed() {
       const c = (p.category || "").trim();
       if (c) set.add(c);
     }
-    return ["All", ...[...set].sort((a, b) => a.localeCompare(b))];
+    return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [bySource]);
 
   const filtered = useMemo(() => {
