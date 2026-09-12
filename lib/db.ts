@@ -68,6 +68,12 @@ export async function ensureSchema() {
     body TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_message_reads (
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    peer_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    last_read_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, peer_id)
+  )`;
   await q`CREATE TABLE IF NOT EXISTS lite_rate (
     key TEXT PRIMARY KEY,
     hits INTEGER NOT NULL DEFAULT 0,
