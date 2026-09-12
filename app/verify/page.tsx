@@ -1,15 +1,32 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ConfirmEmail } from "@/components/ConfirmEmail";
+import { needsEmailVerify, userFromRequest } from "@/lib/session";
 
-export default function VerifyPage({
+export default async function VerifyPage({
   searchParams,
 }: {
   searchParams: { token?: string; ok?: string; error?: string };
 }) {
-  // Server redirect — do not rely on <meta http-equiv=refresh> in the body
-  // (unreliable in App Router / modern browsers), or confirm never hits the API.
+  // Show tap-to-confirm — do not auto-hit the verify API (mail scanners burn GET links).
   if (searchParams.token) {
-    redirect(`/api/auth/verify?token=${encodeURIComponent(searchParams.token)}`);
+    return (
+      <main className="wrap page">
+        <ConfirmEmail token={searchParams.token} />
+      </main>
+    );
+  }
+
+  // Soft recovery: signed-in + already verified + landed on error → treat as success.
+  if (searchParams.error) {
+    try {
+      const me = await userFromRequest();
+      if (me && !needsEmailVerify(me)) {
+        redirect("/verify?ok=1");
+      }
+    } catch {
+      /* show error UI */
+    }
   }
 
   const ok = searchParams.ok === "1";
