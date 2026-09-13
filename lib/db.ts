@@ -114,4 +114,9 @@ export async function ensureSchema() {
   )`;
   await q`ALTER TABLE lite_circle_posts ADD COLUMN IF NOT EXISTS image_url TEXT`;
   await q`CREATE INDEX IF NOT EXISTS lite_circle_posts_circle_idx ON lite_circle_posts (circle_id, created_at DESC)`;
+  await q`CREATE TABLE IF NOT EXISTS lite_site_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
 }

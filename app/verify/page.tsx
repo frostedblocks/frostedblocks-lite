@@ -22,7 +22,7 @@ export default async function VerifyPage({
   // Mail scanners prefetch without cookies, so they never auto-consume.
   // Note: redirect() throws — never wrap it in try/catch.
   if (token) {
-    if (me && !needsEmailVerify(me)) {
+    if (me && !(await needsEmailVerify(me))) {
       redirect("/verify?ok=1");
     }
     if (me) {
@@ -42,14 +42,14 @@ export default async function VerifyPage({
   }
 
   // Soft recovery: signed-in + already verified + landed on error → treat as success.
-  if (searchParams.error && me && !needsEmailVerify(me)) {
+  if (searchParams.error && me && !(await needsEmailVerify(me))) {
     redirect("/verify?ok=1");
   }
 
   const ok = searchParams.ok === "1";
 
   // Success page: if still unverified in this session, don't fake it.
-  if (ok && me && needsEmailVerify(me)) {
+  if (ok && me && (await needsEmailVerify(me))) {
     return (
       <main className="wrap page">
         <article className="glass auth-card">

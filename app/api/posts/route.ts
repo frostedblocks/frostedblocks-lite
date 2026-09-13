@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const { content } = await req.json();
     const text = cleanText(String(content || ""));
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const { id } = await req.json();
     const q = sql();

@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     if (!me) return publicError(401, "Sign in first.");
     if (!me.email) return publicError(400, "This account has no email to confirm.");
-    if (!needsEmailVerify(me)) {
+    if (!(await needsEmailVerify(me))) {
       return NextResponse.json({ ok: true, alreadyVerified: true, mailed: false });
     }
 

@@ -9,7 +9,7 @@ export async function POST(req: Request, ctx: { params: { slug: string } }) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const limited = await rateLimit(`circle-join:${clientIp(req)}:${me!.id}`, 30, 60 * 60);
     if (!limited.ok) {
