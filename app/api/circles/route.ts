@@ -5,6 +5,7 @@ import { userFromRequest } from "@/lib/session";
 import { clientIp, publicError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { denyUnverified } from "@/lib/guard";
+import { isCirclePurpose } from "@/lib/circle-purpose";
 
 function slugify(name: string) {
   const base =
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
     const me = await userFromRequest(req);
     if (!me) return NextResponse.json({ circles: [] });
     const q = sql();
-    const rows = await q`SELECT c.id, c.slug, c.name, c.invite_token, c.owner_id, c.created_at, m.role
+    const rows = await q`SELECT c.id, c.slug, c.name, c.purpose, c.invite_token, c.owner_id, c.created_at, m.role
       FROM lite_circle_members m
       JOIN lite_circles c ON c.id = m.circle_id
       WHERE m.user_id = ${me.id}
@@ -32,6 +33,7 @@ export async function GET(req: Request) {
         id: String(r.id),
         slug: r.slug,
         name: r.name,
+        purpose: r.purpose || null,
         role: r.role,
         owner: Number(r.owner_id) === me.id,
         invitePath: `/c/${r.slug}?i=${r.invite_token}`,
@@ -58,12 +60,14 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const name = String(body.name || "").trim().slice(0, 60);
     if (name.length < 2) return publicError(400, "Name needs at least 2 characters.");
+    const rawPurpose = String(body.purpose || "").trim();
+    const purpose = isCirclePurpose(rawPurpose) ? rawPurpose : null;
     const slug = slugify(name);
     const invite = randomBytes(16).toString("hex");
     const q = sql();
-    const rows = await q`INSERT INTO lite_circles (slug, name, owner_id, invite_token)
-      VALUES (${slug}, ${name}, ${me!.id}, ${invite})
-      RETURNING id, slug, name, invite_token, owner_id, created_at`;
+    const rows = await q`INSERT INTO lite_circles (slug, name, owner_id, invite_token, purpose)
+      VALUES (${slug}, ${name}, ${me!.id}, ${invite}, ${purpose})
+      RETURNING id, slug, name, purpose, invite_token, owner_id, created_at`;
     const c = rows[0];
     await q`INSERT INTO lite_circle_members (circle_id, user_id, role)
       VALUES (${c.id}, ${me!.id}, ${"owner"})`;
@@ -72,6 +76,7 @@ export async function POST(req: Request) {
         id: String(c.id),
         slug: c.slug,
         name: c.name,
+        purpose: c.purpose || null,
         role: "owner",
         owner: true,
         invitePath: `/c/${c.slug}?i=${c.invite_token}`,

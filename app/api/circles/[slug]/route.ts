@@ -12,7 +12,7 @@ export async function GET(req: Request, ctx: { params: { slug: string } }) {
     const invite = new URL(req.url).searchParams.get("i") || "";
     const me = await userFromRequest(req).catch(() => null);
     const q = sql();
-    const rows = await q`SELECT id, slug, name, owner_id, invite_token, created_at
+    const rows = await q`SELECT id, slug, name, purpose, owner_id, invite_token, created_at
       FROM lite_circles WHERE slug = ${slug} LIMIT 1`;
     if (!rows.length) return publicError(404, "Circle not found.");
     const c = rows[0];
@@ -47,6 +47,7 @@ export async function GET(req: Request, ctx: { params: { slug: string } }) {
         id: String(c.id),
         slug: c.slug,
         name: c.name,
+        purpose: c.purpose || null,
         role,
         owner: me ? Number(c.owner_id) === me.id : false,
         member: Boolean(role),

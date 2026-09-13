@@ -2,6 +2,7 @@ export type CircleSummary = {
   id: string;
   slug: string;
   name: string;
+  purpose?: string | null;
   role: string;
   owner: boolean;
   invitePath: string;
@@ -18,6 +19,7 @@ export type CircleDetail = {
   id: string;
   slug: string;
   name: string;
+  purpose?: string | null;
   role: string | null;
   owner: boolean;
   member: boolean;
@@ -33,12 +35,12 @@ export async function listCircles(): Promise<CircleSummary[]> {
   return (data.circles || []) as CircleSummary[];
 }
 
-export async function createCircle(name: string): Promise<CircleSummary> {
+export async function createCircle(name: string, purpose?: string | null): Promise<CircleSummary> {
   const res = await fetch("/api/circles", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, purpose: purpose || null }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not create circle.");
