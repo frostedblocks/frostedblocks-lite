@@ -138,8 +138,9 @@ button { font: inherit; }
   color: #0b1220; background: #7dd3fc;
 }
 .door-network {
-  color: #bbf7d0; background: rgba(22, 101, 52, .35);
-  border: 1px solid rgba(74, 222, 128, .45);
+  color: #0b1220;
+  background: var(--ice-sky);
+  border: 1px solid rgba(125, 211, 252, .55);
 }
 .door-badge-lg, .lite-badge-lg { margin-left: 0; font-size: 12px; padding: 4px 10px; }
 .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 16px; align-items: start; }
@@ -363,4 +364,14 @@ a.post-action { color: #cbd5e1; }
 .post-action.inline:hover { background: none; }
 .delete-btn {
   background: none; border: 0; color: #fda4af; cursor: pointer; padding: 0; font-size: 13px;
+}
+
+.post-action.ice {
+  color: var(--ice-sky);
+  border-color: rgba(125, 211, 252, .4);
+}
+.post-action.ice:hover {
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, .12);
+  border-color: rgba(125, 211, 252, .65);
 }
