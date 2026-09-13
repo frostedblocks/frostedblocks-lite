@@ -12,9 +12,12 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // New accounts → Circles; returning → feed (or Circles is fine too — Circles is the product).
+  const afterAuth = mode === "signup" ? "/circles" : "/circles";
+
   useEffect(() => {
-    if (ready && signedIn) window.location.replace("/feed");
-  }, [ready, signedIn]);
+    if (ready && signedIn) window.location.replace(afterAuth);
+  }, [ready, signedIn, afterAuth]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,7 +26,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     try {
       if (mode === "signup") await signUp(login, password, name);
       else await signIn(login, password);
-      window.location.href = "/feed";
+      window.location.href = afterAuth;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not continue.");
     } finally {
@@ -64,7 +67,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       {mode === "signin" ? (
         <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
       ) : (
-        <p className="note">We’ll email a confirm link before you can post, follow, or message.</p>
+        <p className="note">We’ll email a link. Open it, then you’re in.</p>
       )}
       <p className="note">
         {mode === "signup" ? (

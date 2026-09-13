@@ -7,7 +7,10 @@ export default function HomePage() {
       <section className="glass home-hero home-hero-compact">
         <div>
           <div className="kicker">ICE Lite</div>
-          <h1 className="home-title"><em>Lite Frost before the ICE,</em> a door to the ICE Network</h1>
+          <h1 className="home-title">Share with people you know</h1>
+          <p className="note" style={{ margin: "8px 0 0", maxWidth: "36ch" }}>
+            Make a private Circle. Invite friends. Post photos. That’s it.
+          </p>
         </div>
         <HomeCta />
       </section>

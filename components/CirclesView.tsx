@@ -127,7 +127,7 @@ export function CirclesView() {
       <article className="glass page-card">
         <div className="kicker">Circles</div>
         <h1 style={{ fontSize: 40 }}>Private rooms</h1>
-        <p className="lead">Create a private room for 10 people. Only members can see the posts.</p>
+        <p className="lead">Private room for friends. Only they can see it.</p>
         <p style={{ marginTop: 16 }}>
           <Link className="btn" href="/signin">Sign in to create a room</Link>
         </p>
@@ -140,7 +140,7 @@ export function CirclesView() {
       <article className="glass page-card">
         <div className="kicker">Circles</div>
         <h1 style={{ fontSize: 40 }}>Confirm email first</h1>
-        <p className="lead">Confirm your email in Settings before creating or joining a circle.</p>
+        <p className="lead">Confirm your email first (Settings), then come back.</p>
         <p style={{ marginTop: 16 }}>
           <Link className="btn" href="/settings">Open Settings</Link>
         </p>
@@ -152,7 +152,7 @@ export function CirclesView() {
     <article className="glass page-card">
       <div className="kicker">Circles</div>
       <h1 style={{ fontSize: 40 }}>Your rooms</h1>
-      <p className="lead">Private circles with a job — family pics, team chat, roommate board. Never lands in the public feed.</p>
+      <p className="lead">1. Pick a type · 2. Name it · 3. Share the link. Only members see posts.</p>
 
       <form className="auth-form" onSubmit={makeRoom} style={{ marginTop: 18 }}>
         <div className="chips" style={{ margin: "0 0 12px" }} aria-label="Room purpose">
@@ -180,7 +180,7 @@ export function CirclesView() {
         </label>
         {error ? <p className="error">{error}</p> : null}
         <button className="btn" type="submit" disabled={busy}>
-          {busy ? "Creating…" : "Create a room for 10 people"}
+          {busy ? "Creating…" : "Create Circle"}
         </button>
       </form>
 
@@ -232,7 +232,7 @@ export function CirclesView() {
             </div>
           ))
         ) : (
-          <p className="note">No circles yet. Pick a job above, name the room, then share the guest link.</p>
+          <p className="note">No Circles yet. Pick a type, name it, create, then Copy guest link.</p>
         )}
       </div>
     </article>
