@@ -9,15 +9,23 @@ import {
   listCircles,
   type CircleSummary,
 } from "@/lib/circles-client";
+import {
+  CIRCLE_PURPOSES,
+  type CirclePurposeId,
+  purposeMeta,
+} from "@/lib/circle-purpose";
 
 export function CirclesView() {
   const { signedIn, ready, verified, hasEmail } = useAuth();
   const [circles, setCircles] = useState<CircleSummary[]>([]);
+  const [purpose, setPurpose] = useState<CirclePurposeId | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+
+  const meta = purposeMeta(purpose);
 
   async function refresh() {
     if (!signedIn) {
@@ -39,13 +47,23 @@ export function CirclesView() {
     void refresh();
   }, [ready, signedIn]);
 
+  function pickPurpose(id: CirclePurposeId) {
+    const next = CIRCLE_PURPOSES.find((p) => p.id === id);
+    if (!next) return;
+    setPurpose(id);
+    // Fill placeholder name if empty or still a previous template default.
+    const prior = purposeMeta(purpose);
+    if (!name.trim() || (prior && name.trim() === prior.placeholder)) {
+      setName(next.placeholder);
+    }
+  }
+
   async function makeRoom(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
     try {
-      const c = await createCircle(name);
-      // Land on the room with invite in the URL so Copy guest link is one tap away.
+      const c = await createCircle(name, purpose);
       window.location.href = `/c/${c.slug}?i=${c.invitePath.split("i=")[1] || ""}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create room.");
@@ -137,12 +155,25 @@ export function CirclesView() {
       <p className="lead">Private circles with a job — family pics, team chat, roommate board. Never lands in the public feed.</p>
 
       <form className="auth-form" onSubmit={makeRoom} style={{ marginTop: 18 }}>
+        <div className="chips" style={{ margin: "0 0 12px" }} aria-label="Room purpose">
+          {CIRCLE_PURPOSES.map((p) => (
+            <button
+              key={p.id}
+              className={purpose === p.id ? "btn" : "chip"}
+              type="button"
+              onClick={() => pickPurpose(p.id)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        {meta ? <p className="note" style={{ marginTop: 0 }}>{meta.empty}</p> : null}
         <label>
           Room name
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Weekend crew / Apartment 4B"
+            placeholder={meta?.placeholder || "Weekend crew / Apartment 4B"}
             maxLength={60}
             required
           />
@@ -163,7 +194,12 @@ export function CirclesView() {
             >
               <div>
                 <strong>{c.name}</strong>
-                <p className="note" style={{ margin: "4px 0 0" }}>{c.owner ? "Owner" : "Member"}</p>
+                <p className="note" style={{ margin: "4px 0 0" }}>
+                  {c.owner ? "Owner" : "Member"}
+                  {purposeMeta(c.purpose || undefined)?.label
+                    ? ` · ${purposeMeta(c.purpose || undefined)!.label}`
+                    : ""}
+                </p>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <Link className="btn ghost" href={c.invitePath}>
@@ -196,7 +232,7 @@ export function CirclesView() {
             </div>
           ))
         ) : (
-          <p className="note">No circles yet. Create a room for 10 people — then share the guest link.</p>
+          <p className="note">No circles yet. Pick a job above, name the room, then share the guest link.</p>
         )}
       </div>
     </article>

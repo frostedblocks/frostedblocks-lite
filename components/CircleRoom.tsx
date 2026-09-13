@@ -12,6 +12,7 @@ import {
   loadCirclePosts,
   type CircleDetail,
 } from "@/lib/circles-client";
+import { purposeMeta } from "@/lib/circle-purpose";
 import { publicName } from "@/lib/public";
 import type { IcePost } from "@/lib/types";
 
@@ -168,10 +169,11 @@ export function CircleRoom({ slug }: { slug: string }) {
   }
 
   const members = circle.members || [];
+  const job = purposeMeta(circle.purpose || undefined);
 
   return (
     <article className="glass" style={{ padding: 22, maxWidth: 720, margin: "0 auto" }}>
-      <div className="kicker">Private circle</div>
+      <div className="kicker">Private circle{job ? ` · ${job.label}` : ""}</div>
       <h1 style={{ fontSize: 36, margin: "4px 0 8px" }}>{circle.name}</h1>
       <p className="note" style={{ marginTop: 0 }}>
         Members only — never the public feed.
@@ -243,7 +245,11 @@ export function CircleRoom({ slug }: { slug: string }) {
             <p>{p.content}</p>
           </div>
         ))}
-        {!posts.length ? <p className="note" style={{ padding: 12 }}>No posts yet. Say hello to the room.</p> : null}
+        {!posts.length ? (
+          <p className="note" style={{ padding: 12 }}>
+            {job?.empty || "No posts yet. Say hello to the room."}
+          </p>
+        ) : null}
       </div>
 
       <div className="glass stack-item" style={{ marginTop: 18 }}>
