@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { emailVerifyRequired } from "@/lib/session";
 
-export default function JoinPage() {
-  const requireVerify = emailVerifyRequired();
+export default async function JoinPage() {
+  const requireVerify = await emailVerifyRequired();
   return (
     <main className="wrap page">
       <article className="glass page-card">

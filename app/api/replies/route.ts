@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const body = await req.json();
     const postId = String(body.postId || "").slice(0, 80);
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const { id } = await req.json();
     const q = sql();

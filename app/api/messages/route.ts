@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const limited = await rateLimit(`msg:${clientIp(req)}:${me!.id}`, 20, 15 * 60);
     if (!limited.ok) {
