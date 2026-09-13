@@ -8,7 +8,7 @@ import { splitLinks } from "@/lib/text";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { DoorBadge, doorForPost } from "./LiteBadge";
+import { doorForPost } from "./LiteBadge";
 import { FollowButton } from "./FollowButton";
 import { useAuth } from "@/lib/use-auth";
 
@@ -94,14 +94,9 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
           <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
         )}
         <div>
-          <b>
-            {name}{" "}
-            <DoorBadge source={door} author={post.author} postId={post.id} />
-          </b>
+          <b>{name}</b>
           <div className="meta">
             <Link href={href}>{when(post.timestamp)}</Link>
-            {" · "}
-            {door === "lite" ? "ICE Lite" : "ICE Network"}
           </div>
         </div>
         {canFollow ? <FollowButton compact target={post.author} targetName={name} /> : null}
@@ -132,11 +127,6 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
           <button className="post-action" type="button" onClick={() => { void copy(); }}>
             {copied ? "Copied" : "Copy link"}
           </button>
-          {door === "network" ? (
-            <a className="post-action ice" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">
-              Open on Network
-            </a>
-          ) : null}
           {post.mine ? (
             <button className="post-action danger" type="button" onClick={() => { void remove(); }}>
               Delete
