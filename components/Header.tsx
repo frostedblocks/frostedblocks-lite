@@ -13,6 +13,11 @@ const links = [
   { href: "/network", label: "Network" },
 ];
 
+function linkActive(pathname: string, href: string) {
+  if (href === "/feed") return pathname === "/feed" || pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -36,7 +41,12 @@ export function Header() {
         <BrandLink />
         <nav className="nav nav-desktop" aria-label="Main">
           {links.map((l) => (
-            <Link key={l.href} className="nav-link" href={l.href}>
+            <Link
+              key={l.href}
+              className={linkActive(pathname, l.href) ? "nav-link active" : "nav-link"}
+              href={l.href}
+              aria-current={linkActive(pathname, l.href) ? "page" : undefined}
+            >
               {l.label}
             </Link>
           ))}
@@ -57,7 +67,13 @@ export function Header() {
       {open ? (
         <nav id="mobile-menu" className="nav-drawer" aria-label="Mobile">
           {links.map((l) => (
-            <Link key={l.href} className="nav-link" href={l.href} onClick={() => setOpen(false)}>
+            <Link
+              key={l.href}
+              className={linkActive(pathname, l.href) ? "nav-link active" : "nav-link"}
+              href={l.href}
+              aria-current={linkActive(pathname, l.href) ? "page" : undefined}
+              onClick={() => setOpen(false)}
+            >
               {l.label}
             </Link>
           ))}

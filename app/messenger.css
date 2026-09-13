@@ -1,14 +1,14 @@
-.messenger { padding: 28px; max-width: 760px; margin: 0 auto; }
+.messenger { padding: 24px; max-width: 760px; margin: 0 auto; }
 .messenger-grid {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   grid-template-columns: minmax(160px, 220px) 1fr;
   margin-top: 8px;
 }
 .messenger-people { min-width: 0; }
 .messenger-person {
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,12 +36,12 @@
   font-size: 11px;
   font-weight: 700;
   line-height: 1;
-  color: #0b1220;
-  background: #7dd3fc;
+  color: #061018;
+  background: #38bdf8;
 }
 .nav-link-badge { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 720px) {
-  .messenger { padding: 20px 16px; }
+  .messenger { padding: 18px 14px; }
   .messenger-grid { grid-template-columns: 1fr; }
   .messenger-grid.has-thread .messenger-people { display: none; }
   .messenger-grid:not(.has-thread) .messenger-thread { display: none; }
