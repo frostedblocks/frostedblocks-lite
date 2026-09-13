@@ -66,7 +66,7 @@ export function CirclesView() {
       const c = await createCircle(name, purpose);
       window.location.href = `/c/${c.slug}?i=${c.invitePath.split("i=")[1] || ""}`;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create room.");
+      setError(err instanceof Error ? err.message : "Could not create Circle.");
       setBusy(false);
     }
   }
@@ -111,8 +111,8 @@ export function CirclesView() {
     return (
       <article className="glass page-card" aria-busy="true">
         <div className="kicker">Circles</div>
-        <h1 style={{ fontSize: 40 }}>Your rooms</h1>
-        <p className="note">Loading your circles…</p>
+        <h1 style={{ fontSize: 40 }}>Your Circles</h1>
+        <p className="note">Loading…</p>
         <div className="stack" style={{ marginTop: 18 }}>
           <div className="glass stack-item" style={{ minHeight: 56, opacity: 0.55 }} />
           <div className="glass stack-item" style={{ minHeight: 56, opacity: 0.4 }} />
@@ -126,10 +126,10 @@ export function CirclesView() {
     return (
       <article className="glass page-card">
         <div className="kicker">Circles</div>
-        <h1 style={{ fontSize: 40 }}>Private rooms</h1>
-        <p className="lead">Private room for friends. Only they can see it.</p>
+        <h1 style={{ fontSize: 40 }}>Circles</h1>
+        <p className="lead">A private Circle for friends. Only they can see it.</p>
         <p style={{ marginTop: 16 }}>
-          <Link className="btn" href="/signin">Sign in to create a room</Link>
+          <Link className="btn" href="/signin">Sign in to create a Circle</Link>
         </p>
       </article>
     );
@@ -151,11 +151,11 @@ export function CirclesView() {
   return (
     <article className="glass page-card">
       <div className="kicker">Circles</div>
-      <h1 style={{ fontSize: 40 }}>Your rooms</h1>
+      <h1 style={{ fontSize: 40 }}>Your Circles</h1>
       <p className="lead">1. Pick a type · 2. Name it · 3. Share the link. Only members see posts.</p>
 
       <form className="auth-form" onSubmit={makeRoom} style={{ marginTop: 18 }}>
-        <div className="chips" style={{ margin: "0 0 12px" }} aria-label="Room purpose">
+        <div className="chips" style={{ margin: "0 0 12px" }} aria-label="Circle purpose">
           {CIRCLE_PURPOSES.map((p) => (
             <button
               key={p.id}
@@ -169,7 +169,7 @@ export function CirclesView() {
         </div>
         {meta ? <p className="note" style={{ marginTop: 0 }}>{meta.empty}</p> : null}
         <label>
-          Room name
+          Circle name
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
