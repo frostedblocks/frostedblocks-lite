@@ -1,24 +1,8 @@
 import { NextResponse } from "next/server";
-import { ensureSchema, sql } from "@/lib/db";
 import { appUrl } from "@/lib/mail";
 import { publicError } from "@/lib/http";
 import { needsEmailVerify, userFromRequest } from "@/lib/session";
-import { hashToken } from "@/lib/token";
-
-/** Apply a verify token. Returns true if email_verified was set (or already set via this token). */
-async function consumeVerifyToken(token: string): Promise<boolean> {
-  if (!token) return false;
-  await ensureSchema();
-  const q = sql();
-  const dig = hashToken(token);
-  // Accept hashed tokens; also legacy plain tokens issued before hashing.
-  const rows = await q`SELECT token, user_id FROM lite_email_tokens
-    WHERE (token = ${dig} OR token = ${token}) AND kind = ${"verify"} AND expires_at > NOW()`;
-  if (!rows.length) return false;
-  await q`UPDATE lite_users SET email_verified = TRUE WHERE id = ${rows[0].user_id}`;
-  await q`DELETE FROM lite_email_tokens WHERE token = ${rows[0].token}`;
-  return true;
-}
+import { consumeVerifyToken } from "@/lib/verify-email";
 
 /**
  * Legacy email links hit GET /api/auth/verify?token=…
