@@ -7,10 +7,10 @@ import { AuthButtons } from "./AuthButtons";
 import { BrandLink } from "./BrandLink";
 import { MessagesNavLink } from "./MessagesNavLink";
 
+/** Keep the main bar dumb: Feed + Circles. Network lives in footer / /network. */
 const links = [
   { href: "/feed", label: "Feed" },
   { href: "/circles", label: "Circles" },
-  { href: "/network", label: "Network" },
 ];
 
 function linkActive(pathname: string, href: string) {
