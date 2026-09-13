@@ -69,49 +69,9 @@ export async function findUserByLogin(login: string): Promise<DbUser | null> {
   return rows[0] ? rowUser(rows[0]) : null;
 }
 
-function adminEmails(): string[] {
-  const raw = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
-  return raw
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-/** Site ops: ADMIN_EMAILS match, or first account (id 1) when unset. */
-export function isSiteAdmin(user: DbUser | null): boolean {
-  if (!user) return false;
-  const list = adminEmails();
-  if (list.length) {
-    return Boolean(user.email && list.includes(user.email.toLowerCase()));
-  }
-  return user.id === 1;
-}
-
-/**
- * Site-wide email confirm gate.
- * DB setting is source of truth. Env overrides:
- *   REQUIRE_EMAIL_VERIFY=1 force on
- *   REQUIRE_EMAIL_VERIFY=0 force off
- */
+/** Email confirm OFF unless REQUIRE_EMAIL_VERIFY=1. No in-app admin door. */
 export async function emailVerifyRequired(): Promise<boolean> {
-  const env = process.env.REQUIRE_EMAIL_VERIFY;
-  if (env === "1") return true;
-  if (env === "0") return false;
-  if (!dbUrl()) return false;
-  await ensureSchema();
-  const q = sql();
-  const rows = await q`SELECT value FROM lite_site_settings WHERE key = ${"email_verify_required"} LIMIT 1`;
-  if (!rows[0]) return false;
-  return String(rows[0].value) === "1";
-}
-
-export async function setEmailVerifyRequired(on: boolean): Promise<void> {
-  await ensureSchema();
-  const q = sql();
-  const value = on ? "1" : "0";
-  await q`INSERT INTO lite_site_settings (key, value, updated_at)
-    VALUES (${"email_verify_required"}, ${value}, NOW())
-    ON CONFLICT (key) DO UPDATE SET value = ${value}, updated_at = NOW()`;
+  return process.env.REQUIRE_EMAIL_VERIFY === "1";
 }
 
 export async function needsEmailVerify(user: DbUser): Promise<boolean> {
