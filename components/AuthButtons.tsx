@@ -25,10 +25,11 @@ export function AuthButtons() {
     );
   }
 
+  // Ghost only — page hero/composer owns the one solid primary CTA.
   return (
     <>
       <Link className="btn ghost" href="/signin">Sign in</Link>
-      <Link className="btn" href="/signup">Create Lite account</Link>
+      <Link className="btn ghost" href="/signup">Join</Link>
     </>
   );
 }

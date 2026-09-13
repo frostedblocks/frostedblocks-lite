@@ -5,11 +5,11 @@ import { useAuth } from "@/lib/use-auth";
 export function BrandLink() {
   const { signedIn } = useAuth();
   return (
-    <Link className="brand" href={signedIn ? "/feed" : "/"}>
+    <Link className="brand" href={signedIn ? "/circles" : "/"}>
       <div className="logo">ICE</div>
       <div>
         <b>ICE Lite</b>
-        <span>lite.frostedblocks.com</span>
+        <span>Circles</span>
       </div>
     </Link>
   );
