@@ -4,7 +4,7 @@ export const CIRCLE_PURPOSES = [
     id: "family",
     label: "Family pics",
     placeholder: "Family pics",
-    empty: "Drop family photos and updates here — members only.",
+    empty: "Add the first photo",
   },
   {
     id: "team",
