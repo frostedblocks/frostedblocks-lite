@@ -99,13 +99,22 @@ export async function loadCirclePosts(slug: string) {
   return data.posts || [];
 }
 
-export async function createCirclePost(slug: string, content: string) {
-  const res = await fetch(`/api/circles/${encodeURIComponent(slug)}/posts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ content }),
-  });
+export async function createCirclePost(slug: string, content: string, file?: File | null) {
+  const url = `/api/circles/${encodeURIComponent(slug)}/posts`;
+  let res: Response;
+  if (file) {
+    const form = new FormData();
+    form.set("file", file);
+    if (content.trim()) form.set("content", content);
+    res = await fetch(url, { method: "POST", credentials: "include", body: form });
+  } else {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ content }),
+    });
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not post.");
   return data.post;

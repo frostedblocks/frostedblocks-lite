@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/use-auth";
@@ -20,11 +20,15 @@ export function CircleRoom({ slug }: { slug: string }) {
   const { signedIn, ready, user } = useAuth();
   const search = useSearchParams();
   const invite = search.get("i") || "";
+  const fileRef = useRef<HTMLInputElement>(null);
   const [circle, setCircle] = useState<CircleDetail | null>(null);
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [text, setText] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [posting, setPosting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -50,6 +54,16 @@ export function CircleRoom({ slug }: { slug: string }) {
     void refresh();
   }, [ready, slug, invite, signedIn]);
 
+  useEffect(() => {
+    if (!photo) {
+      setPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(photo);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photo]);
+
   async function join() {
     setBusy(true);
     setError("");
@@ -63,15 +77,41 @@ export function CircleRoom({ slug }: { slug: string }) {
     }
   }
 
+  function onPick(file: File | null) {
+    setError("");
+    if (!file) {
+      setPhoto(null);
+      return;
+    }
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      setError("Use a JPG, PNG, or WEBP.");
+      return;
+    }
+    if (file.size > 2_000_000) {
+      setError("Photo must be under 2MB.");
+      return;
+    }
+    setPhoto(file);
+  }
+
   async function publish(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!photo && !text.trim()) {
+      setError("Add a photo or write something.");
+      return;
+    }
+    setPosting(true);
     try {
-      await createCirclePost(slug, text);
+      await createCirclePost(slug, text, photo);
       setText("");
+      setPhoto(null);
+      if (fileRef.current) fileRef.current.value = "";
       setPosts(await loadCirclePosts(slug));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not post.");
+    } finally {
+      setPosting(false);
     }
   }
 
@@ -170,6 +210,10 @@ export function CircleRoom({ slug }: { slug: string }) {
 
   const members = circle.members || [];
   const job = purposeMeta(circle.purpose || undefined);
+  const emptyCopy =
+    job?.id === "family"
+      ? "Add the first photo"
+      : job?.empty || "Add the first photo";
 
   return (
     <article className="glass" style={{ padding: 22, maxWidth: 720, margin: "0 auto" }}>
@@ -223,12 +267,61 @@ export function CircleRoom({ slug }: { slug: string }) {
             Circle · {circle.name}
           </span>
         </div>
-        <div className="meta">Post as {user?.name || "you"} in this circle only</div>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write to this circle…" rows={4} maxLength={2000} />
+        <div className="meta">Photo as {user?.name || "you"} in this circle only</div>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          style={{ display: "none" }}
+          onChange={(e) => onPick(e.target.files?.[0] || null)}
+        />
+
+        {preview ? (
+          <div style={{ marginBottom: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={preview}
+              alt="Selected"
+              style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 16 }}
+            />
+            <button
+              className="btn ghost"
+              type="button"
+              style={{ marginTop: 8 }}
+              onClick={() => {
+                setPhoto(null);
+                if (fileRef.current) fileRef.current.value = "";
+              }}
+            >
+              Remove photo
+            </button>
+          </div>
+        ) : (
+          <button
+            className="btn"
+            type="button"
+            style={{ width: "100%", minHeight: 88, marginBottom: 10, fontSize: 18 }}
+            onClick={() => fileRef.current?.click()}
+          >
+            Add photo / Camera
+          </button>
+        )}
+
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Caption (optional)"
+          rows={2}
+          maxLength={2000}
+        />
         {error ? <p className="error">{error}</p> : null}
-        <button className="btn" type="submit">Post to circle</button>
+        <button className="btn" type="submit" disabled={posting}>
+          {posting ? "Posting…" : "Post to circle"}
+        </button>
         <p className="note" style={{ marginBottom: 0 }}>
-          <Link className="quiet-link" href="/feed">Public feed</Link>
+          Stays in this room — not the public feed.
         </p>
       </form>
 
@@ -242,12 +335,20 @@ export function CircleRoom({ slug }: { slug: string }) {
                 <div className="meta">Circle only</div>
               </div>
             </div>
-            <p>{p.content}</p>
+            {p.imageURL ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={p.imageURL}
+                alt=""
+                style={{ width: "100%", maxHeight: 420, objectFit: "cover", borderRadius: 14, marginBottom: 8 }}
+              />
+            ) : null}
+            {p.content ? <p>{p.content}</p> : null}
           </div>
         ))}
         {!posts.length ? (
           <p className="note" style={{ padding: 12 }}>
-            {job?.empty || "No posts yet. Say hello to the room."}
+            {emptyCopy}
           </p>
         ) : null}
       </div>

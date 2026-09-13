@@ -112,5 +112,6 @@ export async function ensureSchema() {
     content TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  await q`ALTER TABLE lite_circle_posts ADD COLUMN IF NOT EXISTS image_url TEXT`;
   await q`CREATE INDEX IF NOT EXISTS lite_circle_posts_circle_idx ON lite_circle_posts (circle_id, created_at DESC)`;
 }
