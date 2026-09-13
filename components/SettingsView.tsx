@@ -27,13 +27,6 @@ export function SettingsView() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteErr, setDeleteErr] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
-  const [opsReady, setOpsReady] = useState(false);
-  const [canManageOps, setCanManageOps] = useState(false);
-  const [verifyRequired, setVerifyRequired] = useState(false);
-  const [opsEnvLocked, setOpsEnvLocked] = useState(false);
-  const [opsBusy, setOpsBusy] = useState(false);
-  const [opsMsg, setOpsMsg] = useState("");
-  const [opsErr, setOpsErr] = useState("");
 
   async function refresh() {
     const session = await refreshSession();
@@ -41,21 +34,6 @@ export function SettingsView() {
     setUser(u);
     setName(u?.name || "");
     setReady(true);
-    try {
-      const res = await fetch("/api/ops/email-verify", { credentials: "include" });
-      const data = await res.json();
-      if (res.ok) {
-        setVerifyRequired(Boolean(data.required));
-        setCanManageOps(Boolean(data.canManage));
-        setOpsEnvLocked(Boolean(data.envLocked));
-      } else {
-        setCanManageOps(false);
-      }
-    } catch {
-      setCanManageOps(false);
-    } finally {
-      setOpsReady(true);
-    }
   }
 
   useEffect(() => {
@@ -113,37 +91,6 @@ export function SettingsView() {
       setResendErr(err instanceof Error ? err.message : "Could not send email.");
     } finally {
       setResendBusy(false);
-    }
-  }
-
-  async function toggleEmailVerify(next: boolean) {
-    if (
-      next &&
-      !window.confirm(
-        "Turn on email confirmation? New signups will need to confirm before they can post or use Circles.",
-      )
-    ) {
-      return;
-    }
-    setOpsErr("");
-    setOpsMsg("");
-    setOpsBusy(true);
-    try {
-      const res = await fetch("/api/ops/email-verify", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ required: next }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not save.");
-      setVerifyRequired(Boolean(data.required));
-      setOpsMsg(data.required ? "Require email confirm is On." : "Require email confirm is Off.");
-      await refreshSession();
-    } catch (err) {
-      setOpsErr(err instanceof Error ? err.message : "Could not save.");
-    } finally {
-      setOpsBusy(false);
     }
   }
 
@@ -223,41 +170,6 @@ export function SettingsView() {
           )}
         </div>
 
-
-        {opsReady && canManageOps ? (
-          <div className="glass stack-item">
-            <strong>Require email confirm</strong>
-            <p className="note" style={{ marginBottom: 10 }}>
-              Off: people can post right after signup.
-              {opsEnvLocked
-                ? " Locked by REQUIRE_EMAIL_VERIFY in Vercel — remove that env var to use this switch."
-                : ""}
-            </p>
-            {opsErr ? <p className="error">{opsErr}</p> : null}
-            {opsMsg ? <p className="note">{opsMsg}</p> : null}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <button
-                className={verifyRequired ? "btn" : "btn ghost"}
-                type="button"
-                disabled={opsBusy || opsEnvLocked}
-                onClick={() => { void toggleEmailVerify(true); }}
-              >
-                On
-              </button>
-              <button
-                className={!verifyRequired ? "btn" : "btn ghost"}
-                type="button"
-                disabled={opsBusy || opsEnvLocked}
-                onClick={() => { void toggleEmailVerify(false); }}
-              >
-                Off
-              </button>
-              <span className="note" style={{ margin: 0 }}>
-                Now: <strong>{verifyRequired ? "On" : "Off"}</strong>
-              </span>
-            </div>
-          </div>
-        ) : null}
 
         <div className="glass stack-item">
           <strong>Photo</strong>
