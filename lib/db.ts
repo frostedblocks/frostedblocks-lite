@@ -97,6 +97,7 @@ export async function ensureSchema() {
     invite_token TEXT NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  await q`ALTER TABLE lite_circles ADD COLUMN IF NOT EXISTS purpose TEXT`;
   await q`CREATE TABLE IF NOT EXISTS lite_circle_members (
     circle_id BIGINT NOT NULL REFERENCES lite_circles(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
