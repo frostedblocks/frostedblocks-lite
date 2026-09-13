@@ -364,3 +364,13 @@ a.post-action { color: #cbd5e1; }
 .delete-btn {
   background: none; border: 0; color: #fda4af; cursor: pointer; padding: 0; font-size: 13px;
 }
+
+.post-action.ice {
+  color: var(--ice-sky);
+  border-color: rgba(125, 211, 252, .4);
+}
+.post-action.ice:hover {
+  color: #e0f2fe;
+  background: rgba(56, 189, 248, .12);
+  border-color: rgba(125, 211, 252, .65);
+}

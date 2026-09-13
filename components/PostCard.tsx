@@ -133,7 +133,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
             {copied ? "Copied" : "Copy link"}
           </button>
           {door === "network" ? (
-            <a className="post-action" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">
+            <a className="post-action ice" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">
               Open on Network
             </a>
           ) : null}
