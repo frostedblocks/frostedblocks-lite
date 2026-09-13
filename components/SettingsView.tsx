@@ -117,6 +117,14 @@ export function SettingsView() {
   }
 
   async function toggleEmailVerify(next: boolean) {
+    if (
+      next &&
+      !window.confirm(
+        "Turn on email confirmation? New signups will need to confirm before they can post or use Circles.",
+      )
+    ) {
+      return;
+    }
     setOpsErr("");
     setOpsMsg("");
     setOpsBusy(true);
@@ -130,7 +138,7 @@ export function SettingsView() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not save.");
       setVerifyRequired(Boolean(data.required));
-      setOpsMsg(data.required ? "Email confirmation is ON for new signups." : "Email confirmation is OFF.");
+      setOpsMsg(data.required ? "Require email confirm is On." : "Require email confirm is Off.");
       await refreshSession();
     } catch (err) {
       setOpsErr(err instanceof Error ? err.message : "Could not save.");
@@ -218,23 +226,23 @@ export function SettingsView() {
 
         {opsReady && canManageOps ? (
           <div className="glass stack-item">
-            <strong>Site · email confirmation</strong>
+            <strong>Require email confirm</strong>
             <p className="note" style={{ marginBottom: 10 }}>
-              Turns confirm gates on or off for everyone. Off = signup goes straight to Circles.
+              Off: people can post right after signup.
               {opsEnvLocked
                 ? " Locked by REQUIRE_EMAIL_VERIFY in Vercel — remove that env var to use this switch."
                 : ""}
             </p>
             {opsErr ? <p className="error">{opsErr}</p> : null}
             {opsMsg ? <p className="note">{opsMsg}</p> : null}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
               <button
                 className={verifyRequired ? "btn" : "btn ghost"}
                 type="button"
                 disabled={opsBusy || opsEnvLocked}
                 onClick={() => { void toggleEmailVerify(true); }}
               >
-                {opsBusy && !verifyRequired ? "Saving…" : "Require confirm"}
+                On
               </button>
               <button
                 className={!verifyRequired ? "btn" : "btn ghost"}
@@ -242,14 +250,12 @@ export function SettingsView() {
                 disabled={opsBusy || opsEnvLocked}
                 onClick={() => { void toggleEmailVerify(false); }}
               >
-                {opsBusy && verifyRequired ? "Saving…" : "Turn confirm off"}
+                Off
               </button>
+              <span className="note" style={{ margin: 0 }}>
+                Now: <strong>{verifyRequired ? "On" : "Off"}</strong>
+              </span>
             </div>
-            <p className="note" style={{ marginTop: 10, marginBottom: 0 }}>
-              Now: <strong>{verifyRequired ? "ON" : "OFF"}</strong>
-              {" · "}
-              Tip: set <code>ADMIN_EMAILS</code> in Vercel to your email so only you see this.
-            </p>
           </div>
         ) : null}
 
