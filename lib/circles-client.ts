@@ -67,6 +67,15 @@ export async function deleteCircle(slug: string, confirm: string) {
   if (!res.ok) throw new Error(data.error || "Could not delete circle.");
 }
 
+export async function leaveCircle(slug: string) {
+  const res = await fetch(`/api/circles/${encodeURIComponent(slug)}/leave`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Could not leave circle.");
+}
+
 export async function joinCircle(slug: string, invite: string) {
   const res = await fetch(`/api/circles/${encodeURIComponent(slug)}/join`, {
     method: "POST",
