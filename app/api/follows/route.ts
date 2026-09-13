@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const { target } = await req.json();
     const other = await findUserByLogin(String(target || ""));
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const { target } = await req.json();
     const other = await findUserByLogin(String(target || ""));

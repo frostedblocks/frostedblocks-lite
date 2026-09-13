@@ -74,7 +74,7 @@ export async function POST(req: Request, ctx: { params: { slug: string } }) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const slug = String(ctx.params.slug || "").toLowerCase();
     const mem = await requireMember(slug, me!.id);
@@ -128,7 +128,7 @@ export async function DELETE(req: Request, ctx: { params: { slug: string } }) {
   try {
     await ensureSchema();
     const me = await userFromRequest(req);
-    const blocked = denyUnverified(me);
+    const blocked = await denyUnverified(me);
     if (blocked) return blocked;
     const slug = String(ctx.params.slug || "").toLowerCase();
     const mem = await requireMember(slug, me!.id);
