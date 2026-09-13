@@ -8,6 +8,7 @@ import { clientIp, publicError, sessionCookie } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { isEmail, normalizeLogin } from "@/lib/login";
 import { hashToken, newEmailToken } from "@/lib/token";
+import { emailVerifyRequired } from "@/lib/session";
 
 export async function POST(req: Request) {
   try {
@@ -36,26 +37,34 @@ export async function POST(req: Request) {
     if (existing.length) return publicError(400, "Could not create that account.");
 
     const display = String(name || "").trim() || email.split("@")[0] || "Lite user";
+    const requireVerify = emailVerifyRequired();
     const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash, email_verified)
-      VALUES (${email}, ${null}, ${display}, ${hashPassword(pass)}, ${false})
+      VALUES (${email}, ${null}, ${display}, ${hashPassword(pass)}, ${!requireVerify})
       RETURNING id, email, phone, name, avatar`;
     const user = rows[0];
     const session = randomBytes(32).toString("hex");
     await q`INSERT INTO lite_sessions (token, user_id) VALUES (${session}, ${user.id})`;
 
     let mailed = false;
-    const verify = newEmailToken();
-    await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
-      VALUES (${hashToken(verify)}, ${user.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
-    try {
-      await sendMail(
-        email,
-        "Confirm your ICE Lite email",
-        `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${verify}\n\nOpen the link, then tap Confirm my email.\n\nIf you did not sign up, ignore this.`,
-      );
-      mailed = true;
-    } catch (err) {
-      console.error("signup mail failed", err instanceof Error ? err.message : err);
+    if (requireVerify) {
+      const verify = newEmailToken();
+      await q`INSERT INTO lite_email_tokens (token, user_id, kind, expires_at)
+        VALUES (${hashToken(verify)}, ${user.id}, ${"verify"}, NOW() + INTERVAL '2 days')`;
+      try {
+        await sendMail(
+          email,
+          "Confirm your ICE Lite email",
+          `Confirm this email for ICE Lite:
+${appUrl()}/verify?token=${verify}
+
+Open the link, then tap Confirm my email.
+
+If you did not sign up, ignore this.`,
+        );
+        mailed = true;
+      } catch (err) {
+        console.error("signup mail failed", err instanceof Error ? err.message : err);
+      }
     }
 
     const res = NextResponse.json({
@@ -64,6 +73,7 @@ export async function POST(req: Request) {
       name: user.name,
       avatar: user.avatar,
       mailed,
+      verifyRequired: requireVerify,
     });
     return sessionCookie(res, session);
   } catch {

@@ -149,13 +149,14 @@ export async function signUp(login: string, password: string, name: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not sign up.");
-  // New email accounts start unverified until they open the confirm link.
-  memoryVerified = false;
   memoryHasEmail = true;
+  // When verify is off, server marks verified; refreshSession syncs flags.
+  memoryVerified = data.verifyRequired === false ? true : false;
   cacheUser(data);
-  if (data.mailed === false && typeof window !== "undefined") {
+  if (data.verifyRequired && data.mailed === false && typeof window !== "undefined") {
     sessionStorage.setItem(MAIL_FAILED_KEY, "1");
   }
+  await refreshSession();
   return data;
 }
 

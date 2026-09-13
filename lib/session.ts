@@ -69,6 +69,12 @@ export async function findUserByLogin(login: string): Promise<DbUser | null> {
   return rows[0] ? rowUser(rows[0]) : null;
 }
 
+/** Set REQUIRE_EMAIL_VERIFY=1 in Vercel to turn confirm gates back on. */
+export function emailVerifyRequired() {
+  return process.env.REQUIRE_EMAIL_VERIFY === "1";
+}
+
 export function needsEmailVerify(user: DbUser) {
+  if (!emailVerifyRequired()) return false;
   return Boolean(user.email) && !user.emailVerified;
 }
