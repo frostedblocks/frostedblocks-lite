@@ -31,6 +31,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   const { signedIn } = useAuth();
   const [photo, setPhoto] = useState("");
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [replies, setReplies] = useState<LiteReply[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -65,6 +66,8 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
     const url = postUrl(post.id);
     try {
       await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
     } catch {
       window.prompt("Copy this link", url);
     }
@@ -114,20 +117,32 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         )}
       </p>
       <div className="post-foot">
-        <span>{post.likes} likes · {post.loves} loves · {replies.length} replies</span>
-        <span style={{ display: "flex", gap: 10 }}>
-          <button className="delete-btn" type="button" onClick={() => setOpen((v) => !v)}>
+        <div className="post-stats" aria-label="Engagement">
+          <span>{post.likes} likes</span>
+          <span aria-hidden="true">·</span>
+          <span>{post.loves} loves</span>
+          <span aria-hidden="true">·</span>
+          <span>{replies.length} replies</span>
+        </div>
+        <div className="post-actions">
+          <button className="post-action" type="button" onClick={() => setOpen((v) => !v)}>
             {open ? "Hide replies" : "Reply"}
           </button>
-          <Link className="delete-btn" href={href}>Open</Link>
-          <button className="delete-btn" type="button" onClick={() => { void copy(); }}>Copy link</button>
+          <Link className="post-action" href={href}>Open</Link>
+          <button className="post-action" type="button" onClick={() => { void copy(); }}>
+            {copied ? "Copied" : "Copy link"}
+          </button>
           {door === "network" ? (
-            <a className="delete-btn" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">Open on Network</a>
+            <a className="post-action" href="https://www.frostedblocks.com" target="_blank" rel="noopener noreferrer">
+              Open on Network
+            </a>
           ) : null}
           {post.mine ? (
-            <button className="delete-btn" type="button" onClick={() => { void remove(); }}>Delete</button>
+            <button className="post-action danger" type="button" onClick={() => { void remove(); }}>
+              Delete
+            </button>
           ) : null}
-        </span>
+        </div>
       </div>
       {open ? (
         <div className="stack" style={{ marginTop: 12 }}>
@@ -139,7 +154,7 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
                   <>
                     {" · "}
                     <button
-                      className="delete-btn"
+                      className="post-action danger inline"
                       type="button"
                       onClick={async () => {
                         try {
