@@ -7,6 +7,7 @@ import {
   createCirclePost,
   deleteCircle,
   joinCircle,
+  leaveCircle,
   loadCircle,
   loadCirclePosts,
   type CircleDetail,
@@ -24,6 +25,7 @@ export function CircleRoom({ slug }: { slug: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function refresh() {
@@ -105,6 +107,20 @@ export function CircleRoom({ slug }: { slug: string }) {
     }
   }
 
+  async function leaveRoom() {
+    if (!circle || circle.owner) return;
+    if (!window.confirm(`Leave “${circle.name}”? You can rejoin later with the guest link.`)) return;
+    setLeaving(true);
+    setError("");
+    try {
+      await leaveCircle(slug);
+      window.location.replace("/circles");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not leave circle.");
+      setLeaving(false);
+    }
+  }
+
   if (!ready) return null;
 
   if (!circle && error) {
@@ -160,10 +176,15 @@ export function CircleRoom({ slug }: { slug: string }) {
       <p className="note" style={{ marginTop: 0 }}>
         Members only — never the public feed.
       </p>
+      {circle.owner && circle.invitePath ? (
+        <p className="note" style={{ marginTop: 0 }}>
+          Share this room: tap <strong>Copy guest link</strong> and send it to friends.
+        </p>
+      ) : null}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
         <Link className="btn ghost" href="/circles">All circles</Link>
         {circle.invitePath ? (
-          <button className="btn ghost" type="button" onClick={() => { void copyInvite(); }}>
+          <button className="btn" type="button" onClick={() => { void copyInvite(); }}>
             {copied ? "Invite copied" : "Copy guest link"}
           </button>
         ) : null}
@@ -171,7 +192,11 @@ export function CircleRoom({ slug }: { slug: string }) {
           <button className="btn ghost" type="button" disabled={deleting} onClick={() => { void removeRoom(); }}>
             {deleting ? "Deleting…" : "Delete room"}
           </button>
-        ) : null}
+        ) : (
+          <button className="btn ghost" type="button" disabled={leaving} onClick={() => { void leaveRoom(); }}>
+            {leaving ? "Leaving…" : "Leave"}
+          </button>
+        )}
       </div>
 
       <div className="glass stack-item" style={{ marginBottom: 14 }}>

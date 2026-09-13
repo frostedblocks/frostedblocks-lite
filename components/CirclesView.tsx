@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/use-auth";
 import {
   createCircle,
   deleteCircle,
+  leaveCircle,
   listCircles,
   type CircleSummary,
 } from "@/lib/circles-client";
@@ -15,7 +16,7 @@ export function CirclesView() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [acting, setActing] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   async function refresh() {
@@ -44,6 +45,7 @@ export function CirclesView() {
     setBusy(true);
     try {
       const c = await createCircle(name);
+      // Land on the room with invite in the URL so Copy guest link is one tap away.
       window.location.href = `/c/${c.slug}?i=${c.invitePath.split("i=")[1] || ""}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create room.");
@@ -62,14 +64,28 @@ export function CirclesView() {
     const typed = window.prompt(`Type DELETE to permanently remove “${c.name}”.`, "");
     if (typed !== "DELETE" && typed !== c.name) return;
     setError("");
-    setDeleting(c.slug);
+    setActing(c.slug);
     try {
       await deleteCircle(c.slug, typed || "DELETE");
       setCircles((list) => list.filter((x) => x.slug !== c.slug));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete circle.");
     } finally {
-      setDeleting(null);
+      setActing(null);
+    }
+  }
+
+  async function leaveRoom(c: CircleSummary) {
+    if (!window.confirm(`Leave “${c.name}”? You can rejoin later with the guest link.`)) return;
+    setError("");
+    setActing(c.slug);
+    try {
+      await leaveCircle(c.slug);
+      setCircles((list) => list.filter((x) => x.slug !== c.slug));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not leave circle.");
+    } finally {
+      setActing(null);
     }
   }
 
@@ -157,14 +173,25 @@ export function CirclesView() {
                   <button
                     className="btn ghost"
                     type="button"
-                    disabled={deleting === c.slug}
+                    disabled={acting === c.slug}
                     onClick={() => {
                       void removeRoom(c);
                     }}
                   >
-                    {deleting === c.slug ? "Deleting…" : "Delete"}
+                    {acting === c.slug ? "Deleting…" : "Delete"}
                   </button>
-                ) : null}
+                ) : (
+                  <button
+                    className="btn ghost"
+                    type="button"
+                    disabled={acting === c.slug}
+                    onClick={() => {
+                      void leaveRoom(c);
+                    }}
+                  >
+                    {acting === c.slug ? "Leaving…" : "Leave"}
+                  </button>
+                )}
               </div>
             </div>
           ))
