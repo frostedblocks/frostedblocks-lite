@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     // Token already used or expired — if this session is already verified, treat as success
     // (common after a mail scanner burned the link but the UPDATE still ran on an older GET).
     const me = await userFromRequest(req);
-    if (me && !needsEmailVerify(me)) {
+    if (me && !(await needsEmailVerify(me))) {
       return NextResponse.json({ ok: true, alreadyVerified: true });
     }
 

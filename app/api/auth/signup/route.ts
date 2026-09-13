@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (existing.length) return publicError(400, "Could not create that account.");
 
     const display = String(name || "").trim() || email.split("@")[0] || "Lite user";
-    const requireVerify = emailVerifyRequired();
+    const requireVerify = await emailVerifyRequired();
     const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash, email_verified)
       VALUES (${email}, ${null}, ${display}, ${hashPassword(pass)}, ${!requireVerify})
       RETURNING id, email, phone, name, avatar`;

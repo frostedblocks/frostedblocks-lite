@@ -12,7 +12,7 @@ export async function GET(req: Request) {
         login: me.email || me.phone || "",
         name: me.name,
         avatar: me.avatar,
-        verified: !needsEmailVerify(me),
+        verified: !(await needsEmailVerify(me)),
         hasEmail: Boolean(me.email),
       },
     });
