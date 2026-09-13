@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { refreshSession } from "@/lib/auth-client";
 
@@ -7,6 +7,21 @@ import { refreshSession } from "@/lib/auth-client";
 export function ConfirmEmail({ token }: { token: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    refreshSession()
+      .then((s) => {
+        if (cancelled) return;
+        if (s.user && s.verified) {
+          window.location.replace("/feed");
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function confirm() {
     setError("");
@@ -27,7 +42,8 @@ export function ConfirmEmail({ token }: { token: string }) {
       } catch {
         /* feed will re-check */
       }
-      window.location.replace("/verify?ok=1");
+      // Hard navigate to feed so the confirm banner clears immediately.
+      window.location.replace("/feed");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not confirm that email.");
       setBusy(false);
@@ -37,8 +53,10 @@ export function ConfirmEmail({ token }: { token: string }) {
   return (
     <article className="glass auth-card">
       <div className="kicker">Email</div>
-      <h1 style={{ fontSize: 40 }}>Confirm your email</h1>
-      <p className="lead">Tap below to finish. This step stops mail apps from using the link before you do.</p>
+      <h1 style={{ fontSize: 40 }}>One more tap</h1>
+      <p className="lead">
+        Mail apps often open links before you do. Tap below to finish confirming — then you can post.
+      </p>
       {error ? <p className="error">{error}</p> : null}
       <p style={{ marginTop: 20 }}>
         <button className="btn" type="button" disabled={busy} onClick={() => { void confirm(); }}>
