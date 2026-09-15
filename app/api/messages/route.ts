@@ -5,6 +5,7 @@ import { handleOf, publicName } from "@/lib/public";
 import { denyUnverified } from "@/lib/guard";
 import { clientIp, publicError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { denyIfBanned } from "@/lib/lite-admin";
 
 export async function GET(req: Request) {
   try {
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     const blocked = await denyUnverified(me);
     if (blocked) return blocked;
+    const banned = await denyIfBanned(me?.id);
+    if (banned) return banned;
     const limited = await rateLimit(`msg:${clientIp(req)}:${me!.id}`, 20, 15 * 60);
     if (!limited.ok) {
       const res = publicError(429, "Too many messages. Wait a few minutes.");

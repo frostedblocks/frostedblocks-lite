@@ -7,6 +7,7 @@ import { cleanText } from "@/lib/text";
 import { handleOf, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
 import { putAvatar } from "@/lib/r2";
+import { denyIfBanned, getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
 
 export const runtime = "nodejs";
 
@@ -58,13 +59,17 @@ export async function GET(req: Request, ctx: { params: { slug: string } }) {
     const mem = await requireMember(slug, me.id);
     if (!mem) return publicError(403, "Join this circle to see posts.");
     const q = sql();
+    const admin = await getLiteAdmin().catch(() => null);
     const rows = await q`SELECT p.id, p.author_id, p.content, p.image_url, p.created_at, u.name AS author_name
       FROM lite_circle_posts p
       JOIN lite_users u ON u.id = p.author_id
       WHERE p.circle_id = ${mem.id}
       ORDER BY p.created_at DESC
       LIMIT 100`;
-    return NextResponse.json({ posts: rows.map((r) => mapPost(r, me.id)) });
+    const posts = rows
+      .map((r) => mapPost(r, me.id))
+      .filter((p) => !(admin && isPostHidden(admin, p.id)));
+    return NextResponse.json({ posts });
   } catch {
     return publicError(500, "Could not load circle posts.");
   }
@@ -76,6 +81,8 @@ export async function POST(req: Request, ctx: { params: { slug: string } }) {
     const me = await userFromRequest(req);
     const blocked = await denyUnverified(me);
     if (blocked) return blocked;
+    const banned = await denyIfBanned(me?.id);
+    if (banned) return banned;
     const slug = String(ctx.params.slug || "").toLowerCase();
     const mem = await requireMember(slug, me!.id);
     if (!mem) return publicError(403, "Join this circle to post here.");

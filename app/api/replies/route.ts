@@ -5,6 +5,7 @@ import { handleOf, publicName } from "@/lib/public";
 import { denyUnverified } from "@/lib/guard";
 import { publicError } from "@/lib/http";
 import { cleanText } from "@/lib/text";
+import { denyIfBanned } from "@/lib/lite-admin";
 
 function mapReply(row: any, myId?: number) {
   return {
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     const blocked = await denyUnverified(me);
     if (blocked) return blocked;
+    const banned = await denyIfBanned(me?.id);
+    if (banned) return banned;
     const body = await req.json();
     const postId = String(body.postId || "").slice(0, 80);
     const text = cleanText(String(body.content || ""));

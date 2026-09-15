@@ -2,6 +2,13 @@
 
 Shipped 2026-09-09 on frostedblocks-lite.
 
+## Lite admin lock (ICE canister)
+
+- Source of truth: `getLiteAdmin` on ICE `6jf55-2qaaa-aaaan-q6mwq-cai`.
+- Writes only from Internet Identity principal `gmtr2-…` via Motoko (`#unauthorized` otherwise).
+- Lite servers enforce signups / feed bridge / bans / hidden posts on API routes.
+- `/admin` on Lite is read-only status — not writable via email/phone session.
+
 - Security headers: CSP (enforce), HSTS 2 years without includeSubDomains, COOP, CORP, no ACAO *.
 - Session cookie: HttpOnly, Secure, SameSite=Lax, Path=/, 7-day TTL. New token on each login; logout and logout?all unchanged.
 - Mutating `/api/*` requests must come from lite.frostedblocks.com (or the current Vercel host).
