@@ -9,10 +9,15 @@ import { rateLimit } from "@/lib/rate-limit";
 import { isEmail, normalizeLogin } from "@/lib/login";
 import { hashToken, newEmailToken } from "@/lib/token";
 import { emailVerifyRequired } from "@/lib/session";
+import { getLiteAdmin } from "@/lib/lite-admin";
 
 export async function POST(req: Request) {
   try {
     await ensureSchema();
+    const admin = await getLiteAdmin();
+    if (!admin.signupsOpen) {
+      return publicError(403, "New Lite accounts are closed right now.");
+    }
     const { login, password, name } = await req.json();
     const id = normalizeLogin(String(login || ""));
     const pass = String(password || "");
@@ -54,12 +59,7 @@ export async function POST(req: Request) {
         await sendMail(
           email,
           "Confirm your ICE Lite email",
-          `Confirm this email for ICE Lite:
-${appUrl()}/verify?token=${verify}
-
-Open the link, then tap Confirm my email.
-
-If you did not sign up, ignore this.`,
+          `Confirm this email for ICE Lite:\n${appUrl()}/verify?token=${verify}\n\nOpen the link, then tap Confirm my email.\n\nIf you did not sign up, ignore this.`,
         );
         mailed = true;
       } catch (err) {

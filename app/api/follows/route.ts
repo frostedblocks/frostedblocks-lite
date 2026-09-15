@@ -4,6 +4,7 @@ import { findUserByLogin, userFromRequest } from "@/lib/session";
 import { handleOf, publicName } from "@/lib/public";
 import { denyUnverified } from "@/lib/guard";
 import { publicError } from "@/lib/http";
+import { denyIfBanned } from "@/lib/lite-admin";
 
 export async function GET(req: Request) {
   try {
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     const blocked = await denyUnverified(me);
     if (blocked) return blocked;
+    const banned = await denyIfBanned(me?.id);
+    if (banned) return banned;
     const { target } = await req.json();
     const other = await findUserByLogin(String(target || ""));
     if (!other) return publicError(404, "That Lite user was not found.");

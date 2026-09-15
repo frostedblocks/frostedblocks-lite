@@ -6,6 +6,7 @@ import { cleanText } from "@/lib/text";
 import { handleOf, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
 import { denyUnverified } from "@/lib/guard";
+import { denyIfBanned, getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
 
 function mapPost(row: any, myId?: number) {
   return {
@@ -26,6 +27,7 @@ function mapPost(row: any, myId?: number) {
 export async function GET(req: Request) {
   const me = await userFromRequest(req).catch(() => null);
   const limit = Math.min(50, Math.max(1, Number(new URL(req.url).searchParams.get("limit") || 50)));
+  const admin = await getLiteAdmin().catch(() => null);
   let network: Awaited<ReturnType<typeof fetchRecentPosts>> = [];
   try {
     network = await fetchRecentPosts(limit);
@@ -40,7 +42,9 @@ export async function GET(req: Request) {
       u.name AS author_name
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT ${limit}`;
-    const lite = rows.map((row) => mapPost(row, me?.id));
+    const lite = rows
+      .map((row) => mapPost(row, me?.id))
+      .filter((p) => !(admin && isPostHidden(admin, p.id)));
     const posts = [...lite, ...network].sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).slice(0, limit);
     return NextResponse.json({ posts, networkCount: network.length });
   } catch {
@@ -53,6 +57,8 @@ export async function POST(req: Request) {
     const me = await userFromRequest(req);
     const blocked = await denyUnverified(me);
     if (blocked) return blocked;
+    const banned = await denyIfBanned(me?.id);
+    if (banned) return banned;
     const { content } = await req.json();
     const text = cleanText(String(content || ""));
     if (!text) return publicError(400, "Write something first.");

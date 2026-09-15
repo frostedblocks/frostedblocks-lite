@@ -5,6 +5,7 @@ import { hashPassword } from "@/lib/password";
 import { sessionCookie } from "@/lib/http";
 import { normalizeLogin } from "@/lib/login";
 import { publicName } from "@/lib/public";
+import { getLiteAdmin } from "@/lib/lite-admin";
 
 export async function GET(req: Request) {
   const here = new URL(req.url);
@@ -58,6 +59,10 @@ export async function GET(req: Request) {
             avatar = ${nextAvatar}
         WHERE id = ${userId}`;
     } else {
+      const admin = await getLiteAdmin();
+      if (!admin.signupsOpen) {
+        return NextResponse.redirect(`${origin}/signin?error=signups-closed`);
+      }
       const unusable = hashPassword(randomBytes(32).toString("hex"));
       const rows = await q`INSERT INTO lite_users (email, phone, name, password_hash, avatar, email_verified)
         VALUES (${email}, ${null}, ${display}, ${unusable}, ${picture}, ${true})
