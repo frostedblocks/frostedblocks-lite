@@ -17,8 +17,10 @@ function allowedOrigin(origin: string) {
 function buildCsp(nonce: string) {
   return [
     "default-src 'self'",
-    // Nonce + strict-dynamic: no script unsafe-inline. Next applies the nonce to its scripts.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    // Nonce + strict-dynamic for modern browsers. https: and 'unsafe-inline' are
+    // Safari/WebKit fallbacks — browsers that honor nonce/strict-dynamic ignore them.
+    // Without these, Safari often blanks the page (scripts blocked).
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: 'unsafe-inline'`,
     "script-src-attr 'none'",
     // React style={{ }} needs unsafe-inline; linked CSS stays on 'self'.
     "style-src 'self' 'unsafe-inline'",
