@@ -11,7 +11,7 @@ export type LiteMessage = {
 export type MessageReads = Record<string, number>;
 
 export async function listAllMessages(): Promise<{ me: string; messages: LiteMessage[]; reads: MessageReads }> {
-  const res = await fetch("/api/messages", { cache: "no-store" });
+  const res = await fetch("/api/messages", { cache: "no-store", credentials: "include" });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not load messages.");
   return {
@@ -22,7 +22,10 @@ export async function listAllMessages(): Promise<{ me: string; messages: LiteMes
 }
 
 export async function openThread(handle: string): Promise<{ me: string; messages: LiteMessage[]; reads: MessageReads }> {
-  const res = await fetch(`/api/messages?with=${encodeURIComponent(handle)}`, { cache: "no-store" });
+  const res = await fetch(`/api/messages?with=${encodeURIComponent(handle)}`, {
+    cache: "no-store",
+    credentials: "include",
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not open thread.");
   return {
@@ -73,10 +76,21 @@ export function totalUnread(me: string, messages: LiteMessage[], reads: MessageR
 export async function sendMessage(_from: string, to: string, text: string) {
   const res = await fetch("/api/messages", {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ to, text }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Could not send.");
   return data.message as LiteMessage;
+}
+
+/** Newest inbound message for the current user (for OS notifications). */
+export function latestInbound(me: string, messages: LiteMessage[]) {
+  let newest: LiteMessage | null = null;
+  for (const m of messages) {
+    if (m.to !== me) continue;
+    if (!newest || m.at > newest.at) newest = m;
+  }
+  return newest;
 }
