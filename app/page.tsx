@@ -8,8 +8,8 @@ export default function HomePage() {
         <div>
           <div className="kicker">Circles</div>
           <h1 className="home-title">Share with people you know</h1>
-          <p className="note" style={{ margin: "8px 0 0", maxWidth: "36ch" }}>
-            Make a private Circle. Invite friends. Post photos. That&apos;s it.
+          <p className="note" style={{ margin: "6px 0 0", maxWidth: "40ch" }}>
+            Private Circle. Invite friends. Post photos.
           </p>
         </div>
         <HomeCta />
