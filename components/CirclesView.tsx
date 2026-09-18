@@ -51,7 +51,6 @@ export function CirclesView() {
     const next = CIRCLE_PURPOSES.find((p) => p.id === id);
     if (!next) return;
     setPurpose(id);
-    // Fill placeholder name if empty or still a previous template default.
     const prior = purposeMeta(purpose);
     if (!name.trim() || (prior && name.trim() === prior.placeholder)) {
       setName(next.placeholder);
@@ -126,10 +125,16 @@ export function CirclesView() {
     return (
       <article className="glass page-card">
         <div className="kicker">Circles</div>
-        <h1 style={{ fontSize: 40 }}>Circles</h1>
-        <p className="lead">A private Circle for friends. Only they can see it.</p>
+        <h1 className="home-title" style={{ fontSize: 28 }}>A room for people you know</h1>
+        <p className="lead">Invite with a guest link. Only members see posts.</p>
+        <div className="circles-preview" aria-hidden="true">
+          {CIRCLE_PURPOSES.map((p) => (
+            <span key={p.id} className="chip">{p.label}</span>
+          ))}
+        </div>
+        <p className="note">Family · Team · Roommates. Share the link after you join.</p>
         <p style={{ marginTop: 16 }}>
-          <Link className="btn" href="/signin">Sign in to create a Circle</Link>
+          <Link className="btn" href="/signup">Join to create a Circle</Link>
         </p>
       </article>
     );
