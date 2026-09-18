@@ -414,3 +414,113 @@ a.post-action { color: var(--ice-dim); }
 .circles-preview {
   display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 4px;
 }
+
+/* ICE referral program — in-feed iced-out blue promo */
+.referral-promo {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 10px;
+  padding: 16px 16px 14px;
+  border-radius: var(--ice-radius);
+  border: 1px solid rgba(125, 211, 252, 0.38);
+  background:
+    linear-gradient(155deg, rgba(8, 24, 42, 0.95) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(30, 27, 55, 0.88) 100%);
+  box-shadow:
+    0 8px 28px rgba(14, 165, 233, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.referral-promo-frost {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 10% -15%, rgba(186, 230, 253, 0.22), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 100% 110%, rgba(165, 180, 252, 0.16), transparent 50%);
+}
+.referral-promo-accent {
+  position: relative;
+  height: 1px;
+  margin: 0 0 12px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(186, 230, 253, 0.7),
+    rgba(125, 211, 252, 0.85),
+    rgba(165, 180, 252, 0.55),
+    transparent
+  );
+}
+.referral-promo-kicker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.referral-promo-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0c1929;
+  background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
+  border-radius: var(--ice-radius-pill);
+  padding: 3px 8px;
+}
+.referral-promo-brand {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.9);
+}
+.referral-promo-title {
+  position: relative;
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #f0f9ff;
+}
+.referral-promo-ice {
+  background: linear-gradient(90deg, #e0f2fe, #7dd3fc, #a5b4fc, #c4b5fd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.referral-promo-body {
+  position: relative;
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+.referral-promo-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.referral-promo-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--ice-radius-sm);
+  border: 1px solid rgba(186, 230, 253, 0.45);
+  font-size: 13px;
+  font-weight: 700;
+  color: #0c1929;
+  background: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 40%, #818cf8 78%, #a78bfa 100%);
+  box-shadow: 0 4px 18px rgba(56, 189, 248, 0.32);
+}
+.referral-promo-cta:hover {
+  filter: brightness(1.05);
+}
+.referral-promo-meta {
+  font-size: 11px;
+  color: #64748b;
+}

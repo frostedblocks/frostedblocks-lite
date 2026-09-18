@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PostCard } from "./PostCard";
+import { ReferralPromoAd } from "./ReferralPromoAd";
 import { currentUser, MAIL_FAILED_KEY, refreshSession } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
@@ -179,8 +180,12 @@ export function LiteFeed() {
           </div>
         )}
         <div className="feed">
-          {slice.map((post) => (
-            <PostCard key={post.id} post={post} onChange={() => { void refresh(); }} />
+          {safePage === 0 ? <ReferralPromoAd /> : null}
+          {slice.map((post, i) => (
+            <div key={post.id}>
+              <PostCard post={post} onChange={() => { void refresh(); }} />
+              {safePage === 0 && i === 2 ? <ReferralPromoAd /> : null}
+            </div>
           ))}
           {!slice.length ? (
             <p className="note" style={{ padding: 12 }}>
