@@ -113,11 +113,9 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
       </p>
       <div className="post-foot">
         <div className="post-stats" aria-label="Engagement">
-          <span>{post.likes} likes</span>
-          <span aria-hidden="true">·</span>
-          <span>{post.loves} loves</span>
-          <span aria-hidden="true">·</span>
-          <span>{replies.length} replies</span>
+          {post.likes + post.loves > 0 ? <span>{post.likes + post.loves} loves</span> : null}
+          {post.likes + post.loves > 0 && replies.length > 0 ? <span aria-hidden="true">·</span> : null}
+          {replies.length > 0 ? <span>{replies.length} replies</span> : null}
         </div>
         <div className="post-actions">
           <button className="post-action" type="button" onClick={() => setOpen((v) => !v)}>
