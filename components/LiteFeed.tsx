@@ -47,7 +47,6 @@ export function LiteFeed() {
     listCircles()
       .then((list) => {
         setCircles(list);
-        // Default to first circle when they have one — Circles is the product.
         if (list.length) {
           setDest((d) =>
             d.kind === "public"
@@ -119,10 +118,7 @@ export function LiteFeed() {
         <span><i className="dot" />Live</span>
         <span className="meta">{posts.length} posts</span>
       </div>
-      <p className="note" style={{ margin: "0 0 10px" }}>
-        Want private? Use <Link href="/circles">Circles</Link>.
-      </p>
-      <div className="glass" style={{ padding: 8 }}>
+      <div className="glass feed-shell">
         {signedIn && hasEmail && !verified ? (
           <div className="compose">
             <p className="note" style={{ margin: 0 }}>
