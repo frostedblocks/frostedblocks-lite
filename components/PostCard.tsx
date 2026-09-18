@@ -35,10 +35,47 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   const [replies, setReplies] = useState<LiteReply[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [likes, setLikes] = useState(Number(post.likes || 0));
+  const [likedByMe, setLikedByMe] = useState(!!post.likedByMe);
+  const [likeBusy, setLikeBusy] = useState(false);
   const door = doorForPost(post.author, post.id, post.source);
   const name = publicName(post.authorName);
   const href = postPath(post.id);
   const canFollow = door === "lite" && /^u\d+$/i.test(post.author) && !post.mine;
+  const isNetwork = post.source === "network" || String(post.id).startsWith("network-");
+
+  useEffect(() => {
+    setLikes(Number(post.likes || 0));
+    setLikedByMe(!!post.likedByMe);
+  }, [post.id, post.likes, post.likedByMe]);
+
+  async function toggleLike() {
+    if (!signedIn) {
+      window.location.href = "/signin";
+      return;
+    }
+    if (!isNetwork || likeBusy) return;
+    setLikeBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/likes", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: post.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not like.");
+      const liteLikes = Number(data.liteLikes ?? 0);
+      const chainLikes = Math.max(0, Number(post.likes || 0) - Number(post.liteLikes || 0));
+      setLikedByMe(!!data.liked);
+      setLikes(chainLikes + liteLikes);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not like.");
+    } finally {
+      setLikeBusy(false);
+    }
+  }
 
   useEffect(() => {
     setPhoto(looksLikeEmail(post.author) ? avatarFor(post.author) : "");
@@ -113,11 +150,26 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
       </p>
       <div className="post-foot">
         <div className="post-stats" aria-label="Engagement">
-          {post.likes + post.loves > 0 ? <span>{post.likes + post.loves} loves</span> : null}
-          {post.likes + post.loves > 0 && replies.length > 0 ? <span aria-hidden="true">·</span> : null}
-          {replies.length > 0 ? <span>{replies.length} replies</span> : null}
+          <span>{likes} likes</span>
+          <span aria-hidden="true">·</span>
+          <span>{post.loves} loves</span>
+          <span aria-hidden="true">·</span>
+          <span>{replies.length} replies</span>
         </div>
         <div className="post-actions">
+          {isNetwork ? (
+            <button
+              className="post-action"
+              type="button"
+              disabled={likeBusy}
+              onClick={() => {
+                void toggleLike();
+              }}
+              aria-pressed={likedByMe}
+            >
+              {likedByMe ? "Liked" : "Like"}
+            </button>
+          ) : null}
           <button className="post-action" type="button" onClick={() => setOpen((v) => !v)}>
             {open ? "Hide replies" : "Reply"}
           </button>

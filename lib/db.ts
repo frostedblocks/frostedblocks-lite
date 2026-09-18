@@ -119,4 +119,12 @@ export async function ensureSchema() {
     value TEXT NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`;
+  // Likes from Lite users on bridged ICE Network posts (ids like "network-123")
+  await q`CREATE TABLE IF NOT EXISTS lite_network_likes (
+    user_id    BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    post_key   TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, post_key)
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_network_likes_post_idx ON lite_network_likes (post_key)`;
 }
