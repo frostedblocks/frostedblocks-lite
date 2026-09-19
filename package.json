@@ -4,7 +4,7 @@
   "private": true,
   "description": "Web2 ICE Lite",
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "next dev",
