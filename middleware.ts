@@ -17,12 +17,8 @@ function allowedOrigin(origin: string) {
 function buildCsp(nonce: string) {
   return [
     "default-src 'self'",
-    // Nonce + strict-dynamic for modern browsers. https: and 'unsafe-inline' are
-    // Safari/WebKit fallbacks — browsers that honor nonce/strict-dynamic ignore them.
-    // Without these, Safari often blanks the page (scripts blocked).
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: 'unsafe-inline'`,
     "script-src-attr 'none'",
-    // React style={{ }} needs unsafe-inline; linked CSS stays on 'self'.
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "connect-src 'self' https://icp-api.io https://ic0.app https://*.icp0.io https://api.pwnedpasswords.com",
@@ -52,7 +48,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const nonce = btoa(crypto.randomUUID()).replace(/[^a-zA-Z0-9]/g, "").slice(0, 24);
   const csp = buildCsp(nonce);
 
   const requestHeaders = new Headers(req.headers);
