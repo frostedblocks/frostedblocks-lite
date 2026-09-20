@@ -6,10 +6,10 @@ export default function HomePage() {
     <main className="wrap page">
       <section className="glass home-hero home-hero-compact">
         <div>
-          <div className="kicker">Circles</div>
-          <h1 className="home-title">Share with people you know</h1>
-          <p className="note" style={{ margin: "6px 0 0", maxWidth: "40ch" }}>
-            Private Circle. Invite friends. Post photos.
+          <div className="kicker">ICE Lite</div>
+          <h1 className="home-title">Free ICE Lite — post without a wallet</h1>
+          <p className="note" style={{ margin: "6px 0 0", maxWidth: "44ch" }}>
+            Creators graduate to ICE Network.
           </p>
         </div>
         <HomeCta />

@@ -9,22 +9,25 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   metadataBase: new URL("https://lite.frostedblocks.com"),
   title: {
-    default: "ICE Lite | Lite Frost before the ICE",
+    default: "ICE Lite | Post without a wallet",
     template: "%s | ICE Lite",
   },
-  description: "Lite Frost before the ICE — a door to the ICE Network. Post, follow, and message on ICE Lite with email login.",
-  keywords: ["ICE Lite", "ICE Network", "Lite Frost", "email login social"],
+  description:
+    "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
+  keywords: ["ICE Lite", "ICE Network", "email login", "social"],
   openGraph: {
-    title: "ICE Lite | Lite Frost before the ICE",
-    description: "A door to the ICE Network. Post, follow, and message with email login.",
+    title: "ICE Lite | Post without a wallet",
+    description:
+      "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
     url: "https://lite.frostedblocks.com",
     siteName: "ICE Lite",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ICE Lite | Lite Frost before the ICE",
-    description: "A door to the ICE Network. Post, follow, and message with email login.",
+    title: "ICE Lite | Post without a wallet",
+    description:
+      "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
   },
   alternates: {
     canonical: "https://lite.frostedblocks.com",

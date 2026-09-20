@@ -4,6 +4,17 @@ const nextConfig = {
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  async redirects() {
+    return [
+      { source: "/circles", destination: "/feed", permanent: false },
+      { source: "/circles/:path*", destination: "/feed", permanent: false },
+      { source: "/c/:path*", destination: "/feed", permanent: false },
+      { source: "/network", destination: "/feed", permanent: false },
+      { source: "/network/:path*", destination: "/feed", permanent: false },
+      { source: "/messages", destination: "/feed", permanent: false },
+      { source: "/messages/:path*", destination: "/feed", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {
