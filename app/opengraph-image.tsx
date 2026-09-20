@@ -3,7 +3,8 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "ICE Lite — Lite Frost before the ICE, a door to the ICE Network";
+export const alt =
+  "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.";
 
 export default function Image() {
   return new ImageResponse(
@@ -24,10 +25,10 @@ export default function Image() {
           ICE Lite
         </div>
         <div style={{ display: "flex", fontSize: 64, fontWeight: 750, lineHeight: 0.95 }}>
-          Lite Frost before the ICE,
+          Post without a wallet
         </div>
         <div style={{ display: "flex", fontSize: 52, fontWeight: 750, lineHeight: 1.05, color: "#7dd3fc", marginTop: 12 }}>
-          a door to the ICE Network
+          Creators graduate to ICE Network
         </div>
         <div style={{ display: "flex", marginTop: 36, fontSize: 28, color: "#94a3b8" }}>
           lite.frostedblocks.com
