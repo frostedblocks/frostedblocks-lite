@@ -11,8 +11,6 @@ export default function NotFound() {
           <Link className="btn" href="/">Home</Link>
           {" "}
           <Link className="btn ghost" href="/feed">Live feed</Link>
-          {" "}
-          <Link className="btn ghost" href="/network">Network</Link>
         </p>
       </article>
     </main>
