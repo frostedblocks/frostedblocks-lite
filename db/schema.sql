@@ -38,5 +38,16 @@ CREATE TABLE IF NOT EXISTS lite_messages (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Activation funnel: one row per (user_id, event). Events:
+-- signup_completed | first_post_created | day1_return
+CREATE TABLE IF NOT EXISTS lite_funnel_events (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+  event       TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, event)
+);
+
 CREATE INDEX IF NOT EXISTS lite_posts_created_idx ON lite_posts (created_at DESC);
 CREATE INDEX IF NOT EXISTS lite_messages_pair_idx ON lite_messages (sender_id, receiver_id, created_at);
+CREATE INDEX IF NOT EXISTS lite_funnel_events_event_idx ON lite_funnel_events (event, created_at DESC);
