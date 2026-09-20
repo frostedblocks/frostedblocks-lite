@@ -5,13 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthButtons } from "./AuthButtons";
 import { BrandLink } from "./BrandLink";
-import { MessagesNavLink } from "./MessagesNavLink";
 
-/** Keep the main bar dumb: Feed + Circles. Network lives in footer / /network. */
-const links = [
-  { href: "/feed", label: "Feed" },
-  { href: "/circles", label: "Circles" },
-];
+/** Funnel Lite: Feed only. Circles / Messages / Network nav parked until activation works. */
+const links = [{ href: "/feed", label: "Feed" }];
 
 function linkActive(pathname: string, href: string) {
   if (href === "/feed") return pathname === "/feed" || pathname === "/";
@@ -50,7 +46,6 @@ export function Header() {
               {l.label}
             </Link>
           ))}
-          <MessagesNavLink />
           <AuthButtons />
         </nav>
         <button
@@ -77,7 +72,6 @@ export function Header() {
               {l.label}
             </Link>
           ))}
-          <MessagesNavLink onNavigate={() => setOpen(false)} />
           <AuthButtons />
         </nav>
       ) : null}
