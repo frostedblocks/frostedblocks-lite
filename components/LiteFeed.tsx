@@ -9,6 +9,7 @@ import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
 
 const PAGE_SIZE = 10;
+const POST_SUCCESS_KEY = "ice-lite-post-success";
 
 export function LiteFeed() {
   const { ready, signedIn, verified, hasEmail } = useAuth();
@@ -18,6 +19,7 @@ export function LiteFeed() {
   const [sent, setSent] = useState(false);
   const [mailFailed, setMailFailed] = useState(false);
   const [page, setPage] = useState(0);
+  const [postSuccess, setPostSuccess] = useState(false);
 
   async function refresh() {
     setPosts(await loadFeed());
@@ -53,6 +55,10 @@ export function LiteFeed() {
       await createPost(text);
       setText("");
       setPage(0);
+      if (typeof window !== "undefined" && sessionStorage.getItem(POST_SUCCESS_KEY) !== "1") {
+        sessionStorage.setItem(POST_SUCCESS_KEY, "1");
+        setPostSuccess(true);
+      }
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not post.");
@@ -105,10 +111,15 @@ export function LiteFeed() {
           </div>
         ) : signedIn ? (
           <form className="compose" onSubmit={publish}>
+            {postSuccess ? (
+              <p className="note" style={{ margin: "0 0 8px" }}>
+                Posted. Come back tomorrow — or invite one person who should see this.
+              </p>
+            ) : null}
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Post for everyone…"
+              placeholder="What’s worth sharing?"
               rows={3}
               maxLength={2000}
             />
@@ -134,7 +145,7 @@ export function LiteFeed() {
           ))}
           {!slice.length ? (
             <p className="note" style={{ padding: 12 }}>
-              Nothing here yet. Be the first to post.
+              You’re early. Your first post opens the feed.
             </p>
           ) : null}
         </div>
