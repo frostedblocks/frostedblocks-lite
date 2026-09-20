@@ -10,6 +10,7 @@ import { isEmail, normalizeLogin } from "@/lib/login";
 import { hashToken, newEmailToken } from "@/lib/token";
 import { emailVerifyRequired } from "@/lib/session";
 import { getLiteAdmin } from "@/lib/lite-admin";
+import { trackFunnelEvent } from "@/lib/events";
 
 export async function POST(req: Request) {
   try {
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
     const user = rows[0];
     const session = randomBytes(32).toString("hex");
     await q`INSERT INTO lite_sessions (token, user_id) VALUES (${session}, ${user.id})`;
+    await trackFunnelEvent(Number(user.id), "signup_completed");
 
     let mailed = false;
     if (requireVerify) {

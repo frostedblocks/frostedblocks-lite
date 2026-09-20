@@ -7,6 +7,7 @@ import { handleOf, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
 import { denyUnverified } from "@/lib/guard";
 import { denyIfBanned, getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
+import { trackFunnelEvent } from "@/lib/events";
 
 function mapPost(row: any, myId?: number) {
   return {
@@ -91,6 +92,10 @@ export async function POST(req: Request) {
     const q = sql();
     const rows = await q`INSERT INTO lite_posts (author_id, content, category)
       VALUES (${me!.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
+    const countRows = await q`SELECT COUNT(*)::int AS n FROM lite_posts WHERE author_id = ${me!.id}`;
+    if (Number(countRows[0]?.n ?? 0) === 1) {
+      await trackFunnelEvent(me!.id, "first_post_created");
+    }
     return NextResponse.json({
       post: mapPost({ ...rows[0], author_name: me!.name }, me!.id),
     });

@@ -6,6 +6,7 @@ import { sessionCookie } from "@/lib/http";
 import { normalizeLogin } from "@/lib/login";
 import { publicName } from "@/lib/public";
 import { getLiteAdmin } from "@/lib/lite-admin";
+import { trackFunnelEvent } from "@/lib/events";
 
 export async function GET(req: Request) {
   const here = new URL(req.url);
@@ -49,6 +50,7 @@ export async function GET(req: Request) {
     const existing = await q`SELECT id, name, avatar FROM lite_users WHERE email = ${email} LIMIT 1`;
 
     let userId: number;
+    let isNew = false;
     if (existing.length) {
       userId = Number(existing[0].id);
       const nextName = existing[0].name || display;
@@ -68,10 +70,12 @@ export async function GET(req: Request) {
         VALUES (${email}, ${null}, ${display}, ${unusable}, ${picture}, ${true})
         RETURNING id`;
       userId = Number(rows[0].id);
+      isNew = true;
     }
 
     const session = randomBytes(32).toString("hex");
     await q`INSERT INTO lite_sessions (token, user_id) VALUES (${session}, ${userId})`;
+    if (isNew) await trackFunnelEvent(userId, "signup_completed");
 
     // No email/name/picture in the URL — session cookie carries auth.
     const res = NextResponse.redirect(`${origin}/auth/google`);

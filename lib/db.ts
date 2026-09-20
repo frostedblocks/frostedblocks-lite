@@ -127,4 +127,14 @@ export async function ensureSchema() {
     PRIMARY KEY (user_id, post_key)
   )`;
   await q`CREATE INDEX IF NOT EXISTS lite_network_likes_post_idx ON lite_network_likes (post_key)`;
+
+  // Activation funnel events (signup → first_post → day1_return)
+  await q`CREATE TABLE IF NOT EXISTS lite_funnel_events (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    event TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, event)
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_funnel_events_event_idx ON lite_funnel_events (event, created_at DESC)`;
 }
