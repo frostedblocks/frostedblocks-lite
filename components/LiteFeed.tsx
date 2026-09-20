@@ -6,22 +6,18 @@ import { ReferralPromoAd } from "./ReferralPromoAd";
 import { currentUser, MAIL_FAILED_KEY, refreshSession } from "@/lib/auth-client";
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
-import { createCirclePost, listCircles, type CircleSummary } from "@/lib/circles-client";
 import type { IcePost } from "@/lib/types";
 
 const PAGE_SIZE = 10;
-type Dest = { kind: "public" } | { kind: "circle"; slug: string; name: string };
 
 export function LiteFeed() {
-  const { user, ready, signedIn, verified, hasEmail } = useAuth();
+  const { ready, signedIn, verified, hasEmail } = useAuth();
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [mailFailed, setMailFailed] = useState(false);
   const [page, setPage] = useState(0);
-  const [circles, setCircles] = useState<CircleSummary[]>([]);
-  const [dest, setDest] = useState<Dest>({ kind: "public" });
 
   async function refresh() {
     setPosts(await loadFeed());
@@ -39,26 +35,6 @@ export function LiteFeed() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!signedIn || !verified) {
-      setCircles([]);
-      setDest({ kind: "public" });
-      return;
-    }
-    listCircles()
-      .then((list) => {
-        setCircles(list);
-        if (list.length) {
-          setDest((d) =>
-            d.kind === "public"
-              ? { kind: "circle", slug: list[0].slug, name: list[0].name }
-              : d,
-          );
-        }
-      })
-      .catch(() => setCircles([]));
-  }, [signedIn, verified]);
-
   const pages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
   const safePage = Math.min(page, pages - 1);
   const slice = useMemo(
@@ -74,12 +50,6 @@ export function LiteFeed() {
       return;
     }
     try {
-      if (dest.kind === "circle") {
-        await createCirclePost(dest.slug, text);
-        setText("");
-        window.location.href = `/c/${dest.slug}`;
-        return;
-      }
       await createPost(text);
       setText("");
       setPage(0);
@@ -135,41 +105,16 @@ export function LiteFeed() {
           </div>
         ) : signedIn ? (
           <form className="compose" onSubmit={publish}>
-            {circles.length ? (
-              <div className="chips" style={{ margin: "0 0 8px" }} aria-label="Where to post">
-                {circles.map((c) => (
-                  <button
-                    key={c.id}
-                    className={dest.kind === "circle" && dest.slug === c.slug ? "btn" : "chip"}
-                    type="button"
-                    onClick={() => setDest({ kind: "circle", slug: c.slug, name: c.name })}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-                <button
-                  className={dest.kind === "public" ? "btn" : "chip"}
-                  type="button"
-                  onClick={() => setDest({ kind: "public" })}
-                >
-                  Everyone
-                </button>
-              </div>
-            ) : (
-              <p className="note" style={{ margin: 0 }}>
-                <Link href="/circles">Make a Circle</Link> for friends — or post for everyone below.
-              </p>
-            )}
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={dest.kind === "circle" ? "Say something…" : "Post for everyone…"}
+              placeholder="Post for everyone…"
               rows={3}
               maxLength={2000}
             />
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="submit">
-              {dest.kind === "public" ? "Post" : "Share"}
+              Post
             </button>
           </form>
         ) : (
@@ -189,7 +134,7 @@ export function LiteFeed() {
           ))}
           {!slice.length ? (
             <p className="note" style={{ padding: 12 }}>
-              Nothing here yet. <Link href="/circles">Start a Circle</Link>.
+              Nothing here yet. Be the first to post.
             </p>
           ) : null}
         </div>
