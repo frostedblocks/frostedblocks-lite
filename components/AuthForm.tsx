@@ -12,8 +12,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // New accounts → Circles; returning → feed (or Circles is fine too — Circles is the product).
-  const afterAuth = mode === "signup" ? "/circles" : "/circles";
+  // Signup and return → feed (Circles path retired).
+  const afterAuth = "/feed";
 
   useEffect(() => {
     if (ready && signedIn) window.location.replace(afterAuth);
@@ -64,16 +64,23 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       <button className="btn" type="submit" disabled={busy}>
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>
-      {mode === "signin" ? (
-        <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
+      {mode === "signup" ? (
+        <p className="note">
+          By creating an account you agree to the <Link href="/terms">Terms</Link> and{" "}
+          <Link href="/privacy">Privacy Policy</Link>. We’ll email a link — open it, then you’re in.
+        </p>
       ) : (
-        <p className="note">We’ll email a link. Open it, then you’re in.</p>
+        <Link className="btn ghost" href="/forgot" style={{ textAlign: "center" }}>Forgot password</Link>
       )}
       <p className="note">
         {mode === "signup" ? (
-          <>Already have an account? <Link href="/signin">Sign in</Link></>
+          <>
+            Already have an account? <Link href="/signin">Sign in</Link>
+          </>
         ) : (
-          <>No account yet? <Link href="/signup">Create account</Link></>
+          <>
+            No account yet? <Link href="/signup">Create account</Link>
+          </>
         )}
       </p>
     </form>
