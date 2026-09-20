@@ -6,19 +6,20 @@ import "./messenger.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
+const SHARE =
+  "Free ICE Lite — post without a wallet.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://lite.frostedblocks.com"),
   title: {
     default: "ICE Lite | Post without a wallet",
     template: "%s | ICE Lite",
   },
-  description:
-    "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
-  keywords: ["ICE Lite", "ICE Network", "email login", "social"],
+  description: SHARE,
+  keywords: ["ICE Lite", "email login", "social", "no wallet"],
   openGraph: {
     title: "ICE Lite | Post without a wallet",
-    description:
-      "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
+    description: SHARE,
     url: "https://lite.frostedblocks.com",
     siteName: "ICE Lite",
     type: "website",
@@ -26,8 +27,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ICE Lite | Post without a wallet",
-    description:
-      "Free ICE Lite — post without a wallet. Creators graduate to ICE Network.",
+    description: SHARE,
   },
   alternates: {
     canonical: "https://lite.frostedblocks.com",
