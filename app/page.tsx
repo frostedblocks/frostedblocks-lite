@@ -9,7 +9,7 @@ export default function HomePage() {
           <div className="kicker">ICE Lite</div>
           <h1 className="home-title">Free ICE Lite — post without a wallet</h1>
           <p className="note" style={{ margin: "6px 0 0", maxWidth: "44ch" }}>
-            Creators graduate to ICE Network.
+            Post free. No wallet required.
           </p>
         </div>
         <HomeCta />

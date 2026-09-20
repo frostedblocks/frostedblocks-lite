@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/lib/use-auth";
-import { ONCHAIN_URL } from "@/lib/canisters";
 
 export function HomeCta() {
   const { signedIn, ready } = useAuth();
@@ -14,9 +13,6 @@ export function HomeCta() {
         <Link className="btn" href="/feed">
           Open feed
         </Link>
-        <a className="btn ghost" href={ONCHAIN_URL} rel="noopener noreferrer">
-          Creators → ICE Network
-        </a>
       </div>
     );
   }
@@ -24,7 +20,7 @@ export function HomeCta() {
   return (
     <div className="cta-row">
       <Link className="btn" href="/signup">
-        Create account
+        Post free — no wallet
       </Link>
       <Link className="btn ghost" href="/signin">
         Sign in
