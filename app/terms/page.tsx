@@ -11,8 +11,9 @@ export default function TermsPage() {
           wallets, tokens, or on-chain monetization.
         </p>
         <p className="note" style={{ marginTop: 0 }}>
-          Effective September 20, 2026. Operator placeholder: Frosted Blocks (confirm legal entity
-          and jurisdiction before treating as final).
+          Effective September 20, 2026. Operator: Walter Wood, sole proprietor, Delaware, USA.
+          Brand name “Frosted Blocks” / “ICE Lite” is a trade name only — not a separate legal entity
+          yet.
         </p>
         <div className="stack">
           <div className="glass stack-item">
@@ -43,11 +44,11 @@ export default function TermsPage() {
           <div className="glass stack-item">
             <strong>Your content</strong>
             <p className="note">
-              You keep ownership of posts, photos, and other content you submit. You grant Frosted
-              Blocks a worldwide, non-exclusive, royalty-free license to host, store, display,
-              distribute, and moderate that content on Lite so the service can run. When you delete
-              content or your account, we stop displaying it publicly, except for reasonable backup,
-              security, legal, or abuse-prevention copies.
+              You keep ownership of posts, photos, and other content you submit. You grant Walter
+              Wood (operating ICE Lite) a worldwide, non-exclusive, royalty-free license to host,
+              store, display, distribute, and moderate that content on Lite so the service can run.
+              When you delete content or your account, we stop displaying it publicly, except for
+              reasonable backup, security, legal, or abuse-prevention copies.
             </p>
           </div>
           <div className="glass stack-item">
@@ -70,11 +71,10 @@ export default function TermsPage() {
             <strong>Disclaimers</strong>
             <p className="note">
               Lite is provided “as is.” We do not warrant uninterrupted or error-free service. To
-              the fullest extent allowed by law, Frosted Blocks is not liable for indirect,
-              incidental, special, consequential, or punitive damages, or for lost profits or data.
-              Our total liability for any claim relating to Lite is limited to the greater of (a)
-              amounts you paid us for Lite in the prior 12 months (currently $0 for free use) or
-              (b) USD $100.
+              the fullest extent allowed by law, Walter Wood is not liable for indirect, incidental,
+              special, consequential, or punitive damages, or for lost profits or data. Total
+              liability for any claim relating to Lite is limited to the greater of (a) amounts you
+              paid for Lite in the prior 12 months (currently $0 for free use) or (b) USD $100.
             </p>
           </div>
           <div className="glass stack-item">
@@ -82,7 +82,7 @@ export default function TermsPage() {
             <p className="note">
               These Terms are governed by the laws of the State of Delaware, USA, without regard to
               conflict-of-law rules, unless a mandatory consumer law in your home country says
-              otherwise. Confirm entity and venue with counsel before relying on this clause.
+              otherwise.
             </p>
           </div>
           <div className="glass stack-item">
