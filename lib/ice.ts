@@ -90,14 +90,22 @@ async function loadRecentPosts(limit: number): Promise<IcePost[]> {
   });
 }
 
-export async function fetchRecentPosts(limit = 50): Promise<IcePost[]> {
-  // Lite admin lock: when feed bridge is closed, do not pull on-chain posts.
+/**
+ * On-chain ICE Network pull.
+ * Hard-off for Lite product surfaces. Pass `{ force: true }` only for explicit admin/tools.
+ */
+export async function fetchRecentPosts(
+  limit = 50,
+  opts?: { force?: boolean },
+): Promise<IcePost[]> {
+  if (!opts?.force) return [];
+
   try {
     const { getLiteAdmin } = await import("./lite-admin");
     const admin = await getLiteAdmin();
     if (!admin.feedBridgeOpen) return [];
   } catch {
-    /* if admin query fails, fall through to normal fetch */
+    return [];
   }
 
   const n = Math.min(50, Math.max(1, limit));

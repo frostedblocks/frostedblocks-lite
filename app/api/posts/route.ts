@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { userFromRequest } from "@/lib/session";
-import { fetchRecentPosts } from "@/lib/ice";
 import { cleanText } from "@/lib/text";
 import { handleOf, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
@@ -29,12 +28,6 @@ export async function GET(req: Request) {
   const me = await userFromRequest(req).catch(() => null);
   const limit = Math.min(50, Math.max(1, Number(new URL(req.url).searchParams.get("limit") || 50)));
   const admin = await getLiteAdmin().catch(() => null);
-  let network: Awaited<ReturnType<typeof fetchRecentPosts>> = [];
-  try {
-    network = await fetchRecentPosts(limit);
-  } catch {
-    network = [];
-  }
 
   try {
     await ensureSchema();
@@ -43,38 +36,14 @@ export async function GET(req: Request) {
       u.name AS author_name
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT ${limit}`;
-    const lite = rows
+    const posts = rows
       .map((row) => mapPost(row, me?.id))
       .filter((p) => !(admin && isPostHidden(admin, p.id)));
 
-    // Attach Lite-user likes onto bridged ICE Network posts
-    let networkOut = network;
-    if (network.length) {
-      const keys = network.map((p) => String(p.id));
-      const countRows = await q`SELECT post_key, COUNT(*)::int AS n
-        FROM lite_network_likes WHERE post_key = ANY(${keys}) GROUP BY post_key`;
-      const counts = new Map(countRows.map((r) => [String(r.post_key), Number(r.n ?? 0)]));
-      let mine = new Set<string>();
-      if (me?.id) {
-        const mineRows = await q`SELECT post_key FROM lite_network_likes
-          WHERE user_id = ${me.id} AND post_key = ANY(${keys})`;
-        mine = new Set(mineRows.map((r) => String(r.post_key)));
-      }
-      networkOut = network.map((p) => {
-        const liteLikes = counts.get(String(p.id)) || 0;
-        return {
-          ...p,
-          liteLikes,
-          likedByMe: mine.has(String(p.id)),
-          likes: Number(p.likes || 0) + liteLikes,
-        };
-      });
-    }
-
-    const posts = [...lite, ...networkOut].sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).slice(0, limit);
-    return NextResponse.json({ posts, networkCount: networkOut.length });
+    // Lite-only feed — never merge on-chain ICE Network posts.
+    return NextResponse.json({ posts, networkCount: 0 });
   } catch {
-    return NextResponse.json({ posts: network, networkCount: network.length });
+    return NextResponse.json({ posts: [], networkCount: 0 });
   }
 }
 
