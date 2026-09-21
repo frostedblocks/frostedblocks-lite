@@ -92,9 +92,12 @@ async function loadRecentPosts(limit: number): Promise<IcePost[]> {
 
 /**
  * On-chain ICE Network pull.
- * Disabled for Lite product surfaces unless `force: true`.
+ * Hard-off for Lite product surfaces. Pass `{ force: true }` only for explicit admin/tools.
  */
-export async function fetchRecentPosts(_limit = 50, opts?: { force?: boolean }): Promise<IcePost[]> {
+export async function fetchRecentPosts(
+  limit = 50,
+  opts?: { force?: boolean },
+): Promise<IcePost[]> {
   if (!opts?.force) return [];
 
   try {
@@ -105,7 +108,7 @@ export async function fetchRecentPosts(_limit = 50, opts?: { force?: boolean }):
     return [];
   }
 
-  const n = Math.min(50, Math.max(1, _limit));
+  const n = Math.min(50, Math.max(1, limit));
   if (cache && cache.limit >= n && Date.now() - cache.at < TTL_MS) {
     return cache.posts.slice(0, n);
   }

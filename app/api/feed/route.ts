@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Legacy Network bridge endpoint.
- * Lite no longer surfaces on-chain ICE Network posts on its own feed.
- */
+/** Legacy Network bridge — disabled. Lite feed is Lite-only. */
 export async function GET() {
-  return NextResponse.json({ source: "network", posts: [], cached: false, disabled: true });
+  return NextResponse.json({
+    source: "network",
+    posts: [],
+    cached: false,
+    disabled: true,
+  });
 }

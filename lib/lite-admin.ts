@@ -18,7 +18,7 @@ export type LiteAdmin = {
 
 const DEFAULT: LiteAdmin = {
   signupsOpen: true,
-  // Default closed — Lite must not surface Network posts unless owner opens the bridge.
+  // Closed by default — Lite must not surface Network posts unless owner opens bridge.
   feedBridgeOpen: false,
   bannedLiteHandles: [],
   hiddenLitePostIds: [],
@@ -58,7 +58,7 @@ async function loadLiteAdmin(): Promise<LiteAdmin> {
   const raw = await actor.getLiteAdmin();
   return {
     signupsOpen: raw?.signupsOpen !== false,
-    // Prefer closed when field missing/ambiguous
+    // Prefer closed unless canister explicitly opens the bridge
     feedBridgeOpen: raw?.feedBridgeOpen === true,
     bannedLiteHandles: (raw?.bannedLiteHandles || []).map((h: string) =>
       normalizeHandle(h),

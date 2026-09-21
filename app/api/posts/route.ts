@@ -40,7 +40,7 @@ export async function GET(req: Request) {
       .map((row) => mapPost(row, me?.id))
       .filter((p) => !(admin && isPostHidden(admin, p.id)));
 
-    // Lite-only feed — do not merge on-chain ICE Network posts.
+    // Lite-only feed — never merge on-chain ICE Network posts.
     return NextResponse.json({ posts, networkCount: 0 });
   } catch {
     return NextResponse.json({ posts: [], networkCount: 0 });
