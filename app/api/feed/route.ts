@@ -5,7 +5,6 @@ export const dynamic = "force-dynamic";
 /**
  * Legacy Network bridge endpoint.
  * Lite no longer surfaces on-chain ICE Network posts on its own feed.
- * Kept as an empty stub so old clients don't 404.
  */
 export async function GET() {
   return NextResponse.json({ source: "network", posts: [], cached: false, disabled: true });

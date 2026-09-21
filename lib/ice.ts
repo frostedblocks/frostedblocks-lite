@@ -91,8 +91,8 @@ async function loadRecentPosts(limit: number): Promise<IcePost[]> {
 }
 
 /**
- * On-chain ICE Network pull — disabled for Lite product surfaces.
- * Kept for optional admin/tools; returns [] unless explicitly forced.
+ * On-chain ICE Network pull.
+ * Disabled for Lite product surfaces unless `force: true`.
  */
 export async function fetchRecentPosts(_limit = 50, opts?: { force?: boolean }): Promise<IcePost[]> {
   if (!opts?.force) return [];
