@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import { FeedTabs } from "@/components/FeedTabs";
+
+export const metadata: Metadata = {
+  title: "Feed",
+  description: "Live posts on ICE Lite — free social feed, no wallet required.",
+  alternates: { canonical: "/feed" },
+  openGraph: {
+    title: "Feed | ICE Lite",
+    description: "Live posts on ICE Lite — free social feed, no wallet required.",
+    url: "/feed",
+  },
+};
 
 export default function FeedPage() {
   return (

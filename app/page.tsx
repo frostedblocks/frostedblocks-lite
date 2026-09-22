@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
 import { LiteFeed } from "@/components/LiteFeed";
 import { HomeCta } from "@/components/HomeCta";
+
+export const metadata: Metadata = {
+  title: { absolute: "ICE Lite | Post without a wallet" },
+  description: "Free ICE Lite — post without a wallet.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "ICE Lite | Post without a wallet",
+    description: "Free ICE Lite — post without a wallet.",
+    url: "/",
+  },
+};
 
 export default function HomePage() {
   return (
