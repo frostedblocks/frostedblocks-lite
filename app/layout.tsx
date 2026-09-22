@@ -6,8 +6,7 @@ import "./messenger.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-const SHARE =
-  "Free ICE Lite — post without a wallet.";
+const SHARE = "Free ICE Lite — post without a wallet.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://lite.frostedblocks.com"),
@@ -20,7 +19,6 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ICE Lite | Post without a wallet",
     description: SHARE,
-    url: "https://lite.frostedblocks.com",
     siteName: "ICE Lite",
     type: "website",
   },
@@ -28,9 +26,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ICE Lite | Post without a wallet",
     description: SHARE,
-  },
-  alternates: {
-    canonical: "https://lite.frostedblocks.com",
   },
 };
 

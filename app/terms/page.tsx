@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "ICE Lite Terms of Service — free posting product operated by Walter Wood, Delaware.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "Terms of Service | ICE Lite",
+    description: "ICE Lite Terms of Service — free posting product operated by Walter Wood, Delaware.",
+    url: "/terms",
+  },
+};
 
 export default function TermsPage() {
   return (

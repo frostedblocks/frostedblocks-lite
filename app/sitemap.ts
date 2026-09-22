@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://lite.frostedblocks.com";
-  return ["", "/feed", "/about", "/join", "/terms", "/privacy", "/contact", "/signup", "/signin"].map(
+  return ["", "/feed", "/about", "/join", "/terms", "/privacy", "/contact", "/signup"].map(
     (path) => ({
       url: `${base}${path}`,
       changeFrequency: "daily" as const,
