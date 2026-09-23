@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Free ICE Lite — post without a wallet.";
+export const alt = "Free ICE Lite — post free.";
 
 export default function Image() {
   return new ImageResponse(
@@ -33,7 +33,7 @@ export default function Image() {
           ICE Lite
         </div>
         <div style={{ display: "flex", fontSize: 64, fontWeight: 750, lineHeight: 0.95 }}>
-          Post without a wallet
+          Post free
         </div>
         <div
           style={{
@@ -45,7 +45,7 @@ export default function Image() {
             marginTop: 20,
           }}
         >
-          Free ICE Lite — post without a wallet.
+          Free ICE Lite — post free.
         </div>
         <div style={{ display: "flex", marginTop: 36, fontSize: 28, color: "#64748b" }}>
           lite.frostedblocks.com

@@ -9,7 +9,7 @@ export function BrandLink() {
       <div className="logo" aria-hidden="true"><span className="logo-mark" /></div>
       <div>
         <b>ICE Lite</b>
-        <span>No wallet</span>
+        <span>Free to post</span>
       </div>
     </Link>
   );
