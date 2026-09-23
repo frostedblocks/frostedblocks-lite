@@ -1,9 +1,8 @@
 "use client";
-import { avatarFor } from "@/lib/auth-client";
 import { postPath, postUrl } from "@/lib/post-url";
 import { deletePost } from "@/lib/posts-client";
 import { createReply, deleteReply, loadReplies, type LiteReply } from "@/lib/replies-client";
-import { looksLikeEmail, publicName } from "@/lib/public";
+import { publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -78,8 +77,9 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   }
 
   useEffect(() => {
-    setPhoto(looksLikeEmail(post.author) ? avatarFor(post.author) : "");
-  }, [post.author]);
+    const fromApi = String(post.authorAvatar || "").trim();
+    setPhoto(fromApi);
+  }, [post.author, post.authorAvatar]);
 
   async function refreshReplies() {
     setReplies(await loadReplies(post.id));

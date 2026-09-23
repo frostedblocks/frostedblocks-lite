@@ -5,6 +5,8 @@ export type IcePost = {
   content: string;
   author: string;
   authorName: string;
+  /** Public avatar URL for Lite authors */
+  authorAvatar?: string | null;
   likes: number;
   loves: number;
   /** Likes from Lite users on bridged Network posts */

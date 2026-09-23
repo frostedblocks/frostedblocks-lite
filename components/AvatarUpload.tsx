@@ -16,7 +16,7 @@ export function AvatarUpload({ onDone }: { onDone?: () => void }) {
       if (!currentUser()) throw new Error("Sign in first.");
       const body = new FormData();
       body.set("file", file);
-      const res = await fetch("/api/avatar", { method: "POST", body });
+      const res = await fetch("/api/avatar", { method: "POST", body, credentials: "include" });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || "Upload failed.");
       setAvatar(data.url);
@@ -34,7 +34,7 @@ export function AvatarUpload({ onDone }: { onDone?: () => void }) {
     setBusy(true);
     try {
       if (!currentUser()) throw new Error("Sign in first.");
-      const res = await fetch("/api/avatar", { method: "DELETE" });
+      const res = await fetch("/api/avatar", { method: "DELETE", credentials: "include" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Could not delete.");
