@@ -9,11 +9,13 @@ import { denyIfBanned, getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
 import { trackFunnelEvent } from "@/lib/events";
 
 function mapPost(row: any, myId?: number) {
+  const avatar = row.author_avatar ? String(row.author_avatar) : "";
   return {
     id: String(row.id),
     content: row.content,
     author: handleOf(row.author_id),
     authorName: publicName(row.author_name),
+    authorAvatar: avatar || null,
     likes: 0,
     loves: 0,
     imageURL: null,
@@ -33,7 +35,7 @@ export async function GET(req: Request) {
     await ensureSchema();
     const q = sql();
     const rows = await q`SELECT p.id, p.author_id, p.content, p.category, p.created_at,
-      u.name AS author_name
+      u.name AS author_name, u.avatar AS author_avatar
       FROM lite_posts p JOIN lite_users u ON u.id = p.author_id
       ORDER BY p.created_at DESC LIMIT ${limit}`;
     const posts = rows
@@ -66,7 +68,7 @@ export async function POST(req: Request) {
       await trackFunnelEvent(me!.id, "first_post_created");
     }
     return NextResponse.json({
-      post: mapPost({ ...rows[0], author_name: me!.name }, me!.id),
+      post: mapPost({ ...rows[0], author_name: me!.name, author_avatar: me!.avatar }, me!.id),
     });
   } catch {
     return publicError(500, "Could not post.");
