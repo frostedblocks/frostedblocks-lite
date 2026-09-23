@@ -3,11 +3,11 @@ import { FeedTabs } from "@/components/FeedTabs";
 
 export const metadata: Metadata = {
   title: "Feed",
-  description: "Live posts on ICE Lite — free social feed, no wallet required.",
+  description: "Live posts on ICE Lite — free social feed.",
   alternates: { canonical: "/feed" },
   openGraph: {
     title: "Feed | ICE Lite",
-    description: "Live posts on ICE Lite — free social feed, no wallet required.",
+    description: "Live posts on ICE Lite — free social feed.",
     url: "/feed",
   },
 };

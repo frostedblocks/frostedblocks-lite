@@ -6,25 +6,25 @@ import "./messenger.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-const SHARE = "Free ICE Lite — post without a wallet.";
+const SHARE = "Free ICE Lite — post free.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://lite.frostedblocks.com"),
   title: {
-    default: "ICE Lite | Post without a wallet",
+    default: "ICE Lite | Post free",
     template: "%s | ICE Lite",
   },
   description: SHARE,
-  keywords: ["ICE Lite", "email login", "social", "no wallet"],
+  keywords: ["ICE Lite", "email login", "social", "free social"],
   openGraph: {
-    title: "ICE Lite | Post without a wallet",
+    title: "ICE Lite | Post free",
     description: SHARE,
     siteName: "ICE Lite",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ICE Lite | Post without a wallet",
+    title: "ICE Lite | Post free",
     description: SHARE,
   },
 };

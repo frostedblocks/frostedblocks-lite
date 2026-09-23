@@ -5,11 +5,11 @@ import { GoogleButton } from "@/components/GoogleButton";
 
 export const metadata: Metadata = {
   title: "Sign up",
-  description: "Create a free ICE Lite account — email signup, post without a wallet.",
+  description: "Create a free ICE Lite account — email signup, post free.",
   alternates: { canonical: "/signup" },
   openGraph: {
     title: "Sign up | ICE Lite",
-    description: "Create a free ICE Lite account — email signup, post without a wallet.",
+    description: "Create a free ICE Lite account — email signup, post free.",
     url: "/signup",
   },
 };

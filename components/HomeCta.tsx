@@ -20,7 +20,7 @@ export function HomeCta() {
   return (
     <div className="cta-row">
       <Link className="btn" href="/signup">
-        Post free — no wallet
+        Post free
       </Link>
       <Link className="btn ghost" href="/signin">
         Sign in
