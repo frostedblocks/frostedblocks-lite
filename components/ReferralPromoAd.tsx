@@ -1,3 +1,4 @@
+/** PARKED: unmounted from LiteFeed — do not re-add until Network upgrade is gated. */
 /**
  * In-feed promo for ICE Network referral program (II-only dashboard).
  * Links off Lite → frostedblocks.com/referral
@@ -32,4 +33,3 @@ export function ReferralPromoAd() {
     </aside>
   );
 }
-//
