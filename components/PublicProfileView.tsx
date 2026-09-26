@@ -153,11 +153,9 @@ export function PublicProfileView({ handle }: { handle: string }) {
             </Link>
           </>
         )}
-        {profile.avatar ? (
-          <Link className="btn ghost" href={photosHref}>
-            Photos
-          </Link>
-        ) : null}
+        <Link className="btn ghost" href={photosHref}>
+          Photos
+        </Link>
       </div>
 
       <p className="note">Names only — no emails on public profiles.</p>
