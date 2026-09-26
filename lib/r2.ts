@@ -80,3 +80,13 @@ export async function deleteAvatar(key: string) {
 export async function deletePrefix(prefix: string) {
   await deleteAvatar(`${prefix}noop`);
 }
+
+/** Map a public R2 URL back to the object key, or null if it is not ours. */
+export function keyFromPublicUrl(url: string) {
+  const base = publicBase();
+  const raw = String(url || "").trim();
+  if (!base || !raw.startsWith(`${base}/`)) return null;
+  const key = raw.slice(base.length + 1);
+  if (!key || key.includes("..") || key.startsWith("/")) return null;
+  return key;
+}

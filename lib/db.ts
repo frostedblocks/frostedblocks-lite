@@ -137,4 +137,14 @@ export async function ensureSchema() {
     UNIQUE (user_id, event)
   )`;
   await q`CREATE INDEX IF NOT EXISTS lite_funnel_events_event_idx ON lite_funnel_events (event, created_at DESC)`;
+
+  // Public multi-photo gallery (profile avatar stays on lite_users.avatar)
+  await q`CREATE TABLE IF NOT EXISTS lite_gallery_photos (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_gallery_photos_user_idx
+    ON lite_gallery_photos (user_id, created_at DESC)`;
 }

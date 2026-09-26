@@ -4,8 +4,13 @@
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
 }
+.photo-gallery-card {
+  display: grid;
+  gap: 8px;
+}
 .photo-gallery-tile {
   appearance: none;
+  position: relative;
   display: block;
   margin: 0;
   padding: 0;
@@ -25,14 +30,50 @@
   outline: 2px solid var(--ice-sky);
   outline-offset: 3px;
 }
+.photo-gallery-tile.is-profile {
+  border-color: rgba(125, 211, 252, .55);
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, .28), 0 0 18px rgba(56, 189, 248, .18);
+}
 .photo-gallery-tile img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+.photo-gallery-badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 8px;
+  border-radius: var(--ice-radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #0b1220;
+  background: #7dd3fc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+}
+.photo-gallery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
 .photo-gallery-empty {
   padding: 22px 20px;
+}
+.photo-gallery-lightbox-panel {
+  max-width: min(640px, 94vw);
+}
+.photo-gallery-lightbox-img {
+  display: block;
+  width: min(560px, 86vw);
+  max-height: min(70vh, 560px);
+  object-fit: contain;
+  border-radius: var(--ice-radius);
+  background: rgba(5, 8, 14, .55);
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, .35), 0 18px 48px rgba(0, 0, 0, .45);
 }
 a.avatar-expand {
   cursor: pointer;
