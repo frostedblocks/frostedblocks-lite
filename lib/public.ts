@@ -11,3 +11,12 @@ export function publicName(name?: string | null, fallback = "Lite user") {
   if (!n || looksLikeEmail(n)) return fallback;
   return n;
 }
+
+/** Lite public handles look like u4, u12, … */
+export function isLiteHandle(value: string) {
+  return /^u\d+$/i.test(String(value || "").trim());
+}
+
+export function profilePath(handle: string) {
+  return `/u/${String(handle || "").trim()}`;
+}
