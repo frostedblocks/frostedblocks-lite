@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import "./messenger.css";
+import "./photo-gallery.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
