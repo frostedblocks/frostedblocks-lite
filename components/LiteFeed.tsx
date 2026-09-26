@@ -6,6 +6,7 @@ import { currentUser, MAIL_FAILED_KEY, refreshSession } from "@/lib/auth-client"
 import { useAuth } from "@/lib/use-auth";
 import { createPost, loadFeed } from "@/lib/posts-client";
 import type { IcePost } from "@/lib/types";
+import { POST_MAX_CHARS } from "@/lib/post-limits";
 
 const PAGE_SIZE = 10;
 const POST_SUCCESS_KEY = "ice-lite-post-success";
@@ -119,8 +120,8 @@ export function LiteFeed() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="What’s worth sharing?"
-              rows={3}
-              maxLength={2000}
+              rows={8}
+              maxLength={POST_MAX_CHARS}
             />
             {error ? <p className="error">{error}</p> : null}
             <button className="btn" type="submit">
