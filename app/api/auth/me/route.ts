@@ -4,12 +4,18 @@ import { maybeTrackDay1Return } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
+function noStore(data: unknown, init?: ResponseInit) {
+  const res = NextResponse.json(data, init);
+  res.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+  return res;
+}
+
 export async function GET(req: Request) {
   try {
     const me = await userFromRequest(req);
-    if (!me) return NextResponse.json({ user: null });
+    if (!me) return noStore({ user: null });
     await maybeTrackDay1Return(me.id);
-    return NextResponse.json({
+    return noStore({
       user: {
         login: me.email || me.phone || "",
         name: me.name,
@@ -19,6 +25,6 @@ export async function GET(req: Request) {
       },
     });
   } catch {
-    return NextResponse.json({ user: null });
+    return noStore({ user: null });
   }
 }
