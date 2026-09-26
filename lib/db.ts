@@ -1,1 +1,162 @@
-PLACEHOLDER_DB
+import { neon } from "@neondatabase/serverless";
+
+export function dbUrl() {
+  return (
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    ""
+  );
+}
+
+export function sql() {
+  const url = dbUrl();
+  if (!url) throw new Error("Database URL is missing. Connect ice-lite in Vercel Storage, then Redeploy.");
+  return neon(url);
+}
+
+export async function ensureSchema() {
+  const q = sql();
+  await q`CREATE TABLE IF NOT EXISTS lite_users (
+    id BIGSERIAL PRIMARY KEY,
+    door TEXT NOT NULL DEFAULT 'lite',
+    email TEXT UNIQUE,
+    phone TEXT UNIQUE,
+    name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    avatar TEXT,
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    failed_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK (email IS NOT NULL OR phone IS NOT NULL)
+  )`;
+  await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS failed_attempts INTEGER NOT NULL DEFAULT 0`;
+  await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMPTZ`;
+  await q`ALTER TABLE lite_users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE`;
+  await q`CREATE TABLE IF NOT EXISTS lite_sessions (
+    token TEXT PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_email_tokens (
+    token TEXT PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_posts (
+    id BIGSERIAL PRIMARY KEY,
+    door TEXT NOT NULL DEFAULT 'lite',
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    category TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_follows (
+    follower_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    followee_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (follower_id, followee_id),
+    CHECK (follower_id <> followee_id)
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    receiver_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    body TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_message_reads (
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    peer_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    last_read_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, peer_id)
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_rate (
+    key TEXT PRIMARY KEY,
+    hits INTEGER NOT NULL DEFAULT 0,
+    window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_replies (
+    id BIGSERIAL PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_replies_post_idx ON lite_replies (post_id)`;
+
+  // Privacy circles — separate from public lite_posts (never mixed).
+  await q`CREATE TABLE IF NOT EXISTS lite_circles (
+    id BIGSERIAL PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    owner_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    invite_token TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`ALTER TABLE lite_circles ADD COLUMN IF NOT EXISTS purpose TEXT`;
+  await q`CREATE TABLE IF NOT EXISTS lite_circle_members (
+    circle_id BIGINT NOT NULL REFERENCES lite_circles(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member',
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (circle_id, user_id)
+  )`;
+  await q`CREATE TABLE IF NOT EXISTS lite_circle_posts (
+    id BIGSERIAL PRIMARY KEY,
+    circle_id BIGINT NOT NULL REFERENCES lite_circles(id) ON DELETE CASCADE,
+    author_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`ALTER TABLE lite_circle_posts ADD COLUMN IF NOT EXISTS image_url TEXT`;
+  await q`CREATE INDEX IF NOT EXISTS lite_circle_posts_circle_idx ON lite_circle_posts (circle_id, created_at DESC)`;
+  await q`CREATE TABLE IF NOT EXISTS lite_site_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  // Likes from Lite users on bridged ICE Network posts (ids like "network-123")
+  await q`CREATE TABLE IF NOT EXISTS lite_network_likes (
+    user_id    BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    post_key   TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, post_key)
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_network_likes_post_idx ON lite_network_likes (post_key)`;
+
+  // Activation funnel events (signup → first_post → day1_return)
+  await q`CREATE TABLE IF NOT EXISTS lite_funnel_events (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    event TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, event)
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_funnel_events_event_idx ON lite_funnel_events (event, created_at DESC)`;
+
+  // Public multi-photo gallery (profile avatar stays on lite_users.avatar)
+  await q`CREATE TABLE IF NOT EXISTS lite_gallery_photos (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_gallery_photos_user_idx
+    ON lite_gallery_photos (user_id, created_at DESC)`;
+
+  // Public shared links on Lite profiles (label + URL)
+  await q`CREATE TABLE IF NOT EXISTS lite_profile_links (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    label TEXT NOT NULL DEFAULT '',
+    url TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_profile_links_user_idx
+    ON lite_profile_links (user_id, sort_order ASC, created_at ASC)`;
+}
