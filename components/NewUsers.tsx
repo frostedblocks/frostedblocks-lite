@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { loadPeople, type Person } from "@/lib/follow-client";
+import { profilePath } from "@/lib/public";
 import { FollowButton } from "./FollowButton";
 import { LiteBadge } from "./LiteBadge";
 
@@ -27,14 +28,19 @@ export function NewUsers() {
         people.map((p) => (
           <div key={p.handle} className="glass partner" style={{ marginBottom: 10, minWidth: 0 }}>
             <div className="post-top" style={{ margin: 0 }}>
-              {p.avatar ? (
-                <img className="avatar" src={p.avatar} alt="" />
-              ) : (
-                <div className="avatar">{p.name.slice(0, 1).toUpperCase()}</div>
-              )}
+              <Link href={profilePath(p.handle)} aria-label={`${p.name} profile`}>
+                {p.avatar ? (
+                  <img className="avatar" src={p.avatar} alt="" />
+                ) : (
+                  <div className="avatar">{p.name.slice(0, 1).toUpperCase()}</div>
+                )}
+              </Link>
               <div>
                 <b>
-                  {p.name} <LiteBadge />
+                  <Link href={profilePath(p.handle)} style={{ color: "inherit", textDecoration: "none" }}>
+                    {p.name}
+                  </Link>{" "}
+                  <LiteBadge />
                 </b>
               </div>
             </div>

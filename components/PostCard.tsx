@@ -2,7 +2,7 @@
 import { postPath, postUrl } from "@/lib/post-url";
 import { deletePost } from "@/lib/posts-client";
 import { createReply, deleteReply, loadReplies, type LiteReply } from "@/lib/replies-client";
-import { publicName } from "@/lib/public";
+import { isLiteHandle, profilePath, publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -40,7 +40,8 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   const door = doorForPost(post.author, post.id, post.source);
   const name = publicName(post.authorName);
   const href = postPath(post.id);
-  const canFollow = door === "lite" && /^u\d+$/i.test(post.author) && !post.mine;
+  const canFollow = door === "lite" && isLiteHandle(post.author) && !post.mine;
+  const profileHref = isLiteHandle(post.author) ? profilePath(post.author) : null;
   const isNetwork = post.source === "network" || String(post.id).startsWith("network-");
 
   useEffect(() => {
@@ -125,13 +126,27 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
   return (
     <article className="glass post">
       <div className="post-top">
-        {photo ? (
+        {profileHref ? (
+          <Link href={profileHref} aria-label={`${name} profile`}>
+            {photo ? (
+              <img className="avatar" src={photo} alt="" />
+            ) : (
+              <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
+            )}
+          </Link>
+        ) : photo ? (
           <img className="avatar" src={photo} alt="" />
         ) : (
           <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
         )}
         <div>
-          <b>{name}</b>
+          {profileHref ? (
+            <Link href={profileHref} style={{ color: "inherit", textDecoration: "none" }}>
+              <b>{name}</b>
+            </Link>
+          ) : (
+            <b>{name}</b>
+          )}
           <div className="meta">
             <Link href={href}>{when(post.timestamp)}</Link>
           </div>
