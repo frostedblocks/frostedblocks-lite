@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import "./globals.css";
 import "./messenger.css";
 import "./photo-gallery.css";
+import "./profile-links.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 

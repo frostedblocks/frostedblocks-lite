@@ -147,4 +147,16 @@ export async function ensureSchema() {
   )`;
   await q`CREATE INDEX IF NOT EXISTS lite_gallery_photos_user_idx
     ON lite_gallery_photos (user_id, created_at DESC)`;
+
+  // Public shared links on Lite profiles (label + URL)
+  await q`CREATE TABLE IF NOT EXISTS lite_profile_links (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+    label TEXT NOT NULL DEFAULT '',
+    url TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lite_profile_links_user_idx
+    ON lite_profile_links (user_id, sort_order ASC, created_at ASC)`;
 }

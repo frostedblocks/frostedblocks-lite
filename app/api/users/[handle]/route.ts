@@ -4,6 +4,7 @@ import { userFromRequest } from "@/lib/session";
 import { handleOf, isLiteHandle, publicName } from "@/lib/public";
 import { publicError } from "@/lib/http";
 import { getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
+import { PROFILE_LINKS_CAP, mapProfileLinkRow } from "@/lib/profile-links";
 
 function mapPost(row: any, myId?: number) {
   const avatar = row.author_avatar ? String(row.author_avatar) : "";
@@ -51,6 +52,14 @@ export async function GET(
       .map((row) => mapPost(row, me?.id))
       .filter((p) => !(admin && isPostHidden(admin, p.id)));
 
+    const linkRows = await q`
+      SELECT id, label, url, sort_order
+      FROM lite_profile_links
+      WHERE user_id = ${userId}
+      ORDER BY sort_order ASC, created_at ASC
+      LIMIT ${PROFILE_LINKS_CAP}`;
+    const links = linkRows.map(mapProfileLinkRow);
+
     return NextResponse.json({
       profile: {
         handle: handleOf(user.id),
@@ -60,6 +69,8 @@ export async function GET(
         me: me ? Number(user.id) === me.id : false,
       },
       posts,
+      links,
+      linksCap: PROFILE_LINKS_CAP,
     });
   } catch {
     return publicError(500, "Could not load profile.");
