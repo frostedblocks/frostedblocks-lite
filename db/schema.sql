@@ -51,3 +51,16 @@ CREATE TABLE IF NOT EXISTS lite_funnel_events (
 CREATE INDEX IF NOT EXISTS lite_posts_created_idx ON lite_posts (created_at DESC);
 CREATE INDEX IF NOT EXISTS lite_messages_pair_idx ON lite_messages (sender_id, receiver_id, created_at);
 CREATE INDEX IF NOT EXISTS lite_funnel_events_event_idx ON lite_funnel_events (event, created_at DESC);
+
+
+-- Public shared links on Lite profiles (also created via ensureSchema)
+CREATE TABLE IF NOT EXISTS lite_profile_links (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     BIGINT NOT NULL REFERENCES lite_users(id) ON DELETE CASCADE,
+  label       TEXT NOT NULL DEFAULT '',
+  url         TEXT NOT NULL,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS lite_profile_links_user_idx
+  ON lite_profile_links (user_id, sort_order ASC, created_at ASC);
