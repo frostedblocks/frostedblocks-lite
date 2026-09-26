@@ -17,6 +17,7 @@ export async function GET(req: Request) {
     await maybeTrackDay1Return(me.id);
     return noStore({
       user: {
+        id: me.id,
         login: me.email || me.phone || "",
         name: me.name,
         avatar: me.avatar,
