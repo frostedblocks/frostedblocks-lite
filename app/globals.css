@@ -524,3 +524,59 @@ a.post-action { color: var(--ice-dim); }
   font-size: 11px;
   color: #64748b;
 }
+
+/* Profile avatar lightbox */
+.avatar-expand {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 99px;
+  cursor: zoom-in;
+  line-height: 0;
+  flex-shrink: 0;
+}
+.avatar-expand:focus-visible {
+  outline: 2px solid var(--ice-sky);
+  outline-offset: 3px;
+}
+.avatar-expand:hover .avatar {
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, .55), 0 0 18px rgba(56, 189, 248, .28);
+}
+.avatar-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 7, 12, .72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  cursor: zoom-out;
+}
+.avatar-lightbox-panel {
+  position: relative;
+  padding: 16px;
+  max-width: min(480px, 94vw);
+  cursor: default;
+}
+.avatar-lightbox-img {
+  display: block;
+  width: min(400px, 78vw);
+  height: min(400px, 70vh);
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, .35), 0 18px 48px rgba(0, 0, 0, .45);
+}
+.avatar-lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  padding: 6px 12px;
+  font-size: 12px;
+}
