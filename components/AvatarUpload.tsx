@@ -1,8 +1,15 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { clearAvatar, currentUser, setAvatar } from "@/lib/auth-client";
 
-export function AvatarUpload({ onDone }: { onDone?: () => void }) {
+export function AvatarUpload({
+  onDone,
+  galleryHref,
+}: {
+  onDone?: () => void;
+  galleryHref?: string;
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -51,9 +58,14 @@ export function AvatarUpload({ onDone }: { onDone?: () => void }) {
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
       <label className="btn ghost" style={{ display: "inline-block" }}>
-        {busy ? "Working…" : "Change photo"}
+        {busy ? "Working…" : "Add photo"}
         <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={busy} onChange={pick} />
       </label>
+      {galleryHref ? (
+        <Link className="btn ghost" href={galleryHref}>
+          View photo gallery
+        </Link>
+      ) : null}
       <button className="btn ghost" type="button" disabled={busy} onClick={remove}>
         Delete photo
       </button>

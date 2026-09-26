@@ -9,6 +9,7 @@ import {
   updateDisplayName,
   type LiteUser,
 } from "@/lib/auth-client";
+import { handleOf } from "@/lib/public";
 import { useAuth } from "@/lib/use-auth";
 import { AvatarUpload } from "./AvatarUpload";
 
@@ -129,6 +130,11 @@ export function SettingsView() {
     }
   }
 
+  const galleryHref =
+    typeof user.id === "number" && user.id > 0
+      ? `/u/${handleOf(user.id)}/photos`
+      : undefined;
+
   return (
     <article className="glass page-card">
       <div className="kicker">Settings</div>
@@ -199,8 +205,11 @@ export function SettingsView() {
 
         <div className="glass stack-item">
           <strong>Photo</strong>
-          <p className="note" style={{ marginBottom: 10 }}>JPG, PNG, or WEBP up to 2MB.</p>
-          <AvatarUpload onDone={() => { void refresh({ syncName: false }); }} />
+          <p className="note" style={{ marginBottom: 10 }}>JPG, PNG, or WEBP up to 2MB. Add photos or open your gallery.</p>
+          <AvatarUpload
+            galleryHref={galleryHref}
+            onDone={() => { void refresh({ syncName: false }); }}
+          />
         </div>
 
         <div className="glass stack-item">

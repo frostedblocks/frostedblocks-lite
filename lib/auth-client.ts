@@ -1,6 +1,7 @@
 import { normalizeLogin } from "./login";
 
 export type LiteUser = {
+  id?: number;
   email: string;
   name: string;
   pass?: string;
@@ -40,6 +41,7 @@ function cacheUser(user: LiteUser) {
   clearLegacyLocalAuth();
   const login = normalizeLogin(user.email || user.phone || "");
   memoryUser = {
+    id: typeof user.id === "number" ? user.id : undefined,
     email: login,
     name: user.name,
     avatar: user.avatar,
@@ -117,7 +119,10 @@ export async function refreshSession(): Promise<SessionInfo> {
     }
     memoryVerified = Boolean(data.user.verified);
     memoryHasEmail = Boolean(data.user.hasEmail);
+    const rawId = data.user.id;
+    const id = typeof rawId === "number" ? rawId : Number(rawId);
     cacheUser({
+      id: Number.isFinite(id) && id > 0 ? id : undefined,
       email: normalizeLogin(login),
       name: data.user.name || "Lite user",
       avatar: data.user.avatar || undefined,
