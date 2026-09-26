@@ -6,6 +6,8 @@ import type { IcePost } from "@/lib/types";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
 import { FollowButton } from "./FollowButton";
+import { ProfileLinks } from "./ProfileLinks";
+import type { ProfileLinkRow } from "@/lib/profile-links";
 
 type PublicProfile = {
   handle: string;
@@ -29,6 +31,8 @@ function joinedLabel(value?: string | null) {
 export function PublicProfileView({ handle }: { handle: string }) {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [posts, setPosts] = useState<IcePost[]>([]);
+  const [links, setLinks] = useState<ProfileLinkRow[]>([]);
+  const [linksCap, setLinksCap] = useState(12);
   const [ready, setReady] = useState(false);
   const [missing, setMissing] = useState(false);
 
@@ -49,15 +53,19 @@ export function PublicProfileView({ handle }: { handle: string }) {
         setMissing(true);
         setProfile(null);
         setPosts([]);
+        setLinks([]);
       } else {
         setMissing(false);
         setProfile(data.profile as PublicProfile);
         setPosts((data.posts || []) as IcePost[]);
+        setLinks((data.links || []) as ProfileLinkRow[]);
+        if (typeof data.linksCap === "number") setLinksCap(data.linksCap);
       }
     } catch {
       setMissing(true);
       setProfile(null);
       setPosts([]);
+      setLinks([]);
     } finally {
       setReady(true);
     }
@@ -159,6 +167,15 @@ export function PublicProfileView({ handle }: { handle: string }) {
       </div>
 
       <p className="note">Names only — no emails on public profiles.</p>
+
+      <ProfileLinks
+        isOwner={Boolean(profile.me)}
+        links={links}
+        cap={linksCap}
+        onChange={() => {
+          void refresh();
+        }}
+      />
 
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Lite posts</span>

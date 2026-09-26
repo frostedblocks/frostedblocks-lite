@@ -7,6 +7,9 @@ import { loadFollows } from "@/lib/follow-client";
 import { PostCard } from "./PostCard";
 import { LiteBadge } from "./LiteBadge";
 import type { IcePost } from "@/lib/types";
+import { handleOf } from "@/lib/public";
+import { ProfileLinks } from "./ProfileLinks";
+import type { ProfileLinkRow } from "@/lib/profile-links";
 
 export function ProfileView() {
   const [user, setUser] = useState<LiteUser | null>(null);
@@ -15,6 +18,8 @@ export function ProfileView() {
   const [following, setFollowing] = useState(0);
   const [followers, setFollowers] = useState(0);
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [links, setLinks] = useState<ProfileLinkRow[]>([]);
+  const [linksCap, setLinksCap] = useState(12);
 
   async function refresh() {
     const session = await refreshSession();
@@ -26,8 +31,28 @@ export function ProfileView() {
       const graph = await loadFollows();
       setFollowing(graph.following.length);
       setFollowers(graph.followers.length);
+      if (typeof u.id === "number" && u.id > 0) {
+        try {
+          const res = await fetch(`/api/users/${encodeURIComponent(handleOf(u.id))}`, {
+            cache: "no-store",
+            credentials: "include",
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            setLinks((data.links || []) as ProfileLinkRow[]);
+            if (typeof data.linksCap === "number") setLinksCap(data.linksCap);
+          } else {
+            setLinks([]);
+          }
+        } catch {
+          setLinks([]);
+        }
+      } else {
+        setLinks([]);
+      }
     } else {
       setPosts([]);
+      setLinks([]);
     }
     setReady(true);
   }
@@ -102,6 +127,18 @@ export function ProfileView() {
         <Link className="btn" href="/settings">Settings</Link>
       </div>
       <p className="note">Other people see your name, not your email. Account options live in Settings.</p>
+
+      {typeof user.id === "number" && user.id > 0 ? (
+        <ProfileLinks
+          isOwner
+          links={links}
+          cap={linksCap}
+          onChange={() => {
+            void refresh();
+          }}
+        />
+      ) : null}
+
       <div className="feed-head" style={{ marginTop: 22 }}>
         <span>Your posts</span>
         <span className="meta">{posts.length}</span>
