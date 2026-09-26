@@ -7,6 +7,7 @@ import { publicError } from "@/lib/http";
 import { denyUnverified } from "@/lib/guard";
 import { denyIfBanned, getLiteAdmin, isPostHidden } from "@/lib/lite-admin";
 import { trackFunnelEvent } from "@/lib/events";
+import { POST_MAX_CHARS } from "@/lib/post-limits";
 
 function mapPost(row: any, myId?: number) {
   const avatar = row.author_avatar ? String(row.author_avatar) : "";
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
     const { content } = await req.json();
     const text = cleanText(String(content || ""));
     if (!text) return publicError(400, "Write something first.");
-    if (text.length > 2000) return publicError(400, "Keep it under 2000 characters.");
+    if (text.length > POST_MAX_CHARS) return publicError(400, `Keep it under ${POST_MAX_CHARS} characters.`);
     const q = sql();
     const rows = await q`INSERT INTO lite_posts (author_id, content, category)
       VALUES (${me!.id}, ${text}, ${"Lite"}) RETURNING id, author_id, content, category, created_at`;
