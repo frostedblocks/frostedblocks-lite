@@ -31,6 +31,7 @@ export function PublicProfileView({ handle }: { handle: string }) {
   const [posts, setPosts] = useState<IcePost[]>([]);
   const [ready, setReady] = useState(false);
   const [missing, setMissing] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   async function refresh() {
     const h = String(handle || "").trim();
@@ -65,8 +66,23 @@ export function PublicProfileView({ handle }: { handle: string }) {
 
   useEffect(() => {
     setReady(false);
+    setAvatarOpen(false);
     void refresh();
   }, [handle]);
+
+  useEffect(() => {
+    if (!avatarOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setAvatarOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [avatarOpen]);
 
   if (!ready) return null;
 
@@ -86,17 +102,25 @@ export function PublicProfileView({ handle }: { handle: string }) {
   }
 
   const joined = joinedLabel(profile.joined);
+  const displayName = profile.name || "Lite user";
 
   return (
     <article className="glass" style={{ padding: 28, maxWidth: 720, margin: "0 auto" }}>
       <div className="post-top" style={{ marginBottom: 18 }}>
         {profile.avatar ? (
-          <img
-            className="avatar"
-            src={profile.avatar}
-            alt=""
-            style={{ width: 64, height: 64, objectFit: "cover" }}
-          />
+          <button
+            type="button"
+            className="avatar-expand"
+            aria-label={`View ${displayName}'s profile photo`}
+            onClick={() => setAvatarOpen(true)}
+          >
+            <img
+              className="avatar"
+              src={profile.avatar}
+              alt=""
+              style={{ width: 64, height: 64, objectFit: "cover" }}
+            />
+          </button>
         ) : (
           <div className="avatar" style={{ width: 64, height: 64, fontSize: 20 }}>
             {(profile.name || "U").slice(0, 1).toUpperCase()}
@@ -114,7 +138,7 @@ export function PublicProfileView({ handle }: { handle: string }) {
               flexWrap: "wrap",
             }}
           >
-            {profile.name || "Lite user"}
+            {displayName}
             <LiteBadge size="lg" />
           </h1>
           {joined ? <div className="meta">{joined}</div> : null}
@@ -166,6 +190,35 @@ export function PublicProfileView({ handle }: { handle: string }) {
       ) : (
         <p className="note">No Lite posts yet.</p>
       )}
+
+      {avatarOpen && profile.avatar ? (
+        <div
+          className="avatar-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${displayName}'s profile photo`}
+          onClick={() => setAvatarOpen(false)}
+        >
+          <div
+            className="glass avatar-lightbox-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="btn ghost avatar-lightbox-close"
+              aria-label="Close profile photo"
+              onClick={() => setAvatarOpen(false)}
+            >
+              Close
+            </button>
+            <img
+              className="avatar-lightbox-img"
+              src={profile.avatar}
+              alt={`${displayName}'s profile photo`}
+            />
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -14,6 +14,7 @@ export function ProfileView() {
   const [ready, setReady] = useState(false);
   const [following, setFollowing] = useState(0);
   const [followers, setFollowers] = useState(0);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   async function refresh() {
     const session = await refreshSession();
@@ -35,6 +36,20 @@ export function ProfileView() {
     void refresh();
   }, []);
 
+  useEffect(() => {
+    if (!avatarOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setAvatarOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [avatarOpen]);
+
   if (!ready) return null;
 
   if (!user) {
@@ -50,11 +65,20 @@ export function ProfileView() {
     );
   }
 
+  const displayName = user.name || "Lite user";
+
   return (
     <article className="glass" style={{ padding: 28, maxWidth: 720, margin: "0 auto" }}>
       <div className="post-top" style={{ marginBottom: 18 }}>
         {user.avatar ? (
-          <img className="avatar" src={user.avatar} alt="" style={{ width: 64, height: 64, objectFit: "cover" }} />
+          <button
+            type="button"
+            className="avatar-expand"
+            aria-label="View your profile photo"
+            onClick={() => setAvatarOpen(true)}
+          >
+            <img className="avatar" src={user.avatar} alt="" style={{ width: 64, height: 64, objectFit: "cover" }} />
+          </button>
         ) : (
           <div className="avatar" style={{ width: 64, height: 64, fontSize: 20 }}>
             {(user.name || "U").slice(0, 1).toUpperCase()}
@@ -63,7 +87,7 @@ export function ProfileView() {
         <div>
           <div className="kicker">Lite profile · not on-chain</div>
           <h1 style={{ fontSize: 36, margin: "4px 0", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            {user.name || "Lite user"}
+            {displayName}
             <LiteBadge size="lg" />
           </h1>
           <div className="meta">Only you see this login on your profile.</div>
@@ -87,6 +111,35 @@ export function ProfileView() {
       ) : (
         <p className="note">No posts yet. <Link href="/feed">Write one on the feed.</Link></p>
       )}
+
+      {avatarOpen && user.avatar ? (
+        <div
+          className="avatar-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Your profile photo"
+          onClick={() => setAvatarOpen(false)}
+        >
+          <div
+            className="glass avatar-lightbox-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="btn ghost avatar-lightbox-close"
+              aria-label="Close profile photo"
+              onClick={() => setAvatarOpen(false)}
+            >
+              Close
+            </button>
+            <img
+              className="avatar-lightbox-img"
+              src={user.avatar}
+              alt="Your profile photo"
+            />
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }
