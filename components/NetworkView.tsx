@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadFollows, loadPeople, type FollowRow, type Person } from "@/lib/follow-client";
+import { isLiteHandle, profilePath } from "@/lib/public";
 import { useAuth } from "@/lib/use-auth";
 import { LiteBadge } from "./LiteBadge";
 import { FollowButton } from "./FollowButton";
@@ -177,17 +178,28 @@ function PersonRow({
   meta?: string;
   onChange: () => void;
 }) {
+  const href = isLiteHandle(target) ? profilePath(target) : null;
+  const avatarEl = avatar ? (
+    <img className="avatar" src={avatar} alt="" />
+  ) : (
+    <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
+  );
   return (
     <div className="glass partner" style={{ minWidth: 0 }}>
       <div className="post-top" style={{ margin: 0 }}>
-        {avatar ? (
-          <img className="avatar" src={avatar} alt="" />
+        {href ? (
+          <Link href={href} aria-label={`${name} profile`}>{avatarEl}</Link>
         ) : (
-          <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
+          avatarEl
         )}
         <div>
           <b>
-            {name} <LiteBadge />
+            {href ? (
+              <Link href={href} style={{ color: "inherit", textDecoration: "none" }}>{name}</Link>
+            ) : (
+              name
+            )}{" "}
+            <LiteBadge />
           </b>
           {meta ? <div className="meta">{meta}</div> : null}
         </div>
