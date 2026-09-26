@@ -5,6 +5,8 @@ import { publicName } from "@/lib/public";
 import { clientIp, publicError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     await ensureSchema();
@@ -25,12 +27,15 @@ export async function POST(req: Request) {
       return publicError(400, "That name is not allowed.");
     }
     const q = sql();
-    await q`UPDATE lite_users SET name = ${name} WHERE id = ${me.id}`;
-    return NextResponse.json({
-      name,
+    const rows = await q`UPDATE lite_users SET name = ${name} WHERE id = ${me.id} RETURNING name`;
+    const saved = String(rows[0]?.name || name);
+    const res = NextResponse.json({
+      name: saved,
       login: me.email || me.phone || "",
       avatar: me.avatar,
     });
+    res.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+    return res;
   } catch {
     return publicError(500, "Could not update profile.");
   }
