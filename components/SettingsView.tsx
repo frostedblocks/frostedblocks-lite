@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   deleteAccount,
@@ -27,12 +27,23 @@ export function SettingsView() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteErr, setDeleteErr] = useState("");
   const [deleteBusy, setDeleteBusy] = useState(false);
+  /** Bumps so a late /api/auth/me response cannot overwrite a name the user typed or just saved. */
+  const nameEpoch = useRef(0);
+  const savedName = useRef<string | null>(null);
 
-  async function refresh() {
+  async function refresh(opts?: { syncName?: boolean }) {
+    const syncName = opts?.syncName !== false;
+    const epoch = nameEpoch.current;
     const session = await refreshSession();
     const u = session.user;
     setUser(u);
-    setName(u?.name || "");
+    // Never clobber in-progress edits or a successful save with a stale session payload.
+    if (syncName && epoch === nameEpoch.current && savedName.current === null) {
+      setName(u?.name || "");
+    } else if (savedName.current !== null && epoch === nameEpoch.current) {
+      setName(savedName.current);
+      if (u) setUser({ ...u, name: savedName.current });
+    }
     setReady(true);
   }
 
@@ -60,11 +71,15 @@ export function SettingsView() {
     setNameErr("");
     setNameMsg("");
     setNameBusy(true);
+    nameEpoch.current += 1;
     try {
       const next = await updateDisplayName(name);
+      savedName.current = next;
       setName(next);
+      setUser((prev) => (prev ? { ...prev, name: next } : prev));
       setNameMsg("Display name saved.");
-      await refresh();
+      // Refresh session flags/avatar only — do not let a stale /me wipe the field.
+      await refresh({ syncName: false });
     } catch (err) {
       setNameErr(err instanceof Error ? err.message : "Could not save name.");
     } finally {
@@ -129,7 +144,18 @@ export function SettingsView() {
           <form className="auth-form" onSubmit={saveName} style={{ marginTop: 0 }}>
             <label>
               Name
-              <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} required />
+              <input
+                value={name}
+                onChange={(e) => {
+                  nameEpoch.current += 1;
+                  savedName.current = null;
+                  setName(e.target.value);
+                  setNameMsg("");
+                }}
+                maxLength={40}
+                required
+                autoComplete="nickname"
+              />
             </label>
             {nameErr ? <p className="error">{nameErr}</p> : null}
             {nameMsg ? <p className="note">{nameMsg}</p> : null}
@@ -174,7 +200,7 @@ export function SettingsView() {
         <div className="glass stack-item">
           <strong>Photo</strong>
           <p className="note" style={{ marginBottom: 10 }}>JPG, PNG, or WEBP up to 2MB.</p>
-          <AvatarUpload onDone={() => { void refresh(); }} />
+          <AvatarUpload onDone={() => { void refresh({ syncName: false }); }} />
         </div>
 
         <div className="glass stack-item">
