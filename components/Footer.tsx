@@ -11,9 +11,6 @@ export function Footer() {
       <a href={ONCHAIN_URL} rel="noopener noreferrer">
         ICE Network
       </a>
-      <a className="quiet-link" href={ONCHAIN_URL} rel="noopener noreferrer">
-        Open on chain
-      </a>
     </footer>
   );
 }
