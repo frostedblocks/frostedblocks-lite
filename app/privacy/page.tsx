@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "ICE Lite Privacy Policy — operated by Walter Wood, sole proprietor, Delaware.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "Privacy Policy | ICE Lite",
+    description: "ICE Lite Privacy Policy — operated by Walter Wood, sole proprietor, Delaware.",
+    url: "/privacy",
+  },
+};
 
 export default function PrivacyPage() {
   return (
@@ -8,15 +20,25 @@ export default function PrivacyPage() {
         <h1 style={{ fontSize: 42 }}>Privacy</h1>
         <p className="lead">ICE Lite stores only what the site needs to run.</p>
         <p className="note" style={{ marginTop: 0 }}>
-          Effective September 10, 2026. Last updated September 12, 2026.
+          Effective October 3, 2026. Operator: Walter Wood, sole proprietor, Delaware, USA.
+          “Frosted Blocks” and “ICE Lite” are trade names only. This policy covers Lite
+          (lite.frostedblocks.com) only — not ICE Network.
         </p>
         <div className="stack">
+          <div className="glass stack-item">
+            <strong>What Lite is</strong>
+            <p className="note">
+              Lite is a free posting site. It is not ICE Network, not a token or investment product,
+              and it does not promise earnings. We do not sell your data, sell tokens, or run
+              advertising on Lite. You do not need a wallet to use Lite.
+            </p>
+          </div>
           <div className="glass stack-item">
             <strong>What we keep</strong>
             <p className="note">
               New accounts use email (or Google). We store email, name, hashed password, posts, follows,
-              messages, and optional profile photo. Older phone-only accounts may still have a phone on
-              file. Other people see your name, not your email or phone.
+              messages, and optional profile photo. We do not collect a date of birth. Older phone-only
+              accounts may still have a phone on file. Other people see your name, not your email or phone.
             </p>
           </div>
           <div className="glass stack-item">
@@ -56,7 +78,7 @@ export default function PrivacyPage() {
             <p className="note">
               One HttpOnly sign-in cookie (`ice_lite_session`) keeps you logged in for seven days. It is
               not readable by page scripts. We do not keep your email or phone in localStorage — the
-              signed-in UI reads the session cookie through the Lite API. Ads later may add their own
+              signed-in UI reads the session cookie through the Lite API. Lite does not set advertising
               cookies.
             </p>
           </div>
@@ -80,7 +102,7 @@ export default function PrivacyPage() {
             <strong>Contact</strong>
             <p className="note">
               Questions about this policy: hello@frostedblocks.com or the{" "}
-              <Link href="/contact">contact page</Link>.
+              <Link href="/contact">contact page</Link>. Terms: <Link href="/terms">Terms of Service</Link>.
             </p>
           </div>
         </div>
