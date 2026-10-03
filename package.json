@@ -2,7 +2,7 @@
   "name": "frostedblocks-lite",
   "version": "0.1.0",
   "private": true,
-  "description": "Web2 ICE Lite",
+  "description": "Free-to-post ICE Lite social site. No wallet required. ICE Network is a separate product.",
   "engines": {
     "node": ">=20"
   },

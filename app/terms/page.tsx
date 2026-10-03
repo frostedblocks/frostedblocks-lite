@@ -20,12 +20,11 @@ export default function TermsPage() {
         <h1 style={{ fontSize: 42 }}>Terms of Service</h1>
         <p className="lead">
           ICE Lite is a free posting product. These Terms cover Lite only — not ICE Network,
-          wallets, tokens, or on-chain monetization.
+          wallets, tokens, or on-chain products.
         </p>
         <p className="note" style={{ marginTop: 0 }}>
-          Effective September 20, 2026. Operator: Walter Wood, sole proprietor, Delaware, USA.
-          Brand name “Frosted Blocks” / “ICE Lite” is a trade name only — not a separate legal entity
-          yet.
+          Effective October 3, 2026. Operator: Walter Wood, sole proprietor, Delaware, USA.
+          “Frosted Blocks” and “ICE Lite” are trade names only — not a separate legal entity.
         </p>
         <div className="stack">
           <div className="glass stack-item">
@@ -39,28 +38,33 @@ export default function TermsPage() {
           <div className="glass stack-item">
             <strong>Eligibility</strong>
             <p className="note">
-              You must be at least 13 years old. If you are under 18, you may use Lite only with a
-              parent or guardian’s consent where required by law. One person, one account. Provide
-              accurate information and keep your password secure.
+              You must be at least 13 years old. Lite does not collect a date of birth and does not
+              run a separate age check in the product; by creating an account you represent that you
+              meet this age. If you are under 18, you may use Lite only with a parent or guardian’s
+              consent where required by law. One person, one account. Provide accurate information
+              and keep your password secure.
             </p>
           </div>
           <div className="glass stack-item">
             <strong>What Lite is (and is not)</strong>
             <p className="note">
-              Lite lets you create an account with email or Google, post content, and browse the
-              feed without a wallet. Lite does not sell tokens, does not promise creator
-              monetization, and does not store your Lite profile on ICE Network canisters. ICE
-              Network is a separate product with its own terms if you choose to use it.
+              Lite lets you create an account with email or Google and post on the feed without a
+              wallet. Lite does not sell tokens or token packs, is not an investment, and does not
+              promise earnings, creator payouts, or passive income. Lite does not run ads. Lite does
+              not store your Lite profile on ICE Network canisters. ICE Network (frostedblocks.com)
+              is a separate product with its own terms if you choose to use it. You do not need
+              Network, a wallet, or Internet Identity to use Lite.
             </p>
           </div>
           <div className="glass stack-item">
             <strong>Your content</strong>
             <p className="note">
               You keep ownership of posts, photos, and other content you submit. You grant Walter
-              Wood (operating ICE Lite) a worldwide, non-exclusive, royalty-free license to host,
-              store, display, distribute, and moderate that content on Lite so the service can run.
-              When you delete content or your account, we stop displaying it publicly, except for
-              reasonable backup, security, legal, or abuse-prevention copies.
+              Wood (operating ICE Lite under the Frosted Blocks trade name) a worldwide,
+              non-exclusive, royalty-free license to host, store, display, distribute, and moderate
+              that content on Lite so the service can run. When you delete content or your account,
+              we stop displaying it publicly, except for reasonable backup, security, legal, or
+              abuse-prevention copies.
             </p>
           </div>
           <div className="glass stack-item">
