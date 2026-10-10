@@ -4,6 +4,7 @@ import { deletePost } from "@/lib/posts-client";
 import { createReply, deleteReply, loadReplies, type LiteReply } from "@/lib/replies-client";
 import { isLiteHandle, profilePath, publicName } from "@/lib/public";
 import { splitLinks } from "@/lib/text";
+import { truncateText } from "@/lib/truncate";
 import type { IcePost } from "@/lib/types";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -26,7 +27,11 @@ function when(ts: number) {
   return d.toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" });
 }
 
-export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => void }) {
+export function PostCard({ post, onChange, full = false }: { post: IcePost; onChange?: () => void; full?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const preview = truncateText(post.content);
+  const collapsed = !full && preview.truncated && !expanded;
+  const shownText = collapsed ? preview.text : post.content;
   const { signedIn } = useAuth();
   const [photo, setPhoto] = useState("");
   const [open, setOpen] = useState(false);
@@ -155,14 +160,25 @@ export function PostCard({ post, onChange }: { post: IcePost; onChange?: () => v
         {post.category ? <span className="tag">{post.category}</span> : null}
       </div>
       <p>
-        {splitLinks(post.content).map((part, i) =>
+        {splitLinks(shownText).map((part, i) =>
           part.startsWith("http") ? (
             <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
           ) : (
             <span key={i}>{part}</span>
           ),
         )}
+        {collapsed ? <span aria-hidden="true">…</span> : null}
       </p>
+      {!full && preview.truncated ? (
+        <button
+          type="button"
+          className="show-more"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? "Show less" : "Show more"}
+        </button>
+      ) : null}
       <div className="post-foot">
         <div className="post-stats" aria-label="Engagement">
           <span>{likes} likes</span>
