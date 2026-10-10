@@ -44,7 +44,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         <p className="note" style={{ margin: "0 0 12px" }}>
           <Link className="quiet-link" href="/">Back to feed</Link>
         </p>
-        <PostCard post={post} />
+        <PostCard post={post} full />
       </div>
     </main>
   );

@@ -580,3 +580,19 @@ a.post-action { color: var(--ice-dim); }
   padding: 6px 12px;
   font-size: 12px;
 }
+
+/* Feed post "Show more" / "Show less" toggle */
+.show-more {
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  margin: 0 0 8px;
+  color: #7DD3FC;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.show-more:hover { text-decoration: underline; }
+.show-more:focus-visible { outline: 2px solid #7DD3FC; outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .show-more { transition: none; } }
